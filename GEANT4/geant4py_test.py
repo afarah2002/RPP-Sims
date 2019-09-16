@@ -136,7 +136,7 @@ class BeamInitializer(object):
 
 
 if __name__ == '__main__':
-	while True:
+	# while True:
 		gun_name = "pg1"
 		# f = open("DATAFILES/" + gun_name + "data.txt", 'w+')
 		# while True:
