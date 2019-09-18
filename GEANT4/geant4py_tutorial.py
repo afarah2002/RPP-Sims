@@ -3,6 +3,7 @@ import g4py.ezgeom
 from g4py.ezgeom import G4EzVolume
 import g4py.NISTmaterials
 import g4py.EMSTDpl
+import time
 
 
 
@@ -39,15 +40,24 @@ detector_box.PlaceIt(G4ThreeVector(0.,0.,20.*cm))
 # calorimeter placed inside the box
 cal= G4EzVolume("Calorimeter")
 nai= gNistManager.FindOrBuildMaterial("G4_SODIUM_IODIDE")
-cal.CreateBoxVolume(nai, 5.*cm, 5.*cm, 30.*cm)
-dd= 5.*cm
+au= G4Material.GetMaterial("G4_Au")
+# cal.CreateTubeVolume(au, 30., 10.*cm, 10.*mm)
+cal.CreateOrbVolume(au, 10.*cm)
+dd= 20.*cm
 for ical in range(-1, 2):
 	calPos= G4ThreeVector(dd*ical, 0., 0.)
 	cal.PlaceIt(calPos, ical+1, detector_box)
 gRunManager.Initialize()
 
+angle = 0
+zoom = 1
 while True:
+	angle += 5.
+	zoom += .00005
 	gApplyUICommand("/vis/sceneHandler/create OGLSX OGLSX")
 	gApplyUICommand("/vis/viewer/create OGLSX oglsxviewer")
 	gApplyUICommand("/vis/drawVolume")
+	time.sleep(.05)
+	gApplyUICommand("/vis/viewer/zoom " + str(zoom))
+	gApplyUICommand("/vis/viewer/set/viewpointThetaPhi 0" + str(angle))
 	gApplyUICommand("/vis/viewer/update")
