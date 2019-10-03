@@ -4,61 +4,142 @@ import g4py.ezgeom
 from g4py.ezgeom import G4EzVolume
 import g4py.NISTmaterials
 import g4py.EMSTDpl
+import g4py.ParticleGun, g4py.MedicalBeam
 import random
 import time
+import thread
 
 #----file imports--------#
 from geom_constructor import GeomConstructor 
+# from beam import BeamInitializer
+from beam2 import MyPrimaryGeneratorAction, MyRunAction, MyEventAction, MySteppingAction
 
-# from EZsim.EZgeom import G4EzVolume
-g4py.NISTmaterials.Construct()
-# set DetectorConstruction to the RunManager
-g4py.ezgeom.Construct()
-exN03PL = g4py.EMSTDpl.PhysicsListEMstd()
-gRunManager.SetUserInitialization(exN03PL)
-# reset world material
-air= gNistManager.FindOrBuildMaterial("G4_AIR")
-g4py.ezgeom.SetWorldMaterial(air)
-# dummy box
-GC = GeomConstructor()
-GC.ConstructBox("Detector Box", air, [0., 0., 0.], cm, [20., 20., 40.])
 
-# calorimeter placed inside the box
-cal= G4EzVolume("Calorimeter") #initialize volume
-nai= gNistManager.FindOrBuildMaterial("G4_SODIUM_IODIDE")
-au= G4Material.GetMaterial("G4_Au")
+class Constructor(object):
+	def __init__(self):
+		# from EZsim.EZgeom import G4EzVolume
+		g4py.NISTmaterials.Construct()
+		# set DetectorConstruction to the RunManager
+		g4py.ezgeom.Construct()
+		exN03PL = g4py.EMSTDpl.PhysicsListEMstd()
+		gRunManager.SetUserInitialization(exN03PL)
+		# reset world material
+		air= gNistManager.FindOrBuildMaterial("G4_AIR")
+		# g4py.ezgeom.SetWorldMaterial(air)
 
-GC.ConstructOrb("Orb", nai, [10., 10., 10.], cm, 10.)
+	def construct(self):
+		# dummy box
+		GC = GeomConstructor()
+		# GC.ConstructBox("Detector Box", air, [0., 0., 0.], cm, [20., 20., 40.])
 
-GC.ConstructTube("Tube", au, [-1., -1., -1.], cm, 10., 30., 30., 0, 300.)
+		# calorimeter placed inside the box
+		cal= G4EzVolume("Calorimeter") #initialize volume
+		nai= gNistManager.FindOrBuildMaterial("G4_SODIUM_IODIDE")
+		material1 = G4Material.GetMaterial("G4_Au")
 
-GC.ConstructSphere("Sphere", au, [0., 0., 0.], cm, 0., 10., 0., 300., 0., 150)
+		# GC.ConstructOrb("Orb", nai, [10., 10., 10.], cm, 10.)
 
-GC.ConstructCone("Cone", nai, [-20., -20., -20.], cm, 0., 20., 0., 0., 25., 0., 180) # dphi = 359.9999 is basically 360, but we can still see it
-# sphere = G4EzVolume("Sphere")
-# spherePos = G4ThreeVector(1., 1., 1.)
-# sphere.CreateShpereVolume(au, 1.*cm, .5*m) # haha "Shpere" not "Sphere"
-# sphere.PlaceIt(spherePos)
+		# GC.ConstructTube("Tube", au, [-1., -1., -1.], cm, 10., 30., 30., 0, 300.)
+		scale_factor=5
+		# GC.ConstructSphere("Sphere", material1 , [0., 0., 0.], cm, 9.5*scale_factor, 10.*scale_factor, 0., 360., 0., 180)
 
-gRunManager.Initialize()
+	# GC.ConstructCone("Cone", nai, [-20., -20., -20.], cm, 0., 20., 0., 0., 25., 0., 180) # dphi = 359.9999 is basically 360, but we can still see it
+		# gRunManager.Initialize()
 
-angle = 0
-while True:
-	angle += 5.
-	# angle = float(random.randint(1, 101))
-	
-	gApplyUICommand("/vis/sceneHandler/create OGLSX OGLSX")
-	gApplyUICommand("/vis/viewer/create OGLSX oglsxviewer")
-	gApplyUICommand("/vis/drawVolume")
-	time.sleep(.05)
-	# gApplyUICommand("/vis/viewer/zoom " + str(zoom))
-	gApplyUICommand("/vis/viewer/set/viewpointThetaPhi 0" + str(angle))
-	gApplyUICommand("/vis/viewer/update")
 
-# class GeomBuild(object):
+class Visualizer(object):
 
-# 	def __init__(self):
+	def visualizer(self, view_angle):
 
-# 	def Box(self, material, length, width, height):
+		gApplyUICommand("/vis/sceneHandler/create OGLSX OGLSX")
+		gApplyUICommand("/vis/viewer/create OGLSX oglsxviewer")
+		gApplyUICommand("/vis/drawVolume")
 
-# 	def Tube(self, outer_radius, inner_radius, length)
+		gApplyUICommand("/vis/viewer/select oglsxviewer")
+		gApplyUICommand("/vis/scene/add/trajectories")
+
+		gApplyUICommand("/tracking/storeTrajectory 1")
+		gApplyUICommand("/vis/scene/endOfEventAction accumulate")
+		gApplyUICommand("/vis/scene/endOfRunAction accumulate")
+		# time.sleep(.05)
+		gApplyUICommand("/vis/viewer/set/viewpointThetaPhi 0" + str(angle))
+		gApplyUICommand("/vis/viewer/zoom 1.000001")
+		
+		gApplyUICommand("/vis/viewer/update")
+
+if __name__ == '__main__':
+	Constructor = Constructor()
+	Constructor.construct()
+	VIS = Visualizer()
+
+	# -- particle parameters -- #
+	particle = "e+"
+
+	energy_1 = 50
+	energy_2 = 50
+
+	energyUnit = MeV
+	dimensionUnit = cm
+
+	locationArray_TEST = [0., 0., 0.]
+	momentumArray_TEST = [10., 10., 10.]
+
+	locationArray_1 = [-9.5*5+.1, 0., 0.]
+	momentumArray_1 = [0., 1., 0.]
+
+	locationArray_2 = [9.5*5-.1, 0., 0.]
+	momentumArray_2 = [-1., 10., 0.]
+	# ------------------------- #
+	angle = 0
+	zoom = 1.5
+	while True:
+		angle += 0.075
+
+		# set user actions ...
+
+		PGA_TEST = MyPrimaryGeneratorAction()
+		gRunManager.SetUserAction(PGA_TEST)
+
+		PGA_1 = MyPrimaryGeneratorAction()
+		gRunManager.SetUserAction(PGA_1)
+
+		# PGA_2 = MyPrimaryGeneratorAction()
+		# gRunManager.SetUserAction(PGA_2)
+
+		myRA = MyRunAction()
+		gRunManager.SetUserAction(myRA)
+		  
+		myEA = MyEventAction()
+		gRunManager.SetUserAction(myEA)
+
+		mySA = MySteppingAction()
+		gRunManager.SetUserAction(mySA)
+
+		
+		# print("PGA_1 defined")
+		# PGA_1.GeneratePrimaries(gRunManager.BeamOn(0))
+
+		pgTEST = PGA_TEST.particleGun
+		pgTEST.SetParticleByName(particle)
+		pgTEST.SetParticleEnergy(energy_1*energyUnit)
+		pgTEST.SetParticlePosition(G4ThreeVector(locationArray_TEST[0], locationArray_TEST[1], locationArray_TEST[2])*dimensionUnit)
+		pgTEST.SetParticleMomentumDirection(G4ThreeVector(momentumArray_TEST[0], momentumArray_TEST[1], momentumArray_TEST[2])*dimensionUnit)
+
+		pg1 = PGA_1.particleGun
+		pg1.SetParticleByName(particle)
+		pg1.SetParticleEnergy(energy_1*energyUnit)
+		pg1.SetParticlePosition(G4ThreeVector(locationArray_1[0], locationArray_1[1], locationArray_1[2])*dimensionUnit)
+		pg1.SetParticleMomentumDirection(G4ThreeVector(momentumArray_1[0], momentumArray_1[1], momentumArray_1[2])*dimensionUnit)
+
+		# pg2 = PGA_2.particleGun
+		# pg2.SetParticleByName(particle)
+		# pg2.SetParticleEnergy(energy_2*energyUnit)
+		# pg2.SetParticlePosition(G4ThreeVector(locationArray_2[0], locationArray_2[1], locationArray_2[2])*dimensionUnit)
+		# pg2.SetParticleMomentumDirection(G4ThreeVector(momentumArray_2[0], momentumArray_2[1], momentumArray_2[2])*dimensionUnit)
+		
+
+		gRunManager.BeamOn(1)
+		gRunManager.Initialize()
+
+
+		VIS.visualizer(angle)
