@@ -50,6 +50,7 @@ class Constructor(object):
 class Visualizer(object):
 
 	def visualizer(self, view_angle):
+		# time.sleep(.1)
 
 		gApplyUICommand("/vis/sceneHandler/create OGLSX OGLSX")
 		gApplyUICommand("/vis/viewer/create OGLSX oglsxviewer")
@@ -72,39 +73,14 @@ if __name__ == '__main__':
 	Constructor.construct()
 	VIS = Visualizer()
 
-	# -- particle parameters -- #
-	particle = "e+"
-
-	energy_1 = 50
-	energy_2 = 50
-
-	energyUnit = MeV
-	dimensionUnit = cm
-
-	locationArray_TEST = [0., 0., 0.]
-	momentumArray_TEST = [10., 10., 10.]
-
-	locationArray_1 = [-9.5*5+.1, 0., 0.]
-	momentumArray_1 = [0., 1., 0.]
-
-	locationArray_2 = [9.5*5-.1, 0., 0.]
-	momentumArray_2 = [-1., 10., 0.]
-	# ------------------------- #
 	angle = 0
 	zoom = 1.5
 	while True:
 		angle += 0.075
 
 		# set user actions ...
-
-		PGA_TEST = MyPrimaryGeneratorAction()
-		gRunManager.SetUserAction(PGA_TEST)
-
 		PGA_1 = MyPrimaryGeneratorAction()
 		gRunManager.SetUserAction(PGA_1)
-
-		# PGA_2 = MyPrimaryGeneratorAction()
-		# gRunManager.SetUserAction(PGA_2)
 
 		myRA = MyRunAction()
 		gRunManager.SetUserAction(myRA)
@@ -115,31 +91,8 @@ if __name__ == '__main__':
 		mySA = MySteppingAction()
 		gRunManager.SetUserAction(mySA)
 
-		
-		# print("PGA_1 defined")
-		# PGA_1.GeneratePrimaries(gRunManager.BeamOn(0))
-
-		pgTEST = PGA_TEST.particleGun
-		pgTEST.SetParticleByName(particle)
-		pgTEST.SetParticleEnergy(energy_1*energyUnit)
-		pgTEST.SetParticlePosition(G4ThreeVector(locationArray_TEST[0], locationArray_TEST[1], locationArray_TEST[2])*dimensionUnit)
-		pgTEST.SetParticleMomentumDirection(G4ThreeVector(momentumArray_TEST[0], momentumArray_TEST[1], momentumArray_TEST[2])*dimensionUnit)
-
-		pg1 = PGA_1.particleGun
-		pg1.SetParticleByName(particle)
-		pg1.SetParticleEnergy(energy_1*energyUnit)
-		pg1.SetParticlePosition(G4ThreeVector(locationArray_1[0], locationArray_1[1], locationArray_1[2])*dimensionUnit)
-		pg1.SetParticleMomentumDirection(G4ThreeVector(momentumArray_1[0], momentumArray_1[1], momentumArray_1[2])*dimensionUnit)
-
-		# pg2 = PGA_2.particleGun
-		# pg2.SetParticleByName(particle)
-		# pg2.SetParticleEnergy(energy_2*energyUnit)
-		# pg2.SetParticlePosition(G4ThreeVector(locationArray_2[0], locationArray_2[1], locationArray_2[2])*dimensionUnit)
-		# pg2.SetParticleMomentumDirection(G4ThreeVector(momentumArray_2[0], momentumArray_2[1], momentumArray_2[2])*dimensionUnit)
-		
-
-		gRunManager.BeamOn(1)
 		gRunManager.Initialize()
 
+		gRunManager.BeamOn(100)
 
 		VIS.visualizer(angle)
