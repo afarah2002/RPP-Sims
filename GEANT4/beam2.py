@@ -25,23 +25,24 @@ class MyPrimaryGeneratorAction(G4VUserPrimaryGeneratorAction):
 		energyUnit = MeV
 		dimensionUnit = cm
 
-		locationArray_1 = [-9.5*5+.1, 0., 0.]
-		momentumArray_1 = [1., 0., 0.]
-
-		locationArray_2 = [9.5*5-.1, 0., 0.]
-		momentumArray_2 = [-1., 0., 0.]
-		# ------------------------------ #
-
 		self.particleGun.SetParticleByName(particle) # define particle
 		self.particleGun.SetParticleEnergy(energy_1*energyUnit) # define particle energy 
 
-		self.particleGun.SetParticlePosition(G4ThreeVector(locationArray_1[0], locationArray_1[1], locationArray_1[2])*dimensionUnit) # define first particle generator location
-		self.particleGun.SetParticleMomentumDirection(G4ThreeVector(momentumArray_1[0], momentumArray_1[1], momentumArray_1[2])*dimensionUnit) # define first particle generator momentum
-		self.particleGun.GeneratePrimaryVertex(event)
+		spaceParamDict = {(-9.5*5+.1, 0., 0.):(1., 0., 0.),  # just add a new line for the position tuple and momentum tuple of the next particle gun
+						  (9.5*5-.1, 0., 0.):(1., 0., 0.),
+						  (0., -9.5*5+.1, 0.):(0., 1., 0.),
+						  (0., 9.5*5-.1, 0.):(0., -1., 0.)
+						  }
 
-		self.particleGun.SetParticlePosition(G4ThreeVector(locationArray_2[0], locationArray_2[1], locationArray_2[2])*dimensionUnit) # define second particle generator location
-		self.particleGun.SetParticleMomentumDirection(G4ThreeVector(momentumArray_2[0], momentumArray_2[1], momentumArray_2[2])*dimensionUnit) # define second particle generator momentum
-		self.particleGun.GeneratePrimaryVertex(event)
+		for locationArray, momentumArray in spaceParamDict.items(): # iterates to create as many particle guns as listed in spaceParamDict
+			self.particleGun.SetParticlePosition(G4ThreeVector(locationArray[0], locationArray[1], locationArray[2])*dimensionUnit) # define first particle generator location
+			self.particleGun.SetParticleMomentumDirection(G4ThreeVector(momentumArray[0], momentumArray[1], momentumArray[2])*dimensionUnit) # define first particle generator momentum
+			self.particleGun.GeneratePrimaryVertex(event)
+
+
+		
+
+
 #-------------------------------------------------------------------
 class MyRunAction(G4UserRunAction):
 	"My Run Action"
