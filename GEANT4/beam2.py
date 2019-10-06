@@ -12,9 +12,8 @@ class MyPrimaryGeneratorAction(G4VUserPrimaryGeneratorAction):
 
 	def GeneratePrimaries(self, event):
 
-		# locationArray_TEST = [0., 0., 0.]
-		# momentumArray_TEST = [10., 10., 10.]
-		# dimensionUnit = cm
+		scale_factor=10 # relates to the size of the sphere, coreelates with position of e+ guns
+
 
 		# ---- particle paramteters ---- #
 		particle = "e+"
@@ -28,10 +27,10 @@ class MyPrimaryGeneratorAction(G4VUserPrimaryGeneratorAction):
 		self.particleGun.SetParticleByName(particle) # define particle
 		self.particleGun.SetParticleEnergy(energy_1*energyUnit) # define particle energy 
 
-		spaceParamDict = {(-9.5*5+.1, 0., 0.):(1., 0., 0.),  # just add a new line for the position tuple and momentum tuple of the next particle gun
-						  (9.5*5-.1, 0., 0.):(1., 0., 0.),
-						  (0., -9.5*5+.1, 0.):(0., 1., 0.),
-						  (0., 9.5*5-.1, 0.):(0., -1., 0.)
+		spaceParamDict = {(-9.5*scale_factor+.1, 0., 0.):(1., 0., 0.),  # just add a new line for the position tuple and momentum tuple of the next particle gun
+						  (9.5*scale_factor-.1, 0., 0.):(1., 0., 0.),
+						  (0., -9.5*scale_factor+.1, 0.):(0., 1., 0.),
+						  (0., 9.5*scale_factor-.1, 0.):(0., -1., 0.)
 						  }
 
 		for locationArray, momentumArray in spaceParamDict.items(): # iterates to create as many particle guns as listed in spaceParamDict

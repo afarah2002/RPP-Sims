@@ -40,8 +40,9 @@ class Constructor(object):
 		# GC.ConstructOrb("Orb", nai, [10., 10., 10.], cm, 10.)
 
 		# GC.ConstructTube("Tube", au, [-1., -1., -1.], cm, 10., 30., 30., 0, 300.)
-		scale_factor=5
-		# GC.ConstructSphere("Sphere", material1 , [0., 0., 0.], cm, 9.5*scale_factor, 10.*scale_factor, 0., 360., 0., 180)
+		scale_factor=10
+		GC.ConstructSphere("Sphere", material1 , [0., 0., 0.], cm, 0, 0.001, 0., 360., 0., 180)
+		GC.ConstructSphere("Sphere", material1 , [0., 0., 0.], cm, 9.5*scale_factor, 10.*scale_factor, 0., 360., 0., 180)
 
 	# GC.ConstructCone("Cone", nai, [-20., -20., -20.], cm, 0., 20., 0., 0., 25., 0., 180) # dphi = 359.9999 is basically 360, but we can still see it
 		# gRunManager.Initialize()
@@ -76,7 +77,7 @@ if __name__ == '__main__':
 	angle = 0
 	zoom = 1.5
 	while True:
-		angle += 0.075
+		angle += 0.075 # +0.075 is a recommended delta theta
 
 		# set user actions ...
 		PGA_1 = MyPrimaryGeneratorAction()
@@ -93,6 +94,6 @@ if __name__ == '__main__':
 
 		gRunManager.Initialize()
 
-		gRunManager.BeamOn(100)
+		gRunManager.BeamOn(1)
 
 		VIS.visualizer(angle)
