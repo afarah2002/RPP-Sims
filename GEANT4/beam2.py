@@ -1,5 +1,6 @@
 #----------imports----------#
 from Geant4 import * 
+import random
 
 #----------code starts here!----------#
 class MyPrimaryGeneratorAction(G4VUserPrimaryGeneratorAction):
@@ -11,8 +12,10 @@ class MyPrimaryGeneratorAction(G4VUserPrimaryGeneratorAction):
 		print("Particle gun defined \n")
 
 	def GeneratePrimaries(self, event):
-
-		scale_factor=10 # relates to the size of the sphere, coreelates with position of e+ guns
+		
+		spaceParamDict = {}
+		vectorCount = 10
+		locationArray = [0, 0, 0]
 
 
 		# ---- particle paramteters ---- #
@@ -27,16 +30,16 @@ class MyPrimaryGeneratorAction(G4VUserPrimaryGeneratorAction):
 		self.particleGun.SetParticleByName(particle) # define particle
 		self.particleGun.SetParticleEnergy(energy_1*energyUnit) # define particle energy 
 
-		spaceParamDict = {(-9.5*scale_factor+.1, 0., 0.):(1., 0., 0.),  # just add a new line for the position tuple and momentum tuple of the next particle gun
-						  (9.5*scale_factor-.1, 0., 0.):(1., 0., 0.),
-						  (0., -9.5*scale_factor+.1, 0.):(0., 1., 0.),
-						  (0., 9.5*scale_factor-.1, 0.):(0., -1., 0.)
-						  }
-
-		for locationArray, momentumArray in spaceParamDict.items(): # iterates to create as many particle guns as listed in spaceParamDict
+		for i in range(0,vectorCount):
+			px = random.uniform(-1,1)
+			py = random.uniform(-1,1)
+			pz = random.uniform(-1,1)
+			momentumArray = [px, py, pz]
+			# for locationArray, momentumArray in spaceParamDict.items(): # iterates to create as many particle guns as listed in spaceParamDict
 			self.particleGun.SetParticlePosition(G4ThreeVector(locationArray[0], locationArray[1], locationArray[2])*dimensionUnit) # define first particle generator location
 			self.particleGun.SetParticleMomentumDirection(G4ThreeVector(momentumArray[0], momentumArray[1], momentumArray[2])*dimensionUnit) # define first particle generator momentum
 			self.particleGun.GeneratePrimaryVertex(event)
+
 
 
 		
@@ -69,3 +72,5 @@ class MySteppingAction(G4UserSteppingAction):
 		track= step.GetTrack()
 		touchable= track.GetTouchable()
 		#print " *** vid= ", touchable.GetReplicaNumber()
+
+
