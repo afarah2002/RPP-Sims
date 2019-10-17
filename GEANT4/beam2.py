@@ -9,20 +9,10 @@ class MyPrimaryGeneratorAction(G4VUserPrimaryGeneratorAction):
 	def __init__(self):
 		G4VUserPrimaryGeneratorAction.__init__(self)
 		self.particleGun = G4ParticleGun(1)
-		print("Particle gun defined \n")
+		print("\n Particle gun defined \n")
 
 	def GeneratePrimaries(self, event):
-		# Magnetic field param
-		#################################################
-		magUnit = tesla
-		magVectorList = [[10,10,10],[-1,-1,-1]]
-		for vector in magVectorList:
-			fieldMgr = gTransportationManager.GetFieldManager()
-			myField = G4UniformMagField(G4ThreeVector(vector[0]*magUnit, vector[1]*magUnit, vector[2]*magUnit))
-			#myField= MyField()
-			fieldMgr.SetDetectorField(myField)
-			fieldMgr.CreateChordFinder(myField)
-		#################################################
+
 
 		# Particle param
 		#################################################
@@ -32,8 +22,8 @@ class MyPrimaryGeneratorAction(G4VUserPrimaryGeneratorAction):
 
 		particle = "e+"
 
-		energy_1 = 50	
-		energy_2 = 50
+		energy_1 = 2.5	
+		energy_2 = 2.5
 
 		energyUnit = MeV
 		dimensionUnit = cm
@@ -72,11 +62,73 @@ class MySteppingAction(G4UserSteppingAction):
 	"My Stepping Action"
 
 	def UserSteppingAction(self, step):
-		pass
 		#print "*** dE/dx in current step=", step.GetTotalEnergyDeposit()
-		preStepPoint= step.GetPreStepPoint()
-		track= step.GetTrack()
-		touchable= track.GetTouchable()
+		preStepPoint = step.GetPreStepPoint()
+		postStepPoint = step.GetPostStepPoint()
+		energy = step.GetTotalEnergyDeposit()
+		print(
+			postStepPoint.GetCharge(), 
+			postStepPoint.GetKineticEnergy(), # MeV
+			[preStepPoint.GetMomentum().x, postStepPoint.GetMomentum().x] 
+			# postStepPoint.GetMomentum().y, postStepPoint.GetMomentum().z]
+			)
+		track = step.GetTrack()
+		touchable = track.GetTouchable()
 		#print " *** vid= ", touchable.GetReplicaNumber()
+		pass
+
+class MyField(G4MagneticField):
+	"My Magnetic Field"
+
+	def GetFieldValue(self, pos, time):
+
+		vectorList = [
+						# [0, 1, 0], 
+					 	[-10., -10., -10.]
+					 ]
+		for v in vectorList:
+
+			bfield = G4ThreeVector()
+			bfield.x = v[0]*tesla
+			bfield.y = v[1]*tesla
+			bfield.z = v[2]*tesla
+			return bfield
+
+# class ScoreSD(G4VSensitiveDetector):
+# 	"SD for score voxels"
+
+# 	def __init__(self):
+# 		G4VSensitiveDetector.__init__(self, "ScoreVoxel")
+
+# 	def ProcessHits(self, step, rohist):
+# 		preStepPoint = step.GetPreStepPoint()
+# 		if(preStepPoint.GetCharge() == 0):
+# 			return
+
+# 		track = step.GetTrack()
+# 		touchable = track.GetTouchable()
+# 		voxel_id = touchable.GetReplicaNumber()
+# 		dedx = step.GetTotalEnergyDeposit()
+# 		xz = posXZ(voxel_id)
+# 		# hist_dosezse2d.Fill(xz[1], xz[0], dedx/MeV)
+# 		if( abs(xz[0]) <= 100 ):
+# 			# hist_dosez.Fill(xz[1],  dedx/MeV)
+# 			pass
 
 
+
+		# # Magnetic field param
+		# #################################################
+		# magUnit = tesla
+		# magVectorList = [
+		# 				[.5,.5,.5],
+		# 				# [0,0,0]
+		# 				]
+
+		# for vector in magVectorList:
+		# 	fieldMgr = gTransportationManager.GetFieldManager()
+		# 	vOrigin = G4ThreeVector(0., 0., 0.)
+		# 	myField = G4UniformMagField(G4ThreeVector(vector[0]*magUnit, vector[1]*magUnit, vector[2]*magUnit))
+
+		# return myField
+		# #################################################
