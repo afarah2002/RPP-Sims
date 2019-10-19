@@ -34,16 +34,16 @@ class Plotter(object):
 		fig = plt.figure()
 		ax = fig.add_subplot(111, projection='3d')
 
-		axmin = -3
-		axmax = 3
+		axmin = -600 # what units are these???????
+		axmax = 600
 		axes = plt.gca()
 		axes.set_xlim([axmin,axmax])
 		axes.set_ylim([axmin,axmax])
 		axes.set_zlim([axmin,axmax])
 
-		ax.set_xlabel('X momentum')
-		ax.set_ylabel('Y momentum')
-		ax.set_zlabel('Z momentum')
+		ax.set_xlabel('X position units')
+		ax.set_ylabel('Y position units')
+		ax.set_zlabel('Z position units')
 
 
 		ax.scatter(self.px, self.py, self.pz)
@@ -73,7 +73,6 @@ class MyPrimaryGeneratorAction(G4VUserPrimaryGeneratorAction):
 
 		energy_1 = 2.5	
 		energy_2 = 2.5
-
 		energyUnit = MeV
 		dimensionUnit = cm
 
@@ -120,12 +119,14 @@ class MySteppingAction(G4UserSteppingAction):
 		touchable = track.GetTouchable()
 		KE = track.GetKineticEnergy()
 
+
 		# kinetic energy in MeV - PRE
 		# initialKE = preStepPoint.GetKineticEnergy() 
 		# kinetic energy in MeV - POST
 		# finalKE = postStepPoint.GetKineticEnergy()
 
 		m = [track.GetMomentum().x, track.GetMomentum().y, track.GetMomentum().z] # equal to the postStepPoint momentum
+		p = [track.GetPosition().x, track.GetPosition().y, track.GetPosition().z]
 		mm = np.sqrt((m[0])**2 + (m[1])**2 + (m[2])**2)
 
 		# momenta - PRE
@@ -133,12 +134,12 @@ class MySteppingAction(G4UserSteppingAction):
 		# momenta - POST
 		finalMomentum = [postStepPoint.GetMomentum().x, postStepPoint.GetMomentum().y, postStepPoint.GetMomentum().z]
 
-		print KE, "\n", m, "\n", initialMomentum, "\n", finalMomentum, "\n\n" 
+		print touchable, "\n", KE, "\n", p, "\n", initialMomentum, "\n", finalMomentum, "\n\n" 
 		# energy = step.GetTotalEnergyDeposit()
 
 
 
-		PLT.dataCollection(m)
+		PLT.dataCollection(p)
 		# PLT.grapher()
 
 		# return initialMomentum, finalMomentum
@@ -149,8 +150,9 @@ class MyField(G4MagneticField):
 
 	def GetFieldValue(self, pos, time):
 		vectorList = [
-						[1., 1., 1.], 
+						# [1., 1., 1.], 
 					 	# [10., 10., 10.]
+					 	[0.1, 0.1, 0.1]
 					 	# [0,0,0]
 					 ]
 		for v in vectorList:
