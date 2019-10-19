@@ -2,11 +2,13 @@
 from Geant4 import * 
 import random
 import numpy as np
+## matplotlib stuff
 import matplotlib.pyplot as plt
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 from time import sleep
-# import numpy as np
+from matplotlib import colors
+from matplotlib.ticker import PercentFormatter
 
 #----------code starts here!----------#
 class Plotter(object):
@@ -22,18 +24,21 @@ class Plotter(object):
 		self.py.append(final_momentum[1])
 		self.pz.append(final_momentum[2])
 
+		self.pos3D = np.sqrt(np.square(self.px) + np.square(self.py) + np.square(self.pz)) # 3D position
+
 		print("DATA STORED")
 		print len(self.px), "\n", len(self.py), "\n", len(self.pz), "\n"
 
 	def listReturner(self):
 		print("momnenta returned by plotter")
-		return self.px, self.py, self.pz, 
+		return self.px, self.py, self.pz
 
 	def grapher(self):
-		# Axes3D.scatter(self.px, self.py, self.pz)
 		fig = plt.figure()
-		ax = fig.add_subplot(111, projection='3d')
+		# Axes3D.scatter(self.px, self.py, self.pz)
 
+		# first subplot: a 3D scatter plot of positions
+		ax = fig.add_subplot(111, projection='3d')
 		axmin = -600 # what units are these???????
 		axmax = 600
 		axes = plt.gca()
@@ -45,9 +50,16 @@ class Plotter(object):
 		ax.set_ylabel('Y position units')
 		ax.set_zlabel('Z position units')
 
-
 		ax.scatter(self.px, self.py, self.pz)
 
+		# second subplot: a histogram of positions
+		fig, axs = plt.subplots(4, sharey=True, tight_layout=False)
+		n_bins = 100
+		axs[0].hist(self.px, bins=n_bins) # histogram of 3D position x
+		axs[1].hist(self.py, bins=n_bins) # histogram of 3D position y
+		axs[2].hist(self.pz, bins=n_bins) # histogram of 3D position z
+		axs[3].hist(self.pos3D, bins=n_bins) # histogram of 3D position magnitude
+ 
 		plt.show()
 
 PLT = Plotter()
@@ -66,14 +78,14 @@ class MyPrimaryGeneratorAction(G4VUserPrimaryGeneratorAction):
 		# Particle param
 		#################################################
 		spaceParamDict = {}
-		vectorCount = 100
+		vectorCount = 1000
 		locationArray = [0, 0, 0]
 
 		particle = "e+"
 
-		energy_1 = 2.5	
+		energy_1 = 2.5
 		energy_2 = 2.5
-		energyUnit = MeV
+		energyUnit = MeV 
 		dimensionUnit = cm
 
 		self.particleGun.SetParticleByName(particle) # define particle
@@ -165,42 +177,3 @@ class MyField(G4MagneticField):
 			return bfield
 
 
-
-# class ScoreSD(G4VSensitiveDetector):
-# 	"SD for score voxels"
-
-# 	def __init__(self):
-# 		G4VSensitiveDetector.__init__(self, "ScoreVoxel")
-
-# 	def ProcessHits(self, step, rohist):
-# 		preStepPoint = step.GetPreStepPoint()
-# 		if(preStepPoint.GetCharge() == 0):
-# 			return
-
-# 		track = step.GetTrack()
-# 		touchable = track.GetTouchable()
-# 		voxel_id = touchable.GetReplicaNumber()
-# 		dedx = step.GetTotalEnergyDeposit()
-# 		xz = posXZ(voxel_id)
-# 		# hist_dosezse2d.Fill(xz[1], xz[0], dedx/MeV)
-# 		if( abs(xz[0]) <= 100 ):
-# 			# hist_dosez.Fill(xz[1],  dedx/MeV)
-# 			pass
-
-
-
-		# # Magnetic field param
-		# #################################################
-		# magUnit = tesla
-		# magVectorList = [
-		# 				[.5,.5,.5],
-		# 				# [0,0,0]
-		# 				]
-
-		# for vector in magVectorList:
-		# 	fieldMgr = gTransportationManager.GetFieldManager()
-		# 	vOrigin = G4ThreeVector(0., 0., 0.)
-		# 	myField = G4UniformMagField(G4ThreeVector(vector[0]*magUnit, vector[1]*magUnit, vector[2]*magUnit))
-
-		# return myField
-		# #################################################
