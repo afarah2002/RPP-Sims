@@ -1,8 +1,57 @@
 #----------imports----------#
 from Geant4 import * 
 import random
+import numpy as np
+import matplotlib.pyplot as plt
+import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
+from time import sleep
+# import numpy as np
 
 #----------code starts here!----------#
+class Plotter(object):
+	"graphs 3D momenta"
+
+	def __init__(self):
+		self.px = []
+		self.py = []
+		self.pz = []
+	
+	def dataCollection(self, final_momentum):
+		self.px.append(final_momentum[0])
+		self.py.append(final_momentum[1])
+		self.pz.append(final_momentum[2])
+
+		print("DATA STORED")
+		print len(self.px), "\n", len(self.py), "\n", len(self.pz), "\n"
+
+	def listReturner(self):
+		print("momnenta returned by plotter")
+		return self.px, self.py, self.pz, 
+
+	def grapher(self):
+		# Axes3D.scatter(self.px, self.py, self.pz)
+		fig = plt.figure()
+		ax = fig.add_subplot(111, projection='3d')
+
+		axmin = -3
+		axmax = 3
+		axes = plt.gca()
+		axes.set_xlim([axmin,axmax])
+		axes.set_ylim([axmin,axmax])
+		axes.set_zlim([axmin,axmax])
+
+		ax.set_xlabel('X momentum')
+		ax.set_ylabel('Y momentum')
+		ax.set_zlabel('Z momentum')
+
+
+		ax.scatter(self.px, self.py, self.pz)
+
+		plt.show()
+
+PLT = Plotter()
+
 class MyPrimaryGeneratorAction(G4VUserPrimaryGeneratorAction):
 	"My Primary Generator Action"
 
@@ -46,6 +95,7 @@ class MyRunAction(G4UserRunAction):
 	"My Run Action"
 
 	def EndOfRunAction(self, run):
+		PLT.grapher()
 		print "*** End of Run"
 		print "- Run sammary : (id= %d, #events= %d)" \
 		% (run.GetRunID(), run.GetNumberOfEventToBeProcessed())
@@ -55,6 +105,7 @@ class MyEventAction(G4UserEventAction):
 	"My Event Action"
 
 	def EndOfEventAction(self, event):
+		#print "*** dE/dx in current step=", step.GetTotalEnergyDeposit()
 		pass
 
 # ------------------------------------------------------------------
@@ -62,29 +113,45 @@ class MySteppingAction(G4UserSteppingAction):
 	"My Stepping Action"
 
 	def UserSteppingAction(self, step):
-		#print "*** dE/dx in current step=", step.GetTotalEnergyDeposit()
 		preStepPoint = step.GetPreStepPoint()
 		postStepPoint = step.GetPostStepPoint()
-		energy = step.GetTotalEnergyDeposit()
-		print(
-			postStepPoint.GetCharge(), 
-			postStepPoint.GetKineticEnergy(), # MeV
-			[preStepPoint.GetMomentum().x, postStepPoint.GetMomentum().x] 
-			# postStepPoint.GetMomentum().y, postStepPoint.GetMomentum().z]
-			)
+
 		track = step.GetTrack()
 		touchable = track.GetTouchable()
-		#print " *** vid= ", touchable.GetReplicaNumber()
-		pass
+		KE = track.GetKineticEnergy()
+
+		# kinetic energy in MeV - PRE
+		# initialKE = preStepPoint.GetKineticEnergy() 
+		# kinetic energy in MeV - POST
+		# finalKE = postStepPoint.GetKineticEnergy()
+
+		m = [track.GetMomentum().x, track.GetMomentum().y, track.GetMomentum().z] # equal to the postStepPoint momentum
+		mm = np.sqrt((m[0])**2 + (m[1])**2 + (m[2])**2)
+
+		# momenta - PRE
+		initialMomentum = [preStepPoint.GetMomentum().x, preStepPoint.GetMomentum().y, preStepPoint.GetMomentum().z]
+		# momenta - POST
+		finalMomentum = [postStepPoint.GetMomentum().x, postStepPoint.GetMomentum().y, postStepPoint.GetMomentum().z]
+
+		print KE, "\n", m, "\n", initialMomentum, "\n", finalMomentum, "\n\n" 
+		# energy = step.GetTotalEnergyDeposit()
+
+
+
+		PLT.dataCollection(m)
+		# PLT.grapher()
+
+		# return initialMomentum, finalMomentum
+		pass 
 
 class MyField(G4MagneticField):
 	"My Magnetic Field"
 
 	def GetFieldValue(self, pos, time):
-
 		vectorList = [
-						# [0, 1, 0], 
-					 	[-10., -10., -10.]
+						[1., 1., 1.], 
+					 	# [10., 10., 10.]
+					 	# [0,0,0]
 					 ]
 		for v in vectorList:
 
@@ -92,7 +159,10 @@ class MyField(G4MagneticField):
 			bfield.x = v[0]*tesla
 			bfield.y = v[1]*tesla
 			bfield.z = v[2]*tesla
+			# print "\n", "B-field activated", "\n" ### gets rid of other prints for some reason
 			return bfield
+
+
 
 # class ScoreSD(G4VSensitiveDetector):
 # 	"SD for score voxels"
