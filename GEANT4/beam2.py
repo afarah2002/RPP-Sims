@@ -14,6 +14,8 @@ from time import sleep
 from matplotlib import colors
 from matplotlib.ticker import PercentFormatter
 
+
+## setting up lists for std devs x,y,z, pos/neg
 global std_dev_pos_x_right_LIST
 global std_dev_pos_x_left_LIST
 global std_dev_pos_y_right_LIST
@@ -27,6 +29,21 @@ std_dev_pos_y_right_LIST = []
 std_dev_pos_y_left_LIST = []
 std_dev_pos_z_right_LIST = []
 std_dev_pos_z_left_LIST = []
+## setting up lists for means x,y,z, pos/neg
+global mean_pos_x_right_LIST
+global mean_pos_x_left_LIST
+global mean_pos_y_right_LIST
+global mean_pos_y_left_LIST
+global mean_pos_z_right_LIST
+global mean_pos_z_left_LIST
+
+mean_pos_x_right_LIST = []
+mean_pos_x_left_LIST = []
+mean_pos_y_right_LIST = []
+mean_pos_y_left_LIST = []
+mean_pos_z_right_LIST = []
+mean_pos_z_left_LIST = []
+
 #----------code starts here!----------#
 class Plotter(object):
 	"graphs 3D momenta"
@@ -49,7 +66,7 @@ class Plotter(object):
 		self.pz.append(posf[2])
 		self.pos3D = np.sqrt(np.square(self.px) + np.square(self.py) + np.square(self.pz)) # 3D position
 
-		cutoff = 450
+		cutoff = 400 # above/below this value (+ or -) the cluster is analyzed
 		#isolate clusters
 		if posf[0] > cutoff:
 			self.px_pos.append(posf[0])
@@ -121,8 +138,16 @@ class Plotter(object):
 		std_dev_pos_z_right_LIST.append(self.std_dev_pos_z_right)
 		std_dev_pos_z_left_LIST.append(self.std_dev_pos_z_left)
 
+		mean_pos_x_right_LIST.append(mean_pos_x_right)
+		mean_pos_x_left_LIST.append(mean_pos_x_left)
+		mean_pos_y_right_LIST.append(mean_pos_y_right)
+		mean_pos_y_left_LIST.append(mean_pos_y_left)
+		mean_pos_z_right_LIST.append(mean_pos_z_right)
+		mean_pos_z_left_LIST.append(mean_pos_z_left)
+
 	def dataReturner(self):
-		return [std_dev_pos_x_right_LIST, std_dev_pos_x_left_LIST, std_dev_pos_y_right_LIST, std_dev_pos_y_left_LIST, std_dev_pos_z_right_LIST, std_dev_pos_z_left_LIST]
+		return [std_dev_pos_x_right_LIST, std_dev_pos_x_left_LIST, std_dev_pos_y_right_LIST, std_dev_pos_y_left_LIST, std_dev_pos_z_right_LIST, std_dev_pos_z_left_LIST], \
+			   [mean_pos_x_right_LIST, mean_pos_x_left_LIST, mean_pos_y_right_LIST, mean_pos_y_left_LIST, mean_pos_z_right_LIST, mean_pos_z_left_LIST]
 		pass
 
 	def grapher(self):

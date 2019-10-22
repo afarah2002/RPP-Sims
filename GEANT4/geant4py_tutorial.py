@@ -16,6 +16,8 @@ from geom_constructor import GeomConstructor
 # from beam import BeamInitializer
 from beam2 import MyPrimaryGeneratorAction, MyRunAction, MyEventAction, MySteppingAction, MyField, Plotter
 
+
+## setting up lists for std devs x,y,z, pos/neg
 global std_dev_pos_x_right_LIST
 global std_dev_pos_x_left_LIST
 global std_dev_pos_y_right_LIST
@@ -29,6 +31,22 @@ std_dev_pos_y_right_LIST = []
 std_dev_pos_y_left_LIST = []
 std_dev_pos_z_right_LIST = []
 std_dev_pos_z_left_LIST = []
+
+## setting up lists for means x,y,z, pos/neg
+global mean_pos_x_right_LIST
+global mean_pos_x_left_LIST
+global mean_pos_y_right_LIST
+global mean_pos_y_left_LIST
+global mean_pos_z_right_LIST
+global mean_pos_z_left_LIST
+
+mean_pos_x_right_LIST = []
+mean_pos_x_left_LIST = []
+mean_pos_y_right_LIST = []
+mean_pos_y_left_LIST = []
+mean_pos_z_right_LIST = []
+mean_pos_z_left_LIST = []
+
 
 PLT = Plotter()
 
@@ -96,6 +114,12 @@ class Visualizer(object):
 		gApplyUICommand("/vis/viewer/update")
 
 
+class CurveFitter(object):
+
+	def fit(self):
+		pass
+	def grapher(self):
+		pass
 
 if __name__ == '__main__':
 	Constructor = Constructor()
@@ -164,12 +188,11 @@ if __name__ == '__main__':
 		# myDC.SetSDtoScoreVoxel(scoreSD)
 
 		gRunManager.BeamOn(1)
-		std_devs_LIST = PLT.dataReturner()
-		PLT.wipeData()
 
 		VIS.visualizer(angle)
 
-
+		std_devs_LIST, means_LIST = PLT.dataReturner()
+		PLT.wipeData() #clean lists before starting another run
 
 		std_dev_pos_x_right_LIST = std_devs_LIST[0]
 		std_dev_pos_x_left_LIST = std_devs_LIST[1]
@@ -178,24 +201,40 @@ if __name__ == '__main__':
 		std_dev_pos_z_right_LIST = std_devs_LIST[4]
 		std_dev_pos_z_left_LIST = std_devs_LIST[5]
 
-		print std_dev_pos_x_right_LIST
-		print std_dev_pos_x_left_LIST
-		print std_dev_pos_y_right_LIST
-		print std_dev_pos_y_left_LIST
-		print std_dev_pos_z_right_LIST
-		print std_dev_pos_z_left_LIST
+		means_pos_x_right_LIST = means_LIST[0]
+		means_pos_x_left_LIST = means_LIST[1]
+		means_pos_y_right_LIST = means_LIST[2]
+		means_pos_y_left_LIST = means_LIST[3]
+		means_pos_z_right_LIST = means_LIST[4]
+		means_pos_z_left_LIST = means_LIST[5]
+
+
 	fig = plt.figure()
 	ax1 = fig.add_subplot(111)
+	plt.xlabel("Ratio of B-field to Particle Beam Energy", fontsize=20)
 
+	# plot standard deviations (connected dots)
 	ax1.plot(be_ratio, std_dev_pos_x_right_LIST, label='std_dev_pos_x_right')
 	ax1.plot(be_ratio, std_dev_pos_x_left_LIST, label='std_dev_pos_x_left')
 	ax1.plot(be_ratio, std_dev_pos_y_right_LIST, label='std_dev_pos_y_right')
 	ax1.plot(be_ratio, std_dev_pos_y_left_LIST, label='std_dev_pos_y_left')
 	ax1.plot(be_ratio, std_dev_pos_z_right_LIST, label='std_dev_pos_z_right')
 	ax1.plot(be_ratio, std_dev_pos_z_left_LIST, label='std_dev_pos_z_left')	
-	
-	plt.xlabel("Ratio of B-field to Particle Beam Energy", fontsize=20)
-	plt.ylabel("Std. Dev. of Particle Cluster", fontsize=20)
+	plt.ylabel("Std. Dev. of Positions of Particle Cluster", fontsize=20)
+
+	#plot means (connected dots)
+	# ax1.plot(be_ratio, means_pos_x_right_LIST, label='means_pos_x_right')
+	# ax1.plot(be_ratio, means_pos_x_left_LIST, label='means_pos_x_left')
+	# ax1.plot(be_ratio, means_pos_y_right_LIST, label='means_pos_y_right')
+	# ax1.plot(be_ratio, means_pos_y_left_LIST, label='means_pos_y_left')
+	# ax1.plot(be_ratio, means_pos_z_right_LIST, label='means_pos_z_right')
+	# ax1.plot(be_ratio, means_pos_z_left_LIST, label='means_pos_z_left')	
+	# plt.ylabel("Means positions of particle clusters")
+
+	# ax1.yaxis.set_label_position("right")
+	# ax1.yaxis.tick_right()
+
+
 	plt.legend(loc='upper right')
 	# plt.scatter(be_ratio, std_dev_pos_x_right_LIST)
 	plt.show()
