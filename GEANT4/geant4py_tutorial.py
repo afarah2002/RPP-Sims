@@ -6,14 +6,29 @@ import g4py.NISTmaterials
 import g4py.EMSTDpl
 import g4py.ParticleGun, g4py.MedicalBeam
 
+import matplotlib.pyplot as plt
 import random
 import time
 import thread
-
+import numpy as np
 #----file imports--------#
 from geom_constructor import GeomConstructor 
 # from beam import BeamInitializer
 from beam2 import MyPrimaryGeneratorAction, MyRunAction, MyEventAction, MySteppingAction, MyField, Plotter
+
+global std_dev_pos_x_right_LIST
+global std_dev_pos_x_left_LIST
+global std_dev_pos_y_right_LIST
+global std_dev_pos_y_left_LIST
+global std_dev_pos_z_right_LIST
+global std_dev_pos_z_left_LIST
+
+std_dev_pos_x_right_LIST = []
+std_dev_pos_x_left_LIST = []
+std_dev_pos_y_right_LIST = []
+std_dev_pos_y_left_LIST = []
+std_dev_pos_z_right_LIST = []
+std_dev_pos_z_left_LIST = []
 
 PLT = Plotter()
 
@@ -92,27 +107,50 @@ if __name__ == '__main__':
 
 	angle = 35
 	zoom = 1.5
-	while True:
-		# angle += 0.075 # +0.075 is a recommended delta theta
-		time.sleep(1)
-		PLT # initialize the x y z lists for the plotter
+	be_ratio = np.arange(1e-7, 1e-2, .00005) # ratio between magnetic field (varied) and particle energy (fixed @ 2.5 MeV)
+	# be_ratio = [1]
+	print(len(be_ratio))
+	time.sleep(1)
 
+	for be in be_ratio:
+
+		# angle += 0.075 # +0.075 is a recommended delta theta
+		# for be in be_ratio:
+		print "\n", "NEW BE_RATIO: ", be, "\n"
+		# time.sleep(1)
+
+		PLT # initialize the x y z lists for the plotter
 		# set user actions ...
 		PGA_1 = MyPrimaryGeneratorAction()
 		gRunManager.SetUserAction(PGA_1)
 
-		  
 		myEA = MyEventAction()
 		gRunManager.SetUserAction(myEA)
 
 		mySA = MySteppingAction()
 		gRunManager.SetUserAction(mySA)
 
-		fieldMgr= gTransportationManager.GetFieldManager()
-		# myField= GetFieldValue(G4ThreeVector(0.,10.*tesla,0.))
-		myField= MyField()
-		fieldMgr.SetDetectorField(myField)
-		fieldMgr.CreateChordFinder(myField)
+
+		vectorList = [
+				# [1., 1., 1.], 
+			 	# [10., 10., 10.]
+			 	list(np.multiply([1, 1, 1], be))
+			 	# list(np.multiply([0, 0.1, 0.1], be))
+			 	# list(np.multiply([0.1, 0.1, 0.1], be))
+			 	# list(np.multiply([0.1, 0.1, 0.1], be))
+			 	# list(np.multiply([0.1, 0.1, 0.1], be))
+			 	# list(np.multiply([0.1, 0.1, 0.1], be))
+
+			 	# [0., 0., 1]
+			 	# [0,0,0]
+			 ]
+		for v in vectorList: 
+			fieldMgr = gTransportationManager.GetFieldManager()
+			myField = G4UniformMagField(G4ThreeVector(v[0],v[1],v[2]))
+			# myField = MyField(1)
+			fieldMgr.SetDetectorField(myField)
+			fieldMgr.CreateChordFinder(myField)
+			# print "|B-field| = ", vectorList[0][0]
 
 		myRA = MyRunAction()
 		gRunManager.SetUserAction(myRA)
@@ -126,5 +164,49 @@ if __name__ == '__main__':
 		# myDC.SetSDtoScoreVoxel(scoreSD)
 
 		gRunManager.BeamOn(1)
+		std_devs_LIST = PLT.dataReturner()
+		PLT.wipeData()
 
 		VIS.visualizer(angle)
+
+
+
+		std_dev_pos_x_right_LIST = std_devs_LIST[0]
+		std_dev_pos_x_left_LIST = std_devs_LIST[1]
+		std_dev_pos_y_right_LIST = std_devs_LIST[2]
+		std_dev_pos_y_left_LIST = std_devs_LIST[3]
+		std_dev_pos_z_right_LIST = std_devs_LIST[4]
+		std_dev_pos_z_left_LIST = std_devs_LIST[5]
+
+		print std_dev_pos_x_right_LIST
+		print std_dev_pos_x_left_LIST
+		print std_dev_pos_y_right_LIST
+		print std_dev_pos_y_left_LIST
+		print std_dev_pos_z_right_LIST
+		print std_dev_pos_z_left_LIST
+	fig = plt.figure()
+	ax1 = fig.add_subplot(111)
+
+	ax1.plot(be_ratio, std_dev_pos_x_right_LIST, label='std_dev_pos_x_right')
+	ax1.plot(be_ratio, std_dev_pos_x_left_LIST, label='std_dev_pos_x_left')
+	ax1.plot(be_ratio, std_dev_pos_y_right_LIST, label='std_dev_pos_y_right')
+	ax1.plot(be_ratio, std_dev_pos_y_left_LIST, label='std_dev_pos_y_left')
+	ax1.plot(be_ratio, std_dev_pos_z_right_LIST, label='std_dev_pos_z_right')
+	ax1.plot(be_ratio, std_dev_pos_z_left_LIST, label='std_dev_pos_z_left')	
+	
+	plt.xlabel("Ratio of B-field to Particle Beam Energy", fontsize=20)
+	plt.ylabel("Std. Dev. of Particle Cluster", fontsize=20)
+	plt.legend(loc='upper right')
+	# plt.scatter(be_ratio, std_dev_pos_x_right_LIST)
+	plt.show()
+
+
+
+
+
+
+
+
+
+
+

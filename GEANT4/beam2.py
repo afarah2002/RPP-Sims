@@ -2,6 +2,10 @@
 from Geant4 import * 
 import random
 import numpy as np
+import scipy.stats as ss
+import pandas as pd
+import seaborn as sns  # for nicer graphics
+
 ## matplotlib stuff
 import matplotlib.pyplot as plt
 import matplotlib.pyplot as plt
@@ -10,6 +14,19 @@ from time import sleep
 from matplotlib import colors
 from matplotlib.ticker import PercentFormatter
 
+global std_dev_pos_x_right_LIST
+global std_dev_pos_x_left_LIST
+global std_dev_pos_y_right_LIST
+global std_dev_pos_y_left_LIST
+global std_dev_pos_z_right_LIST
+global std_dev_pos_z_left_LIST
+
+std_dev_pos_x_right_LIST = []
+std_dev_pos_x_left_LIST = []
+std_dev_pos_y_right_LIST = []
+std_dev_pos_y_left_LIST = []
+std_dev_pos_z_right_LIST = []
+std_dev_pos_z_left_LIST = []
 #----------code starts here!----------#
 class Plotter(object):
 	"graphs 3D momenta"
@@ -18,20 +35,95 @@ class Plotter(object):
 		self.px = []
 		self.py = []
 		self.pz = []
-	
-	def dataCollection(self, final_momentum):
-		self.px.append(final_momentum[0])
-		self.py.append(final_momentum[1])
-		self.pz.append(final_momentum[2])
 
+		self.px_pos = []
+		self.px_neg = []
+		self.py_pos = []
+		self.py_neg = []
+		self.pz_pos = []
+		self.pz_neg = []
+	
+	def dataCollection(self, posf, momf):
+		self.px.append(posf[0])
+		self.py.append(posf[1])
+		self.pz.append(posf[2])
 		self.pos3D = np.sqrt(np.square(self.px) + np.square(self.py) + np.square(self.pz)) # 3D position
 
-		print("DATA STORED")
-		print len(self.px), "\n", len(self.py), "\n", len(self.pz), "\n"
+		cutoff = 450
+		#isolate clusters
+		if posf[0] > cutoff:
+			self.px_pos.append(posf[0])
+		if posf[0] < -cutoff:
+			self.px_neg.append(posf[0])
+		if posf[1] > cutoff:
+			self.py_pos.append(posf[1])
+		if posf[1] < -cutoff:
+			self.py_neg.append(posf[1])
+		if posf[2] > cutoff:
+			self.pz_pos.append(posf[2])
+		if posf[2] < -cutoff:
+			self.pz_neg.append(posf[2])
 
-	def listReturner(self):
-		print("momnenta returned by plotter")
-		return self.px, self.py, self.pz
+		print("DATA STORED")
+		# print len(self.px), "\n", len(self.py), "\n", len(self.pz), "\n"
+
+	def dataAnalysis(self):
+		results = open("RESULTS/results_10212019_1.txt", "a")
+
+		# POSITION X - ALL
+		# mean_pos_ = 
+		# std_dev_pos_ = 
+		# median_pos_ = 		
+		# # POSITION Y - ALL
+		# mean_pos_ = 
+		# std_dev_pos_ = 
+		# median_pos_ = 
+		# # POSITION Z - ALL
+		# mean_pos_ = 
+		# std_dev_pos_ = 
+		# median_pos_ = 
+		# POSITION X - POS(RIGHT)
+		mean_pos_x_right = np.mean(self.px_pos)
+		self.std_dev_pos_x_right = np.std(self.px_pos)
+		median_pos_x_right = np.median(self.px_pos)
+		results.write(str(mean_pos_x_right) +  "	" +  str(self.std_dev_pos_x_right) + "	" + str(median_pos_x_right) + "\n")
+		# POSITION X - NEG(LEFT)
+		mean_pos_x_left = np.mean(self.px_neg)
+		self.std_dev_pos_x_left = np.std(self.px_neg)
+		median_pos_x_left = np.median(self.px_neg)
+		# results.write(str(mean_pos_x_left) +  " 	" +  str(self.std_dev_pos_x_left) + "	" + str(median_pos_x_left) + "\n")
+		# POSITION Y - POS(RIGHT)
+		mean_pos_y_right = np.mean(self.py_pos)
+		self.std_dev_pos_y_right = np.std(self.py_pos)
+		median_pos_y_right = np.median(self.py_pos)
+		# results.write(str(mean_pos_y_right) +  "	" +  str(self.std_dev_pos_y_right) + "	" + str(median_pos_y_right) + "\n")
+		# POSITION Y - NEG(LEFT)
+		mean_pos_y_left = np.mean(self.py_neg)
+		self.std_dev_pos_y_left = np.std(self.py_neg)
+		median_pos_y_left = np.median(self.py_neg)
+		# results.write(str(mean_pos_y_left) +  "    " +  str(self.std_dev_pos_y_left) + "	" + str(median_pos_y_left) + "\n")
+		# POSITION Z - POS(RIGHT)
+		mean_pos_z_right = np.mean(self.pz_pos)
+		self.std_dev_pos_z_right = np.std(self.pz_pos)
+		median_pos_z_right = np.median(self.pz_pos)
+		# results.write(str(mean_pos_z_right) +  "	" +  str(self.std_dev_pos_z_right) + "	" + str(median_pos_z_right) + "\n")
+		# POSITION Z - NEG(LEFT)
+		mean_pos_z_left = np.mean(self.pz_neg)
+		self.std_dev_pos_z_left = np.std(self.pz_neg)
+		median_pos_z_left = np.median(self.pz_neg)
+		# results.write(str(mean_pos_z_left) +  "	  " +  str(self.std_dev_pos_z_left) + "	" + str(median_pos_z_left) + "\n\n")
+		# print self.std_dev_pos_x_right, self.std_dev_pos_x_left, self.std_dev_pos_y_right, self.std_dev_pos_y_left, self.std_dev_pos_z_right, self.std_dev_pos_z_left
+
+		std_dev_pos_x_right_LIST.append(self.std_dev_pos_x_right)
+		std_dev_pos_x_left_LIST.append(self.std_dev_pos_x_left)
+		std_dev_pos_y_right_LIST.append(self.std_dev_pos_y_right)
+		std_dev_pos_y_left_LIST.append(self.std_dev_pos_y_left)
+		std_dev_pos_z_right_LIST.append(self.std_dev_pos_z_right)
+		std_dev_pos_z_left_LIST.append(self.std_dev_pos_z_left)
+
+	def dataReturner(self):
+		return [std_dev_pos_x_right_LIST, std_dev_pos_x_left_LIST, std_dev_pos_y_right_LIST, std_dev_pos_y_left_LIST, std_dev_pos_z_right_LIST, std_dev_pos_z_left_LIST]
+		pass
 
 	def grapher(self):
 		fig = plt.figure()
@@ -53,14 +145,37 @@ class Plotter(object):
 		ax.scatter(self.px, self.py, self.pz)
 
 		# second subplot: a histogram of positions
-		fig, axs = plt.subplots(4, sharey=True, tight_layout=False)
-		n_bins = 100
+		fig, axs = plt.subplots(11, sharey=False, tight_layout=False)
+		n_bins = 25
 		axs[0].hist(self.px, bins=n_bins) # histogram of 3D position x
-		axs[1].hist(self.py, bins=n_bins) # histogram of 3D position y
+		axs[1].hist(self.py, bins=n_bins) # histogram of 3D position x
 		axs[2].hist(self.pz, bins=n_bins) # histogram of 3D position z
 		axs[3].hist(self.pos3D, bins=n_bins) # histogram of 3D position magnitude
+
+		axs[5].hist(self.px_pos, bins=n_bins) # histogram of 3D position x
+		axs[6].hist(self.px_neg, bins=n_bins) # histogram of 3D position x
+		axs[7].hist(self.py_pos, bins=n_bins) # histogram of 3D position x
+		axs[8].hist(self.py_neg, bins=n_bins) # histogram of 3D position x
+		axs[9].hist(self.pz_pos, bins=n_bins) # histogram of 3D position z
+		axs[10].hist(self.pz_neg, bins=n_bins) # histogram of 3D position z
+		# plt.figure()
+		# n_bins = 1000
+		# plt.hist([self.px, self.py, self.pz], bins=n_bins, histtype='barstacked', normed=True)
+		# plt.show()
+	def wipeData(self):
+		# wipe lists for next data collection
+		self.px = []
+		self.py = []
+		self.pz = []
+
+		self.px_pos = []
+		self.px_neg = []
+		self.py_pos = []
+		self.py_neg = []
+		self.pz_pos = []
+		self.pz_neg = []
  
-		plt.show()
+
 
 PLT = Plotter()
 
@@ -70,15 +185,14 @@ class MyPrimaryGeneratorAction(G4VUserPrimaryGeneratorAction):
 	def __init__(self):
 		G4VUserPrimaryGeneratorAction.__init__(self)
 		self.particleGun = G4ParticleGun(1)
-		print("\n Particle gun defined \n")
+		# print("\n Particle gun defined \n")
 
 	def GeneratePrimaries(self, event):
 
 
 		# Particle param
 		#################################################
-		spaceParamDict = {}
-		vectorCount = 1000
+		vectorCount = 100
 		locationArray = [0, 0, 0]
 
 		particle = "e+"
@@ -106,7 +220,8 @@ class MyRunAction(G4UserRunAction):
 	"My Run Action"
 
 	def EndOfRunAction(self, run):
-		PLT.grapher()
+		# PLT.grapher()
+		PLT.dataAnalysis()
 		print "*** End of Run"
 		print "- Run sammary : (id= %d, #events= %d)" \
 		% (run.GetRunID(), run.GetNumberOfEventToBeProcessed())
@@ -146,25 +261,27 @@ class MySteppingAction(G4UserSteppingAction):
 		# momenta - POST
 		finalMomentum = [postStepPoint.GetMomentum().x, postStepPoint.GetMomentum().y, postStepPoint.GetMomentum().z]
 
-		print touchable, "\n", KE, "\n", p, "\n", initialMomentum, "\n", finalMomentum, "\n\n" 
+		# print KE, "\n", p, "\n", initialMomentum, "\n", finalMomentum, "\n\n" 
 		# energy = step.GetTotalEnergyDeposit()
 
 
 
-		PLT.dataCollection(p)
-		# PLT.grapher()
+		PLT.dataCollection(p, m) # calls data collection and analysis on final positions and momenta
+		# return initialMomentum, finalMomentum 
 
-		# return initialMomentum, finalMomentum
-		pass 
-
-class MyField(G4MagneticField):
+class MyField(G4MagneticField): ### used when mag field NOT parameterized in main filed
 	"My Magnetic Field"
 
+	def __init__(self, eb_ratio):
+		self.eb_ratio = eb_ratio
+
 	def GetFieldValue(self, pos, time):
+		self.eb_ratio = 1
 		vectorList = [
 						# [1., 1., 1.], 
 					 	# [10., 10., 10.]
-					 	[0.1, 0.1, 0.1]
+					 	list(np.multiply([0.1, 0.1, 0.1], self.eb_ratio))
+					 	# [0., 0., 1]
 					 	# [0,0,0]
 					 ]
 		for v in vectorList:
