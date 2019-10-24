@@ -11,6 +11,7 @@ import random
 import time
 import thread
 import numpy as np
+from scipy import optimize
 #----file imports--------#
 from geom_constructor import GeomConstructor 
 # from beam import BeamInitializer
@@ -18,6 +19,9 @@ from beam2 import MyPrimaryGeneratorAction, MyRunAction, MyEventAction, MySteppi
 
 
 ## setting up lists for std devs x,y,z, pos/neg
+global std_devs_LIST
+std_devs_LIST  = []
+
 global std_dev_pos_x_right_LIST
 global std_dev_pos_x_left_LIST
 global std_dev_pos_y_right_LIST
@@ -113,13 +117,40 @@ class Visualizer(object):
 		
 		gApplyUICommand("/vis/viewer/update")
 
+###############################################################################################################################################
+# Functions for curve fitting by scipy.optimize.curve_fit()
+class BaseFunctions(object):
+	
+	def rational(self, x, p, q):
+	    """
+	    The general rational function description.
+	    p is a list with the polynomial coefficients in the numerator
+	    q is a list with the polynomial coefficients (except the first one)
+	    in the denominator
+	    The zeroth order coefficient of the denominator polynomial is fixed at 1.
+	    Numpy stores coefficients in [x**2 + x + 1] order, so the fixed
+	    zeroth order denominator coefficent must comes last. (Edited.)
+	    """
+	    return np.polyval(p, x) / np.polyval(q + [1.0], x)
+
+BF = BaseFunctions()
+
+def rational3_3(x, p0, p1, p2, q1, q2):
+    return BF.rational(x, [p0, p1, p2], [q1, q2])
 
 class CurveFitter(object):
 
-	def fit(self):
-		pass
-	def grapher(self):
-		pass
+	def fit(self, test_function, x_data, y_data):
+		popt, pcov = optimize.curve_fit(test_function, x_data, y_data, p0=None)
+		print popt, "\n"
+		return popt
+CF = CurveFitter()
+
+
+	# def fit(self):
+	# 	pass
+	# def grapher(self):
+	# 	pass
 
 if __name__ == '__main__':
 	Constructor = Constructor()
@@ -131,7 +162,7 @@ if __name__ == '__main__':
 
 	angle = 35
 	zoom = 1.5
-	be_ratio = np.arange(1e-7, 1e-2, .00005) # ratio between magnetic field (varied) and particle energy (fixed @ 2.5 MeV)
+	be_ratio = np.arange(1e-7, 1e-2, .0001) # ratio between magnetic field (varied) and particle energy (fixed @ 2.5 MeV)
 	# be_ratio = [1]
 	print(len(be_ratio))
 	time.sleep(1)
@@ -194,33 +225,42 @@ if __name__ == '__main__':
 		std_devs_LIST, means_LIST = PLT.dataReturner()
 		PLT.wipeData() #clean lists before starting another run
 
-		std_dev_pos_x_right_LIST = std_devs_LIST[0]
-		std_dev_pos_x_left_LIST = std_devs_LIST[1]
-		std_dev_pos_y_right_LIST = std_devs_LIST[2]
-		std_dev_pos_y_left_LIST = std_devs_LIST[3]
-		std_dev_pos_z_right_LIST = std_devs_LIST[4]
-		std_dev_pos_z_left_LIST = std_devs_LIST[5]
-
-		means_pos_x_right_LIST = means_LIST[0]
-		means_pos_x_left_LIST = means_LIST[1]
-		means_pos_y_right_LIST = means_LIST[2]
-		means_pos_y_left_LIST = means_LIST[3]
-		means_pos_z_right_LIST = means_LIST[4]
-		means_pos_z_left_LIST = means_LIST[5]
+		# means_pos_x_right_LIST = means_LIST[0]
+		# means_pos_x_left_LIST = means_LIST[1]
+		# means_pos_y_right_LIST = means_LIST[2]
+		# means_pos_y_left_LIST = means_LIST[3]
+		# means_pos_z_right_LIST = means_LIST[4]
+		# means_pos_z_left_LIST = means_LIST[5]
 
 
+
+
+	function = rational3_3
 	fig = plt.figure()
 	ax1 = fig.add_subplot(111)
-	plt.xlabel("Ratio of B-field to Particle Beam Energy", fontsize=20)
+	plt.xlabel("Ratio of B-field to Particle Beam Energy (T/MeV) ", fontsize=18)
 
 	# plot standard deviations (connected dots)
-	ax1.plot(be_ratio, std_dev_pos_x_right_LIST, label='std_dev_pos_x_right')
-	ax1.plot(be_ratio, std_dev_pos_x_left_LIST, label='std_dev_pos_x_left')
-	ax1.plot(be_ratio, std_dev_pos_y_right_LIST, label='std_dev_pos_y_right')
-	ax1.plot(be_ratio, std_dev_pos_y_left_LIST, label='std_dev_pos_y_left')
-	ax1.plot(be_ratio, std_dev_pos_z_right_LIST, label='std_dev_pos_z_right')
-	ax1.plot(be_ratio, std_dev_pos_z_left_LIST, label='std_dev_pos_z_left')	
-	plt.ylabel("Std. Dev. of Positions of Particle Cluster", fontsize=20)
+	for std_dev in std_devs_LIST:
+		if std_devs_LIST.index(std_dev) == 0:
+			label = 'std_dev_pos_x_right'
+		if std_devs_LIST.index(std_dev) == 1:
+			label = 'std_dev_pos_x_left'
+		if std_devs_LIST.index(std_dev) == 2:
+			label = 'std_dev_pos_y_right'
+		if std_devs_LIST.index(std_dev) == 3:
+			label = 'std_dev_pos_y_left'
+		if std_devs_LIST.index(std_dev) == 4:
+			label = 'std_dev_pos_z_right'
+		if std_devs_LIST.index(std_dev) == 5:
+			label = 'std_dev_pos_z_left'
+		ax1.scatter(be_ratio, std_dev, label=label)	
+		popt = CF.fit(function, be_ratio, std_dev)
+		plt.plot(be_ratio, function(be_ratio, *popt), label=label)
+
+	plt.ylabel("Std. Dev. of Positions of Particle Clusters", fontsize=18)
+
+
 
 	#plot means (connected dots)
 	# ax1.plot(be_ratio, means_pos_x_right_LIST, label='means_pos_x_right')
@@ -229,7 +269,7 @@ if __name__ == '__main__':
 	# ax1.plot(be_ratio, means_pos_y_left_LIST, label='means_pos_y_left')
 	# ax1.plot(be_ratio, means_pos_z_right_LIST, label='means_pos_z_right')
 	# ax1.plot(be_ratio, means_pos_z_left_LIST, label='means_pos_z_left')	
-	# plt.ylabel("Means positions of particle clusters")
+	# plt.ylabel("Means positions of particle clusters", fontsize=18)
 
 	# ax1.yaxis.set_label_position("right")
 	# ax1.yaxis.tick_right()
