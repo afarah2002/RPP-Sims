@@ -51,6 +51,20 @@ mean_pos_y_left_LIST = []
 mean_pos_z_right_LIST = []
 mean_pos_z_left_LIST = []
 
+## setting up lists for cluster sizes x,y,z, pos/neg
+global n_pos_x_right_LIST
+global n_pos_x_left_LIST
+global n_pos_y_right_LIST
+global n_pos_y_left_LIST
+global n_pos_z_right_LIST
+global n_pos_z_left_LIST
+
+n_pos_x_right_LIST = []
+n_pos_x_left_LIST = []
+n_pos_y_right_LIST = []
+n_pos_y_left_LIST = []
+n_pos_z_right_LIST = []
+n_pos_z_left_LIST = []
 
 PLT = Plotter()
 
@@ -162,8 +176,9 @@ if __name__ == '__main__':
 
 	angle = 35
 	zoom = 1.5
-	be_ratio = np.arange(1e-7, 1e-2, .0001) # ratio between magnetic field (varied) and particle energy (fixed @ 2.5 MeV)
-	# be_ratio = [1]
+	energy = 2.5
+	be_ratio = np.arange(1e-7, 1e0, .01) # ratio between magnetic field (varied) and particle energy (fixed @ 2.5 MeV)
+	# optimal_be_ratio = [1] # after all tests, used to verify best be_ratio, should display 3D position plot
 	print(len(be_ratio))
 	time.sleep(1)
 
@@ -189,7 +204,7 @@ if __name__ == '__main__':
 		vectorList = [
 				# [1., 1., 1.], 
 			 	# [10., 10., 10.]
-			 	list(np.multiply([1, 1, 1], be))
+			 	list(np.multiply([energy, energy, energy], be))
 			 	# list(np.multiply([0, 0.1, 0.1], be))
 			 	# list(np.multiply([0.1, 0.1, 0.1], be))
 			 	# list(np.multiply([0.1, 0.1, 0.1], be))
@@ -222,7 +237,7 @@ if __name__ == '__main__':
 
 		VIS.visualizer(angle)
 
-		std_devs_LIST, means_LIST = PLT.dataReturner()
+		std_devs_LIST, means_LIST, n_LIST = PLT.dataReturner()
 		PLT.wipeData() #clean lists before starting another run
 
 		# means_pos_x_right_LIST = means_LIST[0]
@@ -241,24 +256,27 @@ if __name__ == '__main__':
 	plt.xlabel("Ratio of B-field to Particle Beam Energy (T/MeV) ", fontsize=18)
 
 	# plot standard deviations (connected dots)
-	for std_dev in std_devs_LIST:
-		if std_devs_LIST.index(std_dev) == 0:
-			label = 'std_dev_pos_x_right'
-		if std_devs_LIST.index(std_dev) == 1:
-			label = 'std_dev_pos_x_left'
-		if std_devs_LIST.index(std_dev) == 2:
-			label = 'std_dev_pos_y_right'
-		if std_devs_LIST.index(std_dev) == 3:
-			label = 'std_dev_pos_y_left'
-		if std_devs_LIST.index(std_dev) == 4:
-			label = 'std_dev_pos_z_right'
-		if std_devs_LIST.index(std_dev) == 5:
-			label = 'std_dev_pos_z_left'
-		ax1.scatter(be_ratio, std_dev, label=label)	
-		popt = CF.fit(function, be_ratio, std_dev)
+	dep_var_name = "n"
+	dep_var_LIST = n_LIST
+
+	for dep_var in dep_var_LIST:
+		if dep_var_LIST.index(dep_var) == 0:
+			label = dep_var_name + '_pos_x_right'
+		if dep_var_LIST.index(dep_var) == 1:
+			label = dep_var_name + '_pos_x_left'
+		if dep_var_LIST.index(dep_var) == 2:
+			label = dep_var_name + '_pos_y_right'
+		if dep_var_LIST.index(dep_var) == 3:
+			label = dep_var_name + '_pos_y_left'
+		if dep_var_LIST.index(dep_var) == 4:
+			label = dep_var_name + '_pos_z_right'
+		if dep_var_LIST.index(dep_var) == 5:
+			label = dep_var_name + '_pos_z_left'
+		ax1.scatter(be_ratio, dep_var, label=label)	
+		popt = CF.fit(function, be_ratio, dep_var)
 		plt.plot(be_ratio, function(be_ratio, *popt), label=label)
 
-	plt.ylabel("Std. Dev. of Positions of Particle Clusters", fontsize=18)
+	plt.ylabel(dep_var_name + " of Positions of Particle Clusters", fontsize=18)
 
 
 
