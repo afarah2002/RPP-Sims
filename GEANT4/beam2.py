@@ -43,10 +43,24 @@ mean_pos_y_right_LIST = []
 mean_pos_y_left_LIST = []
 mean_pos_z_right_LIST = []
 mean_pos_z_left_LIST = []
+## setting up lists for cluster sizes x,y,z, pos/neg
+global n_pos_x_right_LIST
+global n_pos_x_left_LIST
+global n_pos_y_right_LIST
+global n_pos_y_left_LIST
+global n_pos_z_right_LIST
+global n_pos_z_left_LIST
+
+n_pos_x_right_LIST = []
+n_pos_x_left_LIST = []
+n_pos_y_right_LIST = []
+n_pos_y_left_LIST = []
+n_pos_z_right_LIST = []
+n_pos_z_left_LIST = []
 
 #----------code starts here!----------#
 class Plotter(object):
-	"graphs 3D momenta"
+	"graphs 3D positions"
 
 	def __init__(self):
 		self.px = []
@@ -66,20 +80,29 @@ class Plotter(object):
 		self.pz.append(posf[2])
 		self.pos3D = np.sqrt(np.square(self.px) + np.square(self.py) + np.square(self.pz)) # 3D position
 
-		cutoff = 400 # above/below this value (+ or -) the cluster is analyzed
+		# cutoff = 400 # above/below this value (+ or -) the cluster is analyzed
+		bound_upper = 300
+		bound_lower = 200 # only consider the cluster within these bounds
 		#isolate clusters
-		if posf[0] > cutoff:
+
+		# if posf[0] > cutoff:
+		if posf[0] > bound_lower and posf[0] < bound_upper:
 			self.px_pos.append(posf[0])
-		if posf[0] < -cutoff:
+		# if posf[0] < -cutoff:
+		if posf[0] < -bound_lower and posf[0] > -bound_upper:
 			self.px_neg.append(posf[0])
-		if posf[1] > cutoff:
+		# if posf[1] > cutoff:
+		if posf[1] > bound_lower and posf[1] < bound_upper:
 			self.py_pos.append(posf[1])
-		if posf[1] < -cutoff:
+		# if posf[1] < -cutoff:
+		if posf[1] < -bound_lower and posf[1] > -bound_upper:
 			self.py_neg.append(posf[1])
-		if posf[2] > cutoff:
+		# if posf[2] > cutoff:
+		if posf[2] > bound_lower and posf[2] < bound_upper:
 			self.pz_pos.append(posf[2])
-		if posf[2] < -cutoff:
-			self.pz_neg.append(posf[2])
+		# if posf[2] < -cutoff:
+		if posf[2] < -bound_lower and posf[2] > -bound_upper:
+			self.pz_neg.append(posf[2]m
 
 		print("DATA STORED")
 		# print len(self.px), "\n", len(self.py), "\n", len(self.pz), "\n"
@@ -100,31 +123,37 @@ class Plotter(object):
 		# std_dev_pos_ = 
 		# median_pos_ = 
 		# POSITION X - POS(RIGHT)
+		n_pos_x_right = len(self.px_pos)
 		mean_pos_x_right = np.mean(self.px_pos)
 		self.std_dev_pos_x_right = np.std(self.px_pos)
 		median_pos_x_right = np.median(self.px_pos)
 		results.write(str(mean_pos_x_right) +  "	" +  str(self.std_dev_pos_x_right) + "	" + str(median_pos_x_right) + "\n")
 		# POSITION X - NEG(LEFT)
+		n_pos_x_left = len(self.px_neg)
 		mean_pos_x_left = np.mean(self.px_neg)
 		self.std_dev_pos_x_left = np.std(self.px_neg)
 		median_pos_x_left = np.median(self.px_neg)
 		# results.write(str(mean_pos_x_left) +  " 	" +  str(self.std_dev_pos_x_left) + "	" + str(median_pos_x_left) + "\n")
 		# POSITION Y - POS(RIGHT)
+		n_pos_y_right = len(self.py_pos)
 		mean_pos_y_right = np.mean(self.py_pos)
 		self.std_dev_pos_y_right = np.std(self.py_pos)
 		median_pos_y_right = np.median(self.py_pos)
 		# results.write(str(mean_pos_y_right) +  "	" +  str(self.std_dev_pos_y_right) + "	" + str(median_pos_y_right) + "\n")
 		# POSITION Y - NEG(LEFT)
+		n_pos_y_left = len(self.py_neg)
 		mean_pos_y_left = np.mean(self.py_neg)
 		self.std_dev_pos_y_left = np.std(self.py_neg)
 		median_pos_y_left = np.median(self.py_neg)
 		# results.write(str(mean_pos_y_left) +  "    " +  str(self.std_dev_pos_y_left) + "	" + str(median_pos_y_left) + "\n")
 		# POSITION Z - POS(RIGHT)
+		n_pos_z_right = len(self.pz_pos)
 		mean_pos_z_right = np.mean(self.pz_pos)
 		self.std_dev_pos_z_right = np.std(self.pz_pos)
 		median_pos_z_right = np.median(self.pz_pos)
 		# results.write(str(mean_pos_z_right) +  "	" +  str(self.std_dev_pos_z_right) + "	" + str(median_pos_z_right) + "\n")
 		# POSITION Z - NEG(LEFT)
+		n_pos_z_left = len(self.pz_neg)
 		mean_pos_z_left = np.mean(self.pz_neg)
 		self.std_dev_pos_z_left = np.std(self.pz_neg)
 		median_pos_z_left = np.median(self.pz_neg)
@@ -145,9 +174,17 @@ class Plotter(object):
 		mean_pos_z_right_LIST.append(mean_pos_z_right)
 		mean_pos_z_left_LIST.append(mean_pos_z_left)
 
+		n_pos_x_right_LIST.append(n_pos_x_right)
+		n_pos_x_left_LIST.append(n_pos_x_left)
+		n_pos_y_right_LIST.append(n_pos_y_right)
+		n_pos_y_left_LIST.append(n_pos_y_left)
+		n_pos_z_right_LIST.append(n_pos_z_right)
+		n_pos_z_left_LIST.append(n_pos_z_left)
+
 	def dataReturner(self):
 		return [std_dev_pos_x_right_LIST, std_dev_pos_x_left_LIST, std_dev_pos_y_right_LIST, std_dev_pos_y_left_LIST, std_dev_pos_z_right_LIST, std_dev_pos_z_left_LIST], \
-			   [mean_pos_x_right_LIST, mean_pos_x_left_LIST, mean_pos_y_right_LIST, mean_pos_y_left_LIST, mean_pos_z_right_LIST, mean_pos_z_left_LIST]
+			   [mean_pos_x_right_LIST, mean_pos_x_left_LIST, mean_pos_y_right_LIST, mean_pos_y_left_LIST, mean_pos_z_right_LIST, mean_pos_z_left_LIST], \
+			   [n_pos_x_right_LIST, n_pos_x_left_LIST, n_pos_y_right_LIST, n_pos_y_left_LIST, n_pos_z_right_LIST, n_pos_z_left_LIST]
 		pass
 
 	def grapher(self):
@@ -223,7 +260,7 @@ class MyPrimaryGeneratorAction(G4VUserPrimaryGeneratorAction):
 		particle = "e+"
 
 		energy_1 = 2.5
-		energy_2 = 2.5
+		# energy_2 = 2.5
 		energyUnit = MeV 
 		dimensionUnit = cm
 
@@ -231,10 +268,10 @@ class MyPrimaryGeneratorAction(G4VUserPrimaryGeneratorAction):
 		self.particleGun.SetParticleEnergy(energy_1*energyUnit) # define particle energy 
 
 		for i in range(0,vectorCount): # creates random momentum vectors originating from [0, 0, 0]
-			px = random.uniform(-1,1)
-			py = random.uniform(-1,1)
-			pz = random.uniform(-1,1)
-			momentumArray = [px, py, pz]
+			mx = random.uniform(-1,1)
+			my = random.uniform(-1,1)
+			mz = random.uniform(-1,1)
+			momentumArray = [mx, my, mz]
 			self.particleGun.SetParticlePosition(G4ThreeVector(locationArray[0], locationArray[1], locationArray[2])*dimensionUnit) # define first particle generator location
 			self.particleGun.SetParticleMomentumDirection(G4ThreeVector(momentumArray[0], momentumArray[1], momentumArray[2])*dimensionUnit) # define first particle generator momentum
 			self.particleGun.GeneratePrimaryVertex(event)
