@@ -179,7 +179,7 @@ if __name__ == '__main__':
 	angle = 35
 	zoom = 1.5
 	# energy = 2.5
-	be_ratio = np.arange(1e-7, 1e0, .1) # ratio between magnetic field (varied) and particle energy (fixed @ 2.5 MeV)
+	be_ratio = np.arange(1e-7, 1e-2, .00005) # ratio between magnetic field (varied) and particle energy (fixed @ 2.5 MeV)
 	# optimal_be_ratio = [1] # after all tests, used to verify best be_ratio, should display 3D position plot
 	bound_lower, bound_upper, vectorCount, energy = PLT.paramReturner()
 	print energy, "\n"
@@ -229,14 +229,8 @@ if __name__ == '__main__':
 
 		myRA = MyRunAction()
 		gRunManager.SetUserAction(myRA)
-		# px, py, pz = PLT.listReturner()
-		# print len(px), len(py), len(pz)
-		# PLT.grapher() 
 
 		gRunManager.Initialize()
-
-		# scoreSD= ScoreSD()
-		# myDC.SetSDtoScoreVoxel(scoreSD)
 
 		gRunManager.BeamOn(1)
 
@@ -245,48 +239,62 @@ if __name__ == '__main__':
 		std_devs_LIST, means_LIST, n_LIST = PLT.dataReturner()
 		PLT.wipeData() #clean lists before starting another run
 
-		# means_pos_x_right_LIST = means_LIST[0]
-		# means_pos_x_left_LIST = means_LIST[1]
-		# means_pos_y_right_LIST = means_LIST[2]
-		# means_pos_y_left_LIST = means_LIST[3]
-		# means_pos_z_right_LIST = means_LIST[4]
-		# means_pos_z_left_LIST = means_LIST[5]
-
-
 
 	function = rational3_3
-	fig = plt.figure()
-	ax1 = fig.add_subplot(111)
 
 	# plot standard deviations (connected dots)
-	dep_var_name = "n"
-	dep_var_LIST = n_LIST
-	units = " "
+	data  = {
+			"SD" : std_devs_LIST, \
+			"means" : means_LIST, \
+			"cluster_size" : n_LIST \
+			}
 
-	for dep_var in dep_var_LIST:
-		if dep_var_LIST.index(dep_var) == 0:
-			label = dep_var_name + '_pos_x_right'
-		if dep_var_LIST.index(dep_var) == 1:
-			label = dep_var_name + '_pos_x_left'
-		if dep_var_LIST.index(dep_var) == 2:
-			label = dep_var_name + '_pos_y_right'
-		if dep_var_LIST.index(dep_var) == 3:
-			label = dep_var_name + '_pos_y_left'
-		if dep_var_LIST.index(dep_var) == 4:
-			label = dep_var_name + '_pos_z_right'
-		if dep_var_LIST.index(dep_var) == 5:
-			label = dep_var_name + '_pos_z_left'
-		ax1.scatter(be_ratio, dep_var, label=label)	
-		popt = CF.fit(function, be_ratio, dep_var)
-		plt.plot(be_ratio, function(be_ratio, *popt), label=label)
+	fig, (sd, means, n) = plt.subplots(3, sharex=True, sharey=False)
+	plt.tight_layout()
+	plt.xlabel("Ratio of B-field to Particle Beam Energy (T/MeV) ", fontsize=9)
 
-	# csfont = {'fontname':'Times New Roman'}
-	matplotlib.rcParams["font.family"] = "Times New Roman"
-	title = dep_var_name + units + "vs be_ratio (T/MeV)"
-	plt.title(title)
-	plt.xlabel("Ratio of B-field to Particle Beam Energy (T/MeV) ", fontsize=18)
-	plt.ylabel(dep_var_name + " of Positions of Particle Clusters", fontsize=18)
-	plt.legend(loc='upper right')
+	for dep_var_name, dep_var_LIST in data.items():
+		# ax1 = fig.add_subplot(111)
+		for dep_var in dep_var_LIST:
+			if dep_var_LIST.index(dep_var) == 0:
+				label = dep_var_name + '_pos_x_right'
+			if dep_var_LIST.index(dep_var) == 1:
+				label = dep_var_name + '_pos_x_left'
+			if dep_var_LIST.index(dep_var) == 2:
+				label = dep_var_name + '_pos_y_right'
+			if dep_var_LIST.index(dep_var) == 3:
+				label = dep_var_name + '_pos_y_left'
+			if dep_var_LIST.index(dep_var) == 4:
+				label = dep_var_name + '_pos_z_right'
+			if dep_var_LIST.index(dep_var) == 5:
+				label = dep_var_name + '_pos_z_left'
+
+			if dep_var_name == 'SD':
+				sd.scatter(be_ratio, dep_var, label=label)	
+				sd.set(ylabel=dep_var_name)
+				title = dep_var_name + " vs be_ratio (T/MeV)"
+				sd.set_title(title)
+				# plt.legend(loc='upper right')
+
+			if dep_var_name == "means":
+				means.scatter(be_ratio, dep_var, label=label)	
+				means.set(ylabel=dep_var_name)
+				title = dep_var_name + " vs be_ratio (T/MeV)"
+				means.set_title(title)
+				# plt.legend(loc='upper right')
+
+			if dep_var_name == "cluster_size":				
+				n.scatter(be_ratio, dep_var, label=label)
+				n.set(ylabel=dep_var_name)
+				title = dep_var_name + " vs be_ratio (T/MeV)"
+				n.set_title(title)
+				# plt.legend(loc='upper right')
+
+			# popt = CF.fit(function, be_ratio, dep_var)
+			# plt.plot(be_ratio, function(be_ratio, *popt), label=label)
+
+		# csfont = {'fontname':'Times New Roman'}
+		# matplotlib.rcParams["font.family"] = "Times New Roman"
 
 	pp = PdfPages("RESULTS/plots.pdf")
 	pp.savefig(fig)
