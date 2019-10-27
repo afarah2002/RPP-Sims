@@ -14,6 +14,17 @@ from time import sleep
 from matplotlib import colors
 from matplotlib.ticker import PercentFormatter
 
+global bound_lower
+global bound_upper
+
+bound_lower = 0 # only consider the cluster within these bounds, range of 100
+bound_upper = bound_lower + 100
+
+global vectorCount
+vectorCount = 100 # number of scattered e+ per run
+
+global energy
+energy_1 = 2.5
 
 ## setting up lists for std devs x,y,z, pos/neg
 global std_dev_pos_x_right_LIST
@@ -81,8 +92,8 @@ class Plotter(object):
 		self.pos3D = np.sqrt(np.square(self.px) + np.square(self.py) + np.square(self.pz)) # 3D position
 
 		# cutoff = 400 # above/below this value (+ or -) the cluster is analyzed
-		bound_upper = 300
-		bound_lower = 200 # only consider the cluster within these bounds
+		# bound_upper = 300
+		# bound_lower = 200 
 		#isolate clusters
 
 		# if posf[0] > cutoff:
@@ -102,13 +113,13 @@ class Plotter(object):
 			self.pz_pos.append(posf[2])
 		# if posf[2] < -cutoff:
 		if posf[2] < -bound_lower and posf[2] > -bound_upper:
-			self.pz_neg.append(posf[2]m
+			self.pz_neg.append(posf[2])
 
 		print("DATA STORED")
 		# print len(self.px), "\n", len(self.py), "\n", len(self.pz), "\n"
 
 	def dataAnalysis(self):
-		results = open("RESULTS/results_10212019_1.txt", "a")
+		# results = open("RESULTS/results_10212019_1.txt", "a")
 
 		# POSITION X - ALL
 		# mean_pos_ = 
@@ -127,7 +138,7 @@ class Plotter(object):
 		mean_pos_x_right = np.mean(self.px_pos)
 		self.std_dev_pos_x_right = np.std(self.px_pos)
 		median_pos_x_right = np.median(self.px_pos)
-		results.write(str(mean_pos_x_right) +  "	" +  str(self.std_dev_pos_x_right) + "	" + str(median_pos_x_right) + "\n")
+		# results.write(str(mean_pos_x_right) +  "	" +  str(self.std_dev_pos_x_right) + "	" + str(median_pos_x_right) + "\n")
 		# POSITION X - NEG(LEFT)
 		n_pos_x_left = len(self.px_neg)
 		mean_pos_x_left = np.mean(self.px_neg)
@@ -224,6 +235,9 @@ class Plotter(object):
 		# n_bins = 1000
 		# plt.hist([self.px, self.py, self.pz], bins=n_bins, histtype='barstacked', normed=True)
 		# plt.show()
+	def paramReturner(self):
+		return bound_lower, bound_upper, vectorCount, energy_1
+
 	def wipeData(self):
 		# wipe lists for next data collection
 		self.px = []
@@ -254,12 +268,10 @@ class MyPrimaryGeneratorAction(G4VUserPrimaryGeneratorAction):
 
 		# Particle param
 		#################################################
-		vectorCount = 100
 		locationArray = [0, 0, 0]
 
 		particle = "e+"
 
-		energy_1 = 2.5
 		# energy_2 = 2.5
 		energyUnit = MeV 
 		dimensionUnit = cm

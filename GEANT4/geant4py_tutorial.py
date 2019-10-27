@@ -6,7 +6,9 @@ import g4py.NISTmaterials
 import g4py.EMSTDpl
 import g4py.ParticleGun, g4py.MedicalBeam
 
+import matplotlib
 import matplotlib.pyplot as plt
+from matplotlib.backends.backend_pdf import PdfPages
 import random
 import time
 import thread
@@ -176,9 +178,12 @@ if __name__ == '__main__':
 
 	angle = 35
 	zoom = 1.5
-	energy = 2.5
-	be_ratio = np.arange(1e-7, 1e0, .01) # ratio between magnetic field (varied) and particle energy (fixed @ 2.5 MeV)
+	# energy = 2.5
+	be_ratio = np.arange(1e-7, 1e0, .1) # ratio between magnetic field (varied) and particle energy (fixed @ 2.5 MeV)
 	# optimal_be_ratio = [1] # after all tests, used to verify best be_ratio, should display 3D position plot
+	bound_lower, bound_upper, vectorCount, energy = PLT.paramReturner()
+	print energy, "\n"
+
 	print(len(be_ratio))
 	time.sleep(1)
 
@@ -249,15 +254,14 @@ if __name__ == '__main__':
 
 
 
-
 	function = rational3_3
 	fig = plt.figure()
 	ax1 = fig.add_subplot(111)
-	plt.xlabel("Ratio of B-field to Particle Beam Energy (T/MeV) ", fontsize=18)
 
 	# plot standard deviations (connected dots)
 	dep_var_name = "n"
 	dep_var_LIST = n_LIST
+	units = " "
 
 	for dep_var in dep_var_LIST:
 		if dep_var_LIST.index(dep_var) == 0:
@@ -276,25 +280,18 @@ if __name__ == '__main__':
 		popt = CF.fit(function, be_ratio, dep_var)
 		plt.plot(be_ratio, function(be_ratio, *popt), label=label)
 
+	# csfont = {'fontname':'Times New Roman'}
+	matplotlib.rcParams["font.family"] = "Times New Roman"
+	title = dep_var_name + units + "vs be_ratio (T/MeV)"
+	plt.title(title)
+	plt.xlabel("Ratio of B-field to Particle Beam Energy (T/MeV) ", fontsize=18)
 	plt.ylabel(dep_var_name + " of Positions of Particle Clusters", fontsize=18)
-
-
-
-	#plot means (connected dots)
-	# ax1.plot(be_ratio, means_pos_x_right_LIST, label='means_pos_x_right')
-	# ax1.plot(be_ratio, means_pos_x_left_LIST, label='means_pos_x_left')
-	# ax1.plot(be_ratio, means_pos_y_right_LIST, label='means_pos_y_right')
-	# ax1.plot(be_ratio, means_pos_y_left_LIST, label='means_pos_y_left')
-	# ax1.plot(be_ratio, means_pos_z_right_LIST, label='means_pos_z_right')
-	# ax1.plot(be_ratio, means_pos_z_left_LIST, label='means_pos_z_left')	
-	# plt.ylabel("Means positions of particle clusters", fontsize=18)
-
-	# ax1.yaxis.set_label_position("right")
-	# ax1.yaxis.tick_right()
-
-
 	plt.legend(loc='upper right')
-	# plt.scatter(be_ratio, std_dev_pos_x_right_LIST)
+
+	pp = PdfPages("RESULTS/plots.pdf")
+	pp.savefig(fig)
+	pp.close()
+
 	plt.show()
 
 
