@@ -13,12 +13,14 @@ from mpl_toolkits.mplot3d import Axes3D
 from time import sleep
 from matplotlib import colors
 from matplotlib.ticker import PercentFormatter
+import time
 
 global bound_lower
 global bound_upper
 
-bound_lower = 0 # only consider the cluster within these bounds, range of 100
+bound_lower = 400 # only consider the cluster within these bounds, range of 100
 bound_upper = bound_lower + 100
+# bound_upper = 500
 
 global vectorCount
 vectorCount = 100 # number of scattered e+ per run
@@ -69,27 +71,86 @@ n_pos_y_left_LIST = []
 n_pos_z_right_LIST = []
 n_pos_z_left_LIST = []
 
+global n_sd_pos_x_right_LIST
+global n_sd_pos_x_left_LIST
+global n_sd_pos_y_right_LIST
+global n_sd_pos_y_left_LIST
+global n_sd_pos_z_right_LIST
+global n_sd_pos_z_left_LIST
+
+n_sd_pos_x_right_LIST = []
+n_sd_pos_x_left_LIST = []
+n_sd_pos_y_right_LIST = []
+n_sd_pos_y_left_LIST = []
+n_sd_pos_z_right_LIST = []
+n_sd_pos_z_left_LIST = []
+
+global px
+global py
+global pz
+global px_pos
+global px_neg
+global py_pos
+global py_neg
+global pz_pos
+global pz_neg
+
+px = []
+py = []
+pz = []
+
+px_pos = []
+px_neg = []
+py_pos = []
+py_neg = []
+pz_pos = []
+pz_neg = []
+
 #----------code starts here!----------#
+class WipeData(object):
+	# wipe lists for next data collection
+	def wipe(self):
+
+		px[:] = []
+		py[:] = []
+		pz[:] = []
+		px_pos[:] = []
+		px_neg[:] = []
+		py_pos[:] = []
+		py_neg[:] = []
+		pz_pos[:] = []
+		pz_neg[:] = []
+
+WIPE = WipeData()
+
 class Plotter(object):
 	"graphs 3D positions"
 
 	def __init__(self):
-		self.px = []
-		self.py = []
-		self.pz = []
+		# self.px = px
+		# self.py = py
+		# self.pz = pz
 
-		self.px_pos = []
-		self.px_neg = []
-		self.py_pos = []
-		self.py_neg = []
-		self.pz_pos = []
-		self.pz_neg = []
-	
+		# self.px_pos = px_pos
+		# self.px_neg = px_neg
+		# self.py_pos = py_pos
+		# self.py_neg = py_neg
+		# self.pz_pos = pz_pos
+		# self.pz_neg = pz_neg
+		pass
+
 	def dataCollection(self, posf, momf):
-		self.px.append(posf[0])
-		self.py.append(posf[1])
-		self.pz.append(posf[2])
-		self.pos3D = np.sqrt(np.square(self.px) + np.square(self.py) + np.square(self.pz)) # 3D position
+		# self.px.append(posf[0])
+		# self.py.append(posf[1])
+		# self.pz.append(posf[2])
+		# time.sleep(1)
+		# print px, "\n", py, "\n", pz, "\n"
+		# time.sleep(1)
+		px.append(posf[0])
+		py.append(posf[1])
+		pz.append(posf[2])
+
+		# self.pos3D = np.sqrt(np.square(self.px) + np.square(self.py) + np.square(self.pz)) # 3D position
 
 		# cutoff = 400 # above/below this value (+ or -) the cluster is analyzed
 		# bound_upper = 300
@@ -98,22 +159,28 @@ class Plotter(object):
 
 		# if posf[0] > cutoff:
 		if posf[0] > bound_lower and posf[0] < bound_upper:
-			self.px_pos.append(posf[0])
+			# self.px_pos.append(posf[0])
+			px_pos.append(posf[0])
 		# if posf[0] < -cutoff:
 		if posf[0] < -bound_lower and posf[0] > -bound_upper:
-			self.px_neg.append(posf[0])
+			# self.px_neg.append(posf[0])
+			px_neg.append(posf[0])
 		# if posf[1] > cutoff:
 		if posf[1] > bound_lower and posf[1] < bound_upper:
-			self.py_pos.append(posf[1])
+			# self.py_pos.append(posf[1])
+			py_pos.append(posf[1])
 		# if posf[1] < -cutoff:
 		if posf[1] < -bound_lower and posf[1] > -bound_upper:
-			self.py_neg.append(posf[1])
+			# self.py_neg.append(posf[1])
+			py_neg.append(posf[1])
 		# if posf[2] > cutoff:
 		if posf[2] > bound_lower and posf[2] < bound_upper:
-			self.pz_pos.append(posf[2])
+			# self.pz_pos.append(posf[2])
+			pz_pos.append(posf[2])
 		# if posf[2] < -cutoff:
 		if posf[2] < -bound_lower and posf[2] > -bound_upper:
-			self.pz_neg.append(posf[2])
+			# self.pz_neg.append(posf[2])
+			pz_neg.append(posf[2])
 
 		print("DATA STORED")
 		# print len(self.px), "\n", len(self.py), "\n", len(self.pz), "\n"
@@ -134,40 +201,46 @@ class Plotter(object):
 		# std_dev_pos_ = 
 		# median_pos_ = 
 		# POSITION X - POS(RIGHT)
-		n_pos_x_right = len(self.px_pos)
-		mean_pos_x_right = np.mean(self.px_pos)
-		self.std_dev_pos_x_right = np.std(self.px_pos)
-		median_pos_x_right = np.median(self.px_pos)
+		n_pos_x_right = len(px_pos)
+		mean_pos_x_right = np.mean(px_pos)
+		self.std_dev_pos_x_right = np.std(px_pos)
+		median_pos_x_right = np.median(px_pos)
+		n_sd_pos_x_right = n_pos_x_right / self.std_dev_pos_x_right
 		# results.write(str(mean_pos_x_right) +  "	" +  str(self.std_dev_pos_x_right) + "	" + str(median_pos_x_right) + "\n")
 		# POSITION X - NEG(LEFT)
-		n_pos_x_left = len(self.px_neg)
-		mean_pos_x_left = np.mean(self.px_neg)
-		self.std_dev_pos_x_left = np.std(self.px_neg)
-		median_pos_x_left = np.median(self.px_neg)
+		n_pos_x_left = len(px_neg)
+		mean_pos_x_left = np.mean(px_neg)
+		self.std_dev_pos_x_left = np.std(px_neg)
+		median_pos_x_left = np.median(px_neg)
+		n_sd_pos_x_left = n_pos_x_left / self.std_dev_pos_x_left
 		# results.write(str(mean_pos_x_left) +  " 	" +  str(self.std_dev_pos_x_left) + "	" + str(median_pos_x_left) + "\n")
 		# POSITION Y - POS(RIGHT)
-		n_pos_y_right = len(self.py_pos)
-		mean_pos_y_right = np.mean(self.py_pos)
-		self.std_dev_pos_y_right = np.std(self.py_pos)
-		median_pos_y_right = np.median(self.py_pos)
+		n_pos_y_right = len(py_pos)
+		mean_pos_y_right = np.mean(py_pos)
+		self.std_dev_pos_y_right = np.std(py_pos)
+		median_pos_y_right = np.median(py_pos)
+		n_sd_pos_y_right = n_pos_y_right / self.std_dev_pos_y_right
 		# results.write(str(mean_pos_y_right) +  "	" +  str(self.std_dev_pos_y_right) + "	" + str(median_pos_y_right) + "\n")
 		# POSITION Y - NEG(LEFT)
-		n_pos_y_left = len(self.py_neg)
-		mean_pos_y_left = np.mean(self.py_neg)
-		self.std_dev_pos_y_left = np.std(self.py_neg)
-		median_pos_y_left = np.median(self.py_neg)
+		n_pos_y_left = len(py_neg)
+		mean_pos_y_left = np.mean(py_neg)
+		self.std_dev_pos_y_left = np.std(py_neg)
+		median_pos_y_left = np.median(py_neg)
+		n_sd_pos_y_left = n_pos_y_left / self.std_dev_pos_y_left
 		# results.write(str(mean_pos_y_left) +  "    " +  str(self.std_dev_pos_y_left) + "	" + str(median_pos_y_left) + "\n")
 		# POSITION Z - POS(RIGHT)
-		n_pos_z_right = len(self.pz_pos)
-		mean_pos_z_right = np.mean(self.pz_pos)
-		self.std_dev_pos_z_right = np.std(self.pz_pos)
-		median_pos_z_right = np.median(self.pz_pos)
+		n_pos_z_right = len(pz_pos)
+		mean_pos_z_right = np.mean(pz_pos)
+		self.std_dev_pos_z_right = np.std(pz_pos)
+		median_pos_z_right = np.median(pz_pos)
+		n_sd_pos_z_right = n_pos_z_right / self.std_dev_pos_z_right
 		# results.write(str(mean_pos_z_right) +  "	" +  str(self.std_dev_pos_z_right) + "	" + str(median_pos_z_right) + "\n")
 		# POSITION Z - NEG(LEFT)
-		n_pos_z_left = len(self.pz_neg)
-		mean_pos_z_left = np.mean(self.pz_neg)
-		self.std_dev_pos_z_left = np.std(self.pz_neg)
-		median_pos_z_left = np.median(self.pz_neg)
+		n_pos_z_left = len(pz_neg)
+		mean_pos_z_left = np.mean(pz_neg)
+		self.std_dev_pos_z_left = np.std(pz_neg)
+		median_pos_z_left = np.median(pz_neg)
+		n_sd_pos_z_left = n_pos_z_left / self.std_dev_pos_z_left
 		# results.write(str(mean_pos_z_left) +  "	  " +  str(self.std_dev_pos_z_left) + "	" + str(median_pos_z_left) + "\n\n")
 		# print self.std_dev_pos_x_right, self.std_dev_pos_x_left, self.std_dev_pos_y_right, self.std_dev_pos_y_left, self.std_dev_pos_z_right, self.std_dev_pos_z_left
 
@@ -192,10 +265,19 @@ class Plotter(object):
 		n_pos_z_right_LIST.append(n_pos_z_right)
 		n_pos_z_left_LIST.append(n_pos_z_left)
 
+		# n_sd_pos_x_right_LIST.append(n_sd_pos_x_right)
+		# n_sd_pos_x_left_LIST.append(n_sd_pos_x_left)
+		# n_sd_pos_y_right_LIST.append(n_sd_pos_y_right)
+		# n_sd_pos_y_left_LIST.append(n_sd_pos_y_left)
+		# n_sd_pos_z_right_LIST.append(n_sd_pos_z_right)
+		# n_sd_pos_z_left_LIST.append(n_sd_pos_z_left)
+
 	def dataReturner(self):
 		return [std_dev_pos_x_right_LIST, std_dev_pos_x_left_LIST, std_dev_pos_y_right_LIST, std_dev_pos_y_left_LIST, std_dev_pos_z_right_LIST, std_dev_pos_z_left_LIST], \
 			   [mean_pos_x_right_LIST, mean_pos_x_left_LIST, mean_pos_y_right_LIST, mean_pos_y_left_LIST, mean_pos_z_right_LIST, mean_pos_z_left_LIST], \
-			   [n_pos_x_right_LIST, n_pos_x_left_LIST, n_pos_y_right_LIST, n_pos_y_left_LIST, n_pos_z_right_LIST, n_pos_z_left_LIST]
+			   [n_pos_x_right_LIST, n_pos_x_left_LIST, n_pos_y_right_LIST, n_pos_y_left_LIST, n_pos_z_right_LIST, n_pos_z_left_LIST], \
+			   [n_sd_pos_x_right_LIST, n_sd_pos_x_left_LIST, n_sd_pos_y_right_LIST, n_sd_pos_y_left_LIST, n_sd_pos_z_right_LIST, n_sd_pos_z_left_LIST]
+
 		pass
 
 	def grapher(self):
@@ -215,42 +297,31 @@ class Plotter(object):
 		ax.set_ylabel('Y position units')
 		ax.set_zlabel('Z position units')
 
-		ax.scatter(self.px, self.py, self.pz)
+		ax.scatter(px, py, pz)
 
 		# second subplot: a histogram of positions
-		fig, axs = plt.subplots(11, sharey=False, tight_layout=False)
-		n_bins = 25
-		axs[0].hist(self.px, bins=n_bins) # histogram of 3D position x
-		axs[1].hist(self.py, bins=n_bins) # histogram of 3D position x
-		axs[2].hist(self.pz, bins=n_bins) # histogram of 3D position z
-		axs[3].hist(self.pos3D, bins=n_bins) # histogram of 3D position magnitude
+		# fig, axs = plt.subplots(11, sharey=False, tight_layout=False)
+		# n_bins = 25
+		# axs[0].hist(self.px, bins=n_bins) # histogram of 3D position x
+		# axs[1].hist(self.py, bins=n_bins) # histogram of 3D position x
+		# axs[2].hist(self.pz, bins=n_bins) # histogram of 3D position z
+		# axs[3].hist(self.pos3D, bins=n_bins) # histogram of 3D position magnitude
 
-		axs[5].hist(self.px_pos, bins=n_bins) # histogram of 3D position x
-		axs[6].hist(self.px_neg, bins=n_bins) # histogram of 3D position x
-		axs[7].hist(self.py_pos, bins=n_bins) # histogram of 3D position x
-		axs[8].hist(self.py_neg, bins=n_bins) # histogram of 3D position x
-		axs[9].hist(self.pz_pos, bins=n_bins) # histogram of 3D position z
-		axs[10].hist(self.pz_neg, bins=n_bins) # histogram of 3D position z
+		# axs[5].hist(self.px_pos, bins=n_bins) # histogram of 3D position x
+		# axs[6].hist(self.px_neg, bins=n_bins) # histogram of 3D position x
+		# axs[7].hist(self.py_pos, bins=n_bins) # histogram of 3D position x
+		# axs[8].hist(self.py_neg, bins=n_bins) # histogram of 3D position x
+		# axs[9].hist(self.pz_pos, bins=n_bins) # histogram of 3D position z
+		# axs[10].hist(self.pz_neg, bins=n_bins) # histogram of 3D position z
 		# plt.figure()
 		# n_bins = 1000
 		# plt.hist([self.px, self.py, self.pz], bins=n_bins, histtype='barstacked', normed=True)
-		# plt.show()
+		plt.show()
 	def paramReturner(self):
 		return bound_lower, bound_upper, vectorCount, energy_1
 
-	def wipeData(self):
-		# wipe lists for next data collection
-		self.px = []
-		self.py = []
-		self.pz = []
 
-		self.px_pos = []
-		self.px_neg = []
-		self.py_pos = []
-		self.py_neg = []
-		self.pz_pos = []
-		self.pz_neg = []
- 
+		 
 
 
 PLT = Plotter()
@@ -296,6 +367,7 @@ class MyRunAction(G4UserRunAction):
 	def EndOfRunAction(self, run):
 		# PLT.grapher()
 		PLT.dataAnalysis()
+		WIPE.wipe()
 		print "*** End of Run"
 		print "- Run sammary : (id= %d, #events= %d)" \
 		% (run.GetRunID(), run.GetNumberOfEventToBeProcessed())
@@ -306,6 +378,8 @@ class MyEventAction(G4UserEventAction):
 
 	def EndOfEventAction(self, event):
 		#print "*** dE/dx in current step=", step.GetTotalEnergyDeposit()
+		# PLT.grapher()
+		# WIPE
 		pass
 
 # ------------------------------------------------------------------
@@ -320,14 +394,13 @@ class MySteppingAction(G4UserSteppingAction):
 		touchable = track.GetTouchable()
 		KE = track.GetKineticEnergy()
 
-
 		# kinetic energy in MeV - PRE
 		# initialKE = preStepPoint.GetKineticEnergy() 
 		# kinetic energy in MeV - POST
 		# finalKE = postStepPoint.GetKineticEnergy()
 
 		m = [track.GetMomentum().x, track.GetMomentum().y, track.GetMomentum().z] # equal to the postStepPoint momentum
-		p = [track.GetPosition().x, track.GetPosition().y, track.GetPosition().z]
+		p = [postStepPoint.GetPosition().x, postStepPoint.GetPosition().y, postStepPoint.GetPosition().z]
 		mm = np.sqrt((m[0])**2 + (m[1])**2 + (m[2])**2)
 
 		# momenta - PRE
@@ -337,7 +410,6 @@ class MySteppingAction(G4UserSteppingAction):
 
 		# print KE, "\n", p, "\n", initialMomentum, "\n", finalMomentum, "\n\n" 
 		# energy = step.GetTotalEnergyDeposit()
-
 
 
 		PLT.dataCollection(p, m) # calls data collection and analysis on final positions and momenta

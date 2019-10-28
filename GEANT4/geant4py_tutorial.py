@@ -17,7 +17,7 @@ from scipy import optimize
 #----file imports--------#
 from geom_constructor import GeomConstructor 
 # from beam import BeamInitializer
-from beam2 import MyPrimaryGeneratorAction, MyRunAction, MyEventAction, MySteppingAction, MyField, Plotter
+from beam2 import MyPrimaryGeneratorAction, MyRunAction, MyEventAction, MySteppingAction, MyField, Plotter, WipeData
 
 
 ## setting up lists for std devs x,y,z, pos/neg
@@ -69,6 +69,7 @@ n_pos_z_right_LIST = []
 n_pos_z_left_LIST = []
 
 PLT = Plotter()
+WIPE = WipeData()
 
 class Constructor(object):
 	def __init__(self):
@@ -179,8 +180,9 @@ if __name__ == '__main__':
 	angle = 35
 	zoom = 1.5
 	# energy = 2.5
-	be_ratio = np.arange(1e-7, 1e-2, .00005) # ratio between magnetic field (varied) and particle energy (fixed @ 2.5 MeV)
-	# optimal_be_ratio = [1] # after all tests, used to verify best be_ratio, should display 3D position plot
+	tickMarks = np.arange(1e-7, 5e-1, 0.05)
+	be_ratio = np.arange(1e-7, 5e-1, .005) # ratio between magnetic field (varied) and particle energy (fixed @ 2.5 MeV)
+	# be_ratio = [0.0001] # after all tests, used to verify best be_ratio, should display 3D position plot
 	bound_lower, bound_upper, vectorCount, energy = PLT.paramReturner()
 	print energy, "\n"
 
@@ -188,7 +190,6 @@ if __name__ == '__main__':
 	time.sleep(1)
 
 	for be in be_ratio:
-
 		# angle += 0.075 # +0.075 is a recommended delta theta
 		# for be in be_ratio:
 		print "\n", "NEW BE_RATIO: ", be, "\n"
@@ -236,69 +237,67 @@ if __name__ == '__main__':
 
 		VIS.visualizer(angle)
 
-		std_devs_LIST, means_LIST, n_LIST = PLT.dataReturner()
-		PLT.wipeData() #clean lists before starting another run
+		std_devs_LIST, means_LIST, n_LIST, n_sd_LIST = PLT.dataReturner()
+		# PLT.wipeData() #clean lists before starting another run
 
 
 	function = rational3_3
 
-	# plot standard deviations (connected dots)
 	data  = {
 			"SD" : std_devs_LIST, \
-			"means" : means_LIST, \
+			# "means" : means_LIST, \
+			"n/sd" : n_sd_LIST, \
 			"cluster_size" : n_LIST \
 			}
 
-	fig, (sd, means, n) = plt.subplots(3, sharex=True, sharey=False)
-	plt.tight_layout()
+	fig, (sd, n_sd, n) = plt.subplots(3, sharex=True, sharey=False)
+	# plt.tight_layout()
 	plt.xlabel("Ratio of B-field to Particle Beam Energy (T/MeV) ", fontsize=9)
 
 	for dep_var_name, dep_var_LIST in data.items():
-		# ax1 = fig.add_subplot(111)
 		for dep_var in dep_var_LIST:
 			if dep_var_LIST.index(dep_var) == 0:
-				label = dep_var_name + '_pos_x_right'
+				label = 'pos_x_right'
 			if dep_var_LIST.index(dep_var) == 1:
-				label = dep_var_name + '_pos_x_left'
+				label = 'pos_x_left'
 			if dep_var_LIST.index(dep_var) == 2:
-				label = dep_var_name + '_pos_y_right'
+				label = 'pos_y_right'
 			if dep_var_LIST.index(dep_var) == 3:
-				label = dep_var_name + '_pos_y_left'
+				label = 'pos_y_left'
 			if dep_var_LIST.index(dep_var) == 4:
-				label = dep_var_name + '_pos_z_right'
+				label = 'pos_z_right'
 			if dep_var_LIST.index(dep_var) == 5:
-				label = dep_var_name + '_pos_z_left'
+				label = 'pos_z_left'
 
 			if dep_var_name == 'SD':
-				sd.scatter(be_ratio, dep_var, label=label)	
+				sd.plot(be_ratio, dep_var, label=label)	
 				sd.set(ylabel=dep_var_name)
 				title = dep_var_name + " vs be_ratio (T/MeV)"
 				sd.set_title(title)
-				# plt.legend(loc='upper right')
+				# popt = CF.fit(function, be_ratio, dep_var)
+				# sd.plot(be_ratio, function(be_ratio, *popt), label=label)
 
-			if dep_var_name == "means":
-				means.scatter(be_ratio, dep_var, label=label)	
-				means.set(ylabel=dep_var_name)
+			if dep_var_name == "n/sd":
+				n_sd.plot(be_ratio, dep_var, label=label)	
+				n_sd.set(ylabel=dep_var_name)
 				title = dep_var_name + " vs be_ratio (T/MeV)"
-				means.set_title(title)
-				# plt.legend(loc='upper right')
+				n_sd.set_title(title)
 
 			if dep_var_name == "cluster_size":				
-				n.scatter(be_ratio, dep_var, label=label)
+				n.plot(be_ratio, dep_var, label=label)
 				n.set(ylabel=dep_var_name)
 				title = dep_var_name + " vs be_ratio (T/MeV)"
 				n.set_title(title)
-				# plt.legend(loc='upper right')
 
-			# popt = CF.fit(function, be_ratio, dep_var)
-			# plt.plot(be_ratio, function(be_ratio, *popt), label=label)
+	plt.xticks(tickMarks)
+	plt.legend()
 
 		# csfont = {'fontname':'Times New Roman'}
 		# matplotlib.rcParams["font.family"] = "Times New Roman"
 
-	pp = PdfPages("RESULTS/plots.pdf")
-	pp.savefig(fig)
-	pp.close()
+	# pp = PdfPages("RESULTS/" + str(bound_lower) + "_" + str(bound_upper) + ".pdf")
+	# pp.savefig(fig)
+	# pp.close()
 
 	plt.show()
 
