@@ -15,111 +15,70 @@ from matplotlib import colors
 from matplotlib.ticker import PercentFormatter
 import time
 
+
 global bound_lower
 global bound_upper
 
 bound_lower = 400 # only consider the cluster within these bounds, range of 100
-bound_upper = bound_lower + 100
-# bound_upper = 500
+bound_upper = bound_lower + 700
+# bound_upper = 550
 
 global vectorCount
-vectorCount = 100 # number of scattered e+ per run
+vectorCount = 500 # number of scattered e+ per run
 
-global energy
-energy_1 = 2.5
+# global energy
+# energy = SP.sendEnergy()
 
-## setting up lists for std devs x,y,z, pos/neg
-global std_dev_pos_x_right_LIST
-global std_dev_pos_x_left_LIST
-global std_dev_pos_y_right_LIST
-global std_dev_pos_y_left_LIST
-global std_dev_pos_z_right_LIST
-global std_dev_pos_z_left_LIST
+global pos_3D_right
+pos_3D_right= []
+global n_sd_pos_3D_right_LIST
+sd_pos_3D_right_LIST = []
+global n_pos_3D_right_LIST
+n_pos_3D_right_LIST = []
+global n_sd_pos_3D_right_LIST
+n_sd_pos_3D_right_LIST = []
 
-std_dev_pos_x_right_LIST = []
-std_dev_pos_x_left_LIST = []
-std_dev_pos_y_right_LIST = []
-std_dev_pos_y_left_LIST = []
-std_dev_pos_z_right_LIST = []
-std_dev_pos_z_left_LIST = []
-## setting up lists for means x,y,z, pos/neg
-global mean_pos_x_right_LIST
-global mean_pos_x_left_LIST
-global mean_pos_y_right_LIST
-global mean_pos_y_left_LIST
-global mean_pos_z_right_LIST
-global mean_pos_z_left_LIST
-
-mean_pos_x_right_LIST = []
-mean_pos_x_left_LIST = []
-mean_pos_y_right_LIST = []
-mean_pos_y_left_LIST = []
-mean_pos_z_right_LIST = []
-mean_pos_z_left_LIST = []
-## setting up lists for cluster sizes x,y,z, pos/neg
-global n_pos_x_right_LIST
-global n_pos_x_left_LIST
-global n_pos_y_right_LIST
-global n_pos_y_left_LIST
-global n_pos_z_right_LIST
-global n_pos_z_left_LIST
-
-n_pos_x_right_LIST = []
-n_pos_x_left_LIST = []
-n_pos_y_right_LIST = []
-n_pos_y_left_LIST = []
-n_pos_z_right_LIST = []
-n_pos_z_left_LIST = []
-
-global n_sd_pos_x_right_LIST
-global n_sd_pos_x_left_LIST
-global n_sd_pos_y_right_LIST
-global n_sd_pos_y_left_LIST
-global n_sd_pos_z_right_LIST
-global n_sd_pos_z_left_LIST
-
-n_sd_pos_x_right_LIST = []
-n_sd_pos_x_left_LIST = []
-n_sd_pos_y_right_LIST = []
-n_sd_pos_y_left_LIST = []
-n_sd_pos_z_right_LIST = []
-n_sd_pos_z_left_LIST = []
+global pos_3D_left
+pos_3D_left = []
+global n_sd_pos_3D_left_LIST
+sd_pos_3D_left_LIST = []
+global n_pos_3D_left_LIST
+n_pos_3D_left_LIST = []
+global n_sd_pos_3D_left_LIST
+n_sd_pos_3D_left_LIST = []
 
 global px
 global py
 global pz
-global px_pos
-global px_neg
-global py_pos
-global py_neg
-global pz_pos
-global pz_neg
 
 px = []
 py = []
 pz = []
 
-px_pos = []
-px_neg = []
-py_pos = []
-py_neg = []
-pz_pos = []
-pz_neg = []
+
 
 #----------code starts here!----------#
+
+
 class WipeData(object):
 	# wipe lists for next data collection
 	def wipe(self):
-
+		pos_3D_right[:] = []
+		pos_3D_left[:] = []
 		px[:] = []
 		py[:] = []
 		pz[:] = []
-		px_pos[:] = []
-		px_neg[:] = []
-		py_pos[:] = []
-		py_neg[:] = []
-		pz_pos[:] = []
-		pz_neg[:] = []
+
+	def wipeComps(self):
+
+		sd_pos_3D_right_LIST[:] = []
+		n_pos_3D_right_LIST[:] = []
+		n_sd_pos_3D_right_LIST[:] = []
+		sd_pos_3D_left_LIST[:] = []
+		n_pos_3D_left_LIST[:] = []
+		n_sd_pos_3D_left_LIST[:] = []
+
+
 
 WIPE = WipeData()
 
@@ -127,22 +86,10 @@ class Plotter(object):
 	"graphs 3D positions"
 
 	def __init__(self):
-		# self.px = px
-		# self.py = py
-		# self.pz = pz
-
-		# self.px_pos = px_pos
-		# self.px_neg = px_neg
-		# self.py_pos = py_pos
-		# self.py_neg = py_neg
-		# self.pz_pos = pz_pos
-		# self.pz_neg = pz_neg
 		pass
 
 	def dataCollection(self, posf, momf):
-		# self.px.append(posf[0])
-		# self.py.append(posf[1])
-		# self.pz.append(posf[2])
+
 		# time.sleep(1)
 		# print px, "\n", py, "\n", pz, "\n"
 		# time.sleep(1)
@@ -150,37 +97,12 @@ class Plotter(object):
 		py.append(posf[1])
 		pz.append(posf[2])
 
-		# self.pos3D = np.sqrt(np.square(self.px) + np.square(self.py) + np.square(self.pz)) # 3D position
+		position = np.sqrt(np.square(posf[0]) + np.square(posf[1]) + np.square(posf[2]))
 
-		# cutoff = 400 # above/below this value (+ or -) the cluster is analyzed
-		# bound_upper = 300
-		# bound_lower = 200 
-		#isolate clusters
-
-		# if posf[0] > cutoff:
-		if posf[0] > bound_lower and posf[0] < bound_upper:
-			# self.px_pos.append(posf[0])
-			px_pos.append(posf[0])
-		# if posf[0] < -cutoff:
-		if posf[0] < -bound_lower and posf[0] > -bound_upper:
-			# self.px_neg.append(posf[0])
-			px_neg.append(posf[0])
-		# if posf[1] > cutoff:
-		if posf[1] > bound_lower and posf[1] < bound_upper:
-			# self.py_pos.append(posf[1])
-			py_pos.append(posf[1])
-		# if posf[1] < -cutoff:
-		if posf[1] < -bound_lower and posf[1] > -bound_upper:
-			# self.py_neg.append(posf[1])
-			py_neg.append(posf[1])
-		# if posf[2] > cutoff:
-		if posf[2] > bound_lower and posf[2] < bound_upper:
-			# self.pz_pos.append(posf[2])
-			pz_pos.append(posf[2])
-		# if posf[2] < -cutoff:
-		if posf[2] < -bound_lower and posf[2] > -bound_upper:
-			# self.pz_neg.append(posf[2])
-			pz_neg.append(posf[2])
+		if posf[0] < 0 and posf[1] < 0 and posf[2] < 0 and -position < -bound_lower and -position > -bound_upper:
+			pos_3D_left.append(position)
+		if posf[0] > 0 and posf[1] > 0 and posf[2] > 0 and position > bound_lower and position < bound_upper:
+			pos_3D_right.append(position)
 
 		print("DATA STORED")
 		# print len(self.px), "\n", len(self.py), "\n", len(self.pz), "\n"
@@ -188,95 +110,39 @@ class Plotter(object):
 	def dataAnalysis(self):
 		# results = open("RESULTS/results_10212019_1.txt", "a")
 
-		# POSITION X - ALL
-		# mean_pos_ = 
-		# std_dev_pos_ = 
-		# median_pos_ = 		
-		# # POSITION Y - ALL
-		# mean_pos_ = 
-		# std_dev_pos_ = 
-		# median_pos_ = 
-		# # POSITION Z - ALL
-		# mean_pos_ = 
-		# std_dev_pos_ = 
-		# median_pos_ = 
-		# POSITION X - POS(RIGHT)
-		n_pos_x_right = len(px_pos)
-		mean_pos_x_right = np.mean(px_pos)
-		self.std_dev_pos_x_right = np.std(px_pos)
-		median_pos_x_right = np.median(px_pos)
-		n_sd_pos_x_right = n_pos_x_right / self.std_dev_pos_x_right
-		# results.write(str(mean_pos_x_right) +  "	" +  str(self.std_dev_pos_x_right) + "	" + str(median_pos_x_right) + "\n")
-		# POSITION X - NEG(LEFT)
-		n_pos_x_left = len(px_neg)
-		mean_pos_x_left = np.mean(px_neg)
-		self.std_dev_pos_x_left = np.std(px_neg)
-		median_pos_x_left = np.median(px_neg)
-		n_sd_pos_x_left = n_pos_x_left / self.std_dev_pos_x_left
-		# results.write(str(mean_pos_x_left) +  " 	" +  str(self.std_dev_pos_x_left) + "	" + str(median_pos_x_left) + "\n")
-		# POSITION Y - POS(RIGHT)
-		n_pos_y_right = len(py_pos)
-		mean_pos_y_right = np.mean(py_pos)
-		self.std_dev_pos_y_right = np.std(py_pos)
-		median_pos_y_right = np.median(py_pos)
-		n_sd_pos_y_right = n_pos_y_right / self.std_dev_pos_y_right
-		# results.write(str(mean_pos_y_right) +  "	" +  str(self.std_dev_pos_y_right) + "	" + str(median_pos_y_right) + "\n")
-		# POSITION Y - NEG(LEFT)
-		n_pos_y_left = len(py_neg)
-		mean_pos_y_left = np.mean(py_neg)
-		self.std_dev_pos_y_left = np.std(py_neg)
-		median_pos_y_left = np.median(py_neg)
-		n_sd_pos_y_left = n_pos_y_left / self.std_dev_pos_y_left
-		# results.write(str(mean_pos_y_left) +  "    " +  str(self.std_dev_pos_y_left) + "	" + str(median_pos_y_left) + "\n")
-		# POSITION Z - POS(RIGHT)
-		n_pos_z_right = len(pz_pos)
-		mean_pos_z_right = np.mean(pz_pos)
-		self.std_dev_pos_z_right = np.std(pz_pos)
-		median_pos_z_right = np.median(pz_pos)
-		n_sd_pos_z_right = n_pos_z_right / self.std_dev_pos_z_right
-		# results.write(str(mean_pos_z_right) +  "	" +  str(self.std_dev_pos_z_right) + "	" + str(median_pos_z_right) + "\n")
-		# POSITION Z - NEG(LEFT)
-		n_pos_z_left = len(pz_neg)
-		mean_pos_z_left = np.mean(pz_neg)
-		self.std_dev_pos_z_left = np.std(pz_neg)
-		median_pos_z_left = np.median(pz_neg)
-		n_sd_pos_z_left = n_pos_z_left / self.std_dev_pos_z_left
-		# results.write(str(mean_pos_z_left) +  "	  " +  str(self.std_dev_pos_z_left) + "	" + str(median_pos_z_left) + "\n\n")
-		# print self.std_dev_pos_x_right, self.std_dev_pos_x_left, self.std_dev_pos_y_right, self.std_dev_pos_y_left, self.std_dev_pos_z_right, self.std_dev_pos_z_left
+		n_pos_3D_right = len(pos_3D_right)
+		mean_pos_3D_right = np.mean(pos_3D_right)
+		self.std_dev_pos_3D_right = np.std(pos_3D_right)
+		if self.std_dev_pos_3D_right == 0:
+			self.std_dev_pos_3D_right = 0.0001
+		median_pos_3D_right = np.median(pos_3D_right)
+		n_sd_pos_3D_right = float(n_pos_3D_right / self.std_dev_pos_3D_right)
 
-		std_dev_pos_x_right_LIST.append(self.std_dev_pos_x_right)
-		std_dev_pos_x_left_LIST.append(self.std_dev_pos_x_left)
-		std_dev_pos_y_right_LIST.append(self.std_dev_pos_y_right)
-		std_dev_pos_y_left_LIST.append(self.std_dev_pos_y_left)
-		std_dev_pos_z_right_LIST.append(self.std_dev_pos_z_right)
-		std_dev_pos_z_left_LIST.append(self.std_dev_pos_z_left)
+		n_pos_3D_left = len(pos_3D_left)
+		mean_pos_3D_left = np.mean(pos_3D_left)
+		self.std_dev_pos_3D_left = np.std(pos_3D_left)
+		if self.std_dev_pos_3D_left == 0:
+			self.std_dev_pos_3D_left = 0.0001
+		median_pos_3D_left = np.median(pos_3D_left)
+		n_sd_pos_3D_left = float(n_pos_3D_left / self.std_dev_pos_3D_left)
 
-		mean_pos_x_right_LIST.append(mean_pos_x_right)
-		mean_pos_x_left_LIST.append(mean_pos_x_left)
-		mean_pos_y_right_LIST.append(mean_pos_y_right)
-		mean_pos_y_left_LIST.append(mean_pos_y_left)
-		mean_pos_z_right_LIST.append(mean_pos_z_right)
-		mean_pos_z_left_LIST.append(mean_pos_z_left)
+		sd_pos_3D_right_LIST.append(self.std_dev_pos_3D_right)
+		n_sd_pos_3D_right_LIST.append(n_sd_pos_3D_right)
+		n_pos_3D_right_LIST.append(n_pos_3D_right)
 
-		n_pos_x_right_LIST.append(n_pos_x_right)
-		n_pos_x_left_LIST.append(n_pos_x_left)
-		n_pos_y_right_LIST.append(n_pos_y_right)
-		n_pos_y_left_LIST.append(n_pos_y_left)
-		n_pos_z_right_LIST.append(n_pos_z_right)
-		n_pos_z_left_LIST.append(n_pos_z_left)
+		sd_pos_3D_left_LIST.append(self.std_dev_pos_3D_left)
+		n_sd_pos_3D_left_LIST.append(n_sd_pos_3D_left)
+		n_pos_3D_left_LIST.append(n_pos_3D_left)
 
-		# n_sd_pos_x_right_LIST.append(n_sd_pos_x_right)
-		# n_sd_pos_x_left_LIST.append(n_sd_pos_x_left)
-		# n_sd_pos_y_right_LIST.append(n_sd_pos_y_right)
-		# n_sd_pos_y_left_LIST.append(n_sd_pos_y_left)
-		# n_sd_pos_z_right_LIST.append(n_sd_pos_z_right)
-		# n_sd_pos_z_left_LIST.append(n_sd_pos_z_left)
+
 
 	def dataReturner(self):
-		return [std_dev_pos_x_right_LIST, std_dev_pos_x_left_LIST, std_dev_pos_y_right_LIST, std_dev_pos_y_left_LIST, std_dev_pos_z_right_LIST, std_dev_pos_z_left_LIST], \
-			   [mean_pos_x_right_LIST, mean_pos_x_left_LIST, mean_pos_y_right_LIST, mean_pos_y_left_LIST, mean_pos_z_right_LIST, mean_pos_z_left_LIST], \
-			   [n_pos_x_right_LIST, n_pos_x_left_LIST, n_pos_y_right_LIST, n_pos_y_left_LIST, n_pos_z_right_LIST, n_pos_z_left_LIST], \
-			   [n_sd_pos_x_right_LIST, n_sd_pos_x_left_LIST, n_sd_pos_y_right_LIST, n_sd_pos_y_left_LIST, n_sd_pos_z_right_LIST, n_sd_pos_z_left_LIST]
+
+		return [sd_pos_3D_right_LIST, sd_pos_3D_left_LIST], \
+			   [n_pos_3D_right_LIST, n_pos_3D_left_LIST], \
+			   [n_sd_pos_3D_right_LIST, n_sd_pos_3D_left_LIST]
+
+
 
 		pass
 
@@ -299,26 +165,10 @@ class Plotter(object):
 
 		ax.scatter(px, py, pz)
 
-		# second subplot: a histogram of positions
-		# fig, axs = plt.subplots(11, sharey=False, tight_layout=False)
-		# n_bins = 25
-		# axs[0].hist(self.px, bins=n_bins) # histogram of 3D position x
-		# axs[1].hist(self.py, bins=n_bins) # histogram of 3D position x
-		# axs[2].hist(self.pz, bins=n_bins) # histogram of 3D position z
-		# axs[3].hist(self.pos3D, bins=n_bins) # histogram of 3D position magnitude
-
-		# axs[5].hist(self.px_pos, bins=n_bins) # histogram of 3D position x
-		# axs[6].hist(self.px_neg, bins=n_bins) # histogram of 3D position x
-		# axs[7].hist(self.py_pos, bins=n_bins) # histogram of 3D position x
-		# axs[8].hist(self.py_neg, bins=n_bins) # histogram of 3D position x
-		# axs[9].hist(self.pz_pos, bins=n_bins) # histogram of 3D position z
-		# axs[10].hist(self.pz_neg, bins=n_bins) # histogram of 3D position z
-		# plt.figure()
-		# n_bins = 1000
-		# plt.hist([self.px, self.py, self.pz], bins=n_bins, histtype='barstacked', normed=True)
 		plt.show()
+
 	def paramReturner(self):
-		return bound_lower, bound_upper, vectorCount, energy_1
+		return bound_lower, bound_upper, vectorCount, energy
 
 
 		 
@@ -329,11 +179,11 @@ PLT = Plotter()
 class MyPrimaryGeneratorAction(G4VUserPrimaryGeneratorAction):
 	"My Primary Generator Action"
 
-	def __init__(self):
+	def __init__(self,energy):
 		G4VUserPrimaryGeneratorAction.__init__(self)
 		self.particleGun = G4ParticleGun(1)
 		# print("\n Particle gun defined \n")
-
+		self.energy = energy
 	def GeneratePrimaries(self, event):
 
 
@@ -342,15 +192,15 @@ class MyPrimaryGeneratorAction(G4VUserPrimaryGeneratorAction):
 		locationArray = [0, 0, 0]
 
 		particle = "e+"
-
 		# energy_2 = 2.5
 		energyUnit = MeV 
 		dimensionUnit = cm
 
+		energy = self.energy
 		self.particleGun.SetParticleByName(particle) # define particle
-		self.particleGun.SetParticleEnergy(energy_1*energyUnit) # define particle energy 
+		self.particleGun.SetParticleEnergy(energy*energyUnit) # define particle energy 
 
-		for i in range(0,vectorCount): # creates random momentum vectors originating from [0, 0, 0]
+		for i in range(0, vectorCount): # creates random momentum vectors originating from [0, 0, 0]
 			mx = random.uniform(-1,1)
 			my = random.uniform(-1,1)
 			mz = random.uniform(-1,1)
@@ -377,9 +227,6 @@ class MyEventAction(G4UserEventAction):
 	"My Event Action"
 
 	def EndOfEventAction(self, event):
-		#print "*** dE/dx in current step=", step.GetTotalEnergyDeposit()
-		# PLT.grapher()
-		# WIPE
 		pass
 
 # ------------------------------------------------------------------

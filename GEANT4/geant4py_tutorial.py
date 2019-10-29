@@ -20,56 +20,11 @@ from geom_constructor import GeomConstructor
 from beam2 import MyPrimaryGeneratorAction, MyRunAction, MyEventAction, MySteppingAction, MyField, Plotter, WipeData
 
 
-## setting up lists for std devs x,y,z, pos/neg
-global std_devs_LIST
-std_devs_LIST  = []
-
-global std_dev_pos_x_right_LIST
-global std_dev_pos_x_left_LIST
-global std_dev_pos_y_right_LIST
-global std_dev_pos_y_left_LIST
-global std_dev_pos_z_right_LIST
-global std_dev_pos_z_left_LIST
-
-std_dev_pos_x_right_LIST = []
-std_dev_pos_x_left_LIST = []
-std_dev_pos_y_right_LIST = []
-std_dev_pos_y_left_LIST = []
-std_dev_pos_z_right_LIST = []
-std_dev_pos_z_left_LIST = []
-
-## setting up lists for means x,y,z, pos/neg
-global mean_pos_x_right_LIST
-global mean_pos_x_left_LIST
-global mean_pos_y_right_LIST
-global mean_pos_y_left_LIST
-global mean_pos_z_right_LIST
-global mean_pos_z_left_LIST
-
-mean_pos_x_right_LIST = []
-mean_pos_x_left_LIST = []
-mean_pos_y_right_LIST = []
-mean_pos_y_left_LIST = []
-mean_pos_z_right_LIST = []
-mean_pos_z_left_LIST = []
-
-## setting up lists for cluster sizes x,y,z, pos/neg
-global n_pos_x_right_LIST
-global n_pos_x_left_LIST
-global n_pos_y_right_LIST
-global n_pos_y_left_LIST
-global n_pos_z_right_LIST
-global n_pos_z_left_LIST
-
-n_pos_x_right_LIST = []
-n_pos_x_left_LIST = []
-n_pos_y_right_LIST = []
-n_pos_y_left_LIST = []
-n_pos_z_right_LIST = []
-n_pos_z_left_LIST = []
-
 PLT = Plotter()
 WIPE = WipeData()
+
+energy_LIST = np.arange(0., 50, 1.) # MeV
+global energy
 
 class Constructor(object):
 	def __init__(self):
@@ -168,140 +123,118 @@ CF = CurveFitter()
 	# 	pass
 	# def grapher(self):
 	# 	pass
+Constructor = Constructor()
+Constructor.construct()
+VIS = Visualizer()
+
+initialMomenta = []
+finalMomenta = []
+
+angle = 35
+zoom = 1.5
 
 if __name__ == '__main__':
-	Constructor = Constructor()
-	Constructor.construct()
-	VIS = Visualizer()
+	
+	for e in energy_LIST:
+		WIPE.wipeComps()
+		energy = e
+		# energy = 2.5
 
-	initialMomenta = []
-	finalMomenta = []
+		be_step = 1e-4
 
-	angle = 35
-	zoom = 1.5
-	# energy = 2.5
-	tickMarks = np.arange(1e-7, 5e-1, 0.05)
-	be_ratio = np.arange(1e-7, 5e-1, .005) # ratio between magnetic field (varied) and particle energy (fixed @ 2.5 MeV)
-	# be_ratio = [0.0001] # after all tests, used to verify best be_ratio, should display 3D position plot
-	bound_lower, bound_upper, vectorCount, energy = PLT.paramReturner()
-	print energy, "\n"
+		tickMarks = np.arange(1e-7, 1e-2, be_step*5.)
+		be_ratio = np.arange(1e-7, 1e-2, be_step) # ratio between magnetic field (varied) and particle energy (fixed @ 2.5 MeV)
+		# be_ratio = [0.0001496] # 2.5 MeV after all tests, used to verify best be_ratio, should display 3D position plot
+		# be_ratio = [9.90385e-5] # 0.5 MeV after all tests, used to verify best be_ratio, should display 3D position plot
+		print energy, "\n"
 
-	print(len(be_ratio))
-	time.sleep(1)
+		print(len(be_ratio))
+		time.sleep(1)
 
-	for be in be_ratio:
-		# angle += 0.075 # +0.075 is a recommended delta theta
-		# for be in be_ratio:
-		print "\n", "NEW BE_RATIO: ", be, "\n"
-		# time.sleep(1)
+		for be in be_ratio:
+			# angle += 0.075 # +0.075 is a recommended delta theta
 
-		PLT # initialize the x y z lists for the plotter
-		# set user actions ...
-		PGA_1 = MyPrimaryGeneratorAction()
-		gRunManager.SetUserAction(PGA_1)
+			# set user actions ...
+			PGA_1 = MyPrimaryGeneratorAction(energy)
+			gRunManager.SetUserAction(PGA_1)
 
-		myEA = MyEventAction()
-		gRunManager.SetUserAction(myEA)
+			myEA = MyEventAction()
+			gRunManager.SetUserAction(myEA)
 
-		mySA = MySteppingAction()
-		gRunManager.SetUserAction(mySA)
+			mySA = MySteppingAction()
+			gRunManager.SetUserAction(mySA)
 
 
-		vectorList = [
-				# [1., 1., 1.], 
-			 	# [10., 10., 10.]
-			 	list(np.multiply([energy, energy, energy], be))
-			 	# list(np.multiply([0, 0.1, 0.1], be))
-			 	# list(np.multiply([0.1, 0.1, 0.1], be))
-			 	# list(np.multiply([0.1, 0.1, 0.1], be))
-			 	# list(np.multiply([0.1, 0.1, 0.1], be))
-			 	# list(np.multiply([0.1, 0.1, 0.1], be))
+			vectorList = [list(np.multiply([energy, energy, energy], be))]
 
-			 	# [0., 0., 1]
-			 	# [0,0,0]
-			 ]
-		for v in vectorList: 
-			fieldMgr = gTransportationManager.GetFieldManager()
-			myField = G4UniformMagField(G4ThreeVector(v[0],v[1],v[2]))
-			# myField = MyField(1)
-			fieldMgr.SetDetectorField(myField)
-			fieldMgr.CreateChordFinder(myField)
-			# print "|B-field| = ", vectorList[0][0]
+			for v in vectorList: 
+				fieldMgr = gTransportationManager.GetFieldManager()
+				myField = G4UniformMagField(G4ThreeVector(v[0],v[1],v[2]))
+				# myField = MyField(1)
+				fieldMgr.SetDetectorField(myField)
+				fieldMgr.CreateChordFinder(myField)
+				# print "|B-field| = ", vectorList[0][0]
 
-		myRA = MyRunAction()
-		gRunManager.SetUserAction(myRA)
+			myRA = MyRunAction()
+			gRunManager.SetUserAction(myRA)
 
-		gRunManager.Initialize()
+			gRunManager.Initialize()
 
-		gRunManager.BeamOn(1)
+			gRunManager.BeamOn(1)
 
-		VIS.visualizer(angle)
+			VIS.visualizer(angle)
 
-		std_devs_LIST, means_LIST, n_LIST, n_sd_LIST = PLT.dataReturner()
-		# PLT.wipeData() #clean lists before starting another run
+			# std_devs_LIST, means_LIST, n_LIST, n_sd_LIST = PLT.dataReturner()
+			std_devs_LIST, n_LIST, n_sd_LIST = PLT.dataReturner() # for 3D positions
+
+			# PLT.wipeData() #clean lists before starting another run
 
 
-	function = rational3_3
+		function = rational3_3
 
-	data  = {
-			"SD" : std_devs_LIST, \
-			# "means" : means_LIST, \
-			"n/sd" : n_sd_LIST, \
-			"cluster_size" : n_LIST \
-			}
+		data  = {
+				"SD" : std_devs_LIST, \
+				# "means" : means_LIST, \
+				"n/sd" : n_sd_LIST, \
+				"cluster_size" : n_LIST \
+				}
 
-	fig, (sd, n_sd, n) = plt.subplots(3, sharex=True, sharey=False)
-	# plt.tight_layout()
-	plt.xlabel("Ratio of B-field to Particle Beam Energy (T/MeV) ", fontsize=9)
+		fig, (sd, n_sd, n) = plt.subplots(3, sharex=True, sharey=False)
+		# plt.tight_layout()
+		plt.xlabel("Ratio of B-field to Particle Beam Energy (T/MeV) ", fontsize=9)
 
-	for dep_var_name, dep_var_LIST in data.items():
-		for dep_var in dep_var_LIST:
-			if dep_var_LIST.index(dep_var) == 0:
-				label = 'pos_x_right'
-			if dep_var_LIST.index(dep_var) == 1:
-				label = 'pos_x_left'
-			if dep_var_LIST.index(dep_var) == 2:
-				label = 'pos_y_right'
-			if dep_var_LIST.index(dep_var) == 3:
-				label = 'pos_y_left'
-			if dep_var_LIST.index(dep_var) == 4:
-				label = 'pos_z_right'
-			if dep_var_LIST.index(dep_var) == 5:
-				label = 'pos_z_left'
+		for dep_var_name, dep_var_LIST in data.items():
 
-			if dep_var_name == 'SD':
-				sd.plot(be_ratio, dep_var, label=label)	
-				sd.set(ylabel=dep_var_name)
-				title = dep_var_name + " vs be_ratio (T/MeV)"
-				sd.set_title(title)
-				# popt = CF.fit(function, be_ratio, dep_var)
-				# sd.plot(be_ratio, function(be_ratio, *popt), label=label)
+			for dep_var in dep_var_LIST:
 
-			if dep_var_name == "n/sd":
-				n_sd.plot(be_ratio, dep_var, label=label)	
-				n_sd.set(ylabel=dep_var_name)
-				title = dep_var_name + " vs be_ratio (T/MeV)"
-				n_sd.set_title(title)
+				if dep_var_LIST.index(dep_var) == 0:
+					label = 'right'
+				if dep_var_LIST.index(dep_var) == 1:
+					label = 'left'
 
-			if dep_var_name == "cluster_size":				
-				n.plot(be_ratio, dep_var, label=label)
-				n.set(ylabel=dep_var_name)
-				title = dep_var_name + " vs be_ratio (T/MeV)"
-				n.set_title(title)
+				if dep_var_name == 'SD':
+					sd.plot(be_ratio, dep_var, label=label)	
+					sd.set(ylabel=dep_var_name)
+					title = dep_var_name + " vs be_ratio (T/MeV)"
+					sd.set_title(title)
+					# popt = CF.fit(function, be_ratio, dep_var)
+					# sd.plot(be_ratio, function(be_ratio, *popt), label=label)
 
-	plt.xticks(tickMarks)
-	plt.legend()
+				if dep_var_name == "n/sd":
+					n_sd.plot(be_ratio, dep_var, label=label)	
+					n_sd.set(ylabel=dep_var_name)
+					title = dep_var_name + " vs be_ratio (T/MeV)"
+					n_sd.set_title(title)
 
-		# csfont = {'fontname':'Times New Roman'}
-		# matplotlib.rcParams["font.family"] = "Times New Roman"
+				if dep_var_name == "cluster_size":				
+					n.plot(be_ratio, dep_var, label=label)
+					n.set(ylabel=dep_var_name)
+					title = dep_var_name + " vs be_ratio (T/MeV)"
+					n.set_title(title)
 
-	# pp = PdfPages("RESULTS/" + str(bound_lower) + "_" + str(bound_upper) + ".pdf")
-	# pp.savefig(fig)
-	# pp.close()
-
-	plt.show()
-
-
+		plt.xticks(tickMarks)
+		plt.legend()
+		plt.show()
 
 
 
