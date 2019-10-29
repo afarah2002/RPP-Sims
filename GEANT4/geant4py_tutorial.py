@@ -146,15 +146,15 @@ if __name__ == '__main__':
 		energy = e
 		# energy = 2.5
 
-		be_step = 1e-4
+		be_step = 1.e-5
 
 		tickMarks = np.arange(1e-7, 1e-2, be_step*5.)
-		# be_ratio = np.arange(1e-7, 1e-2, be_step) # ratio between magnetic field (varied) and particle energy (fixed @ 2.5 MeV)
-		be_ratio = [0, 0.000099, .02] # 2.5 MeV after all tests, used to verify best be_ratio, should display 3D position plot
+		be_ratio = np.arange(1e-4, 2.1e-4, be_step) # ratio between magnetic field (varied) and particle energy (fixed @ 2.5 MeV)
+		# be_ratio = [1.e-4, 2.e-4, be_step] # 2.5 MeV after all tests, used to verify best be_ratio, should display 3D position plot
 		# be_ratio = [9.90385e-5] # 0.5 MeV after all tests, used to verify best be_ratio, should display 3D position plot
 		print energy, "\n"
 
-		print(len(be_ratio))
+		print("be len: ", len(be_ratio))
 		time.sleep(1)
 
 		for be in be_ratio:
@@ -260,13 +260,13 @@ if __name__ == '__main__':
 		plt.xticks(tickMarks)
 		plt.legend()
 		# plt.show()
-	plt.figure()
-	plt.xlabel("Energy (MeV)")
-	plt.ylabel("Optimal B/E ratio (T/MeV)")
-	plt.scatter(energy_LIST, opt_be_right_LIST, label='right')
-	plt.scatter(energy_LIST, opt_be_left_LIST, label='left')
-	plt.legend()
-	plt.show()
+	# plt.figure()
+	# plt.xlabel("Energy (MeV)")
+	# plt.ylabel("Optimal B/E ratio (T/MeV)")
+	# plt.scatter(energy_LIST, opt_be_right_LIST, label='right')
+	# plt.scatter(energy_LIST, opt_be_left_LIST, label='left')
+	# plt.legend()
+	# plt.show()
 
 
 
