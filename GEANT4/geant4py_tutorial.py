@@ -23,8 +23,13 @@ from beam2 import MyPrimaryGeneratorAction, MyRunAction, MyEventAction, MySteppi
 PLT = Plotter()
 WIPE = WipeData()
 
-energy_LIST = np.arange(0., 50, 1.) # MeV
-global energy
+# energy_LIST = list(np.arange(2., 9., 1.)) # MeV
+energy_LIST = [2.5]
+
+global opt_be_right_LIST
+global opt_be_left_LIST
+opt_be_right_LIST = []
+opt_be_left_LIST = []
 
 class Constructor(object):
 	def __init__(self):
@@ -134,7 +139,8 @@ angle = 35
 zoom = 1.5
 
 if __name__ == '__main__':
-	
+	print(energy_LIST)
+	time.sleep(1)
 	for e in energy_LIST:
 		WIPE.wipeComps()
 		energy = e
@@ -143,8 +149,8 @@ if __name__ == '__main__':
 		be_step = 1e-4
 
 		tickMarks = np.arange(1e-7, 1e-2, be_step*5.)
-		be_ratio = np.arange(1e-7, 1e-2, be_step) # ratio between magnetic field (varied) and particle energy (fixed @ 2.5 MeV)
-		# be_ratio = [0.0001496] # 2.5 MeV after all tests, used to verify best be_ratio, should display 3D position plot
+		# be_ratio = np.arange(1e-7, 1e-2, be_step) # ratio between magnetic field (varied) and particle energy (fixed @ 2.5 MeV)
+		be_ratio = [0, 0.000099, .02] # 2.5 MeV after all tests, used to verify best be_ratio, should display 3D position plot
 		# be_ratio = [9.90385e-5] # 0.5 MeV after all tests, used to verify best be_ratio, should display 3D position plot
 		print energy, "\n"
 
@@ -189,6 +195,22 @@ if __name__ == '__main__':
 
 			# PLT.wipeData() #clean lists before starting another run
 
+		for num, n_sd in enumerate(n_sd_LIST):
+			if num == 0: # right cluster
+				print "NSD RIGHT"
+				time.sleep(1)
+				max_n_sd = max(n_sd) # gets the peak n/sd that shows the greatest clustering efficiency
+				opt_be = n_sd.index(max_n_sd) * be_step # find the be_ratio that produces that max n/sd 
+
+				opt_be_right_LIST.append(opt_be)
+			else: # left cluster
+				print "NSD LEFT"
+				time.sleep(1)
+				max_n_sd = max(n_sd) # gets the peak n/sd that shows the greatest clustering efficiency
+				opt_be = n_sd.index(max_n_sd) * be_step # find the be_ratio that produces that max n/sd 
+
+				opt_be_left_LIST.append(opt_be)
+
 
 		function = rational3_3
 
@@ -202,6 +224,8 @@ if __name__ == '__main__':
 		fig, (sd, n_sd, n) = plt.subplots(3, sharex=True, sharey=False)
 		# plt.tight_layout()
 		plt.xlabel("Ratio of B-field to Particle Beam Energy (T/MeV) ", fontsize=9)
+
+
 
 		for dep_var_name, dep_var_LIST in data.items():
 
@@ -226,6 +250,7 @@ if __name__ == '__main__':
 					title = dep_var_name + " vs be_ratio (T/MeV)"
 					n_sd.set_title(title)
 
+
 				if dep_var_name == "cluster_size":				
 					n.plot(be_ratio, dep_var, label=label)
 					n.set(ylabel=dep_var_name)
@@ -234,7 +259,14 @@ if __name__ == '__main__':
 
 		plt.xticks(tickMarks)
 		plt.legend()
-		plt.show()
+		# plt.show()
+	plt.figure()
+	plt.xlabel("Energy (MeV)")
+	plt.ylabel("Optimal B/E ratio (T/MeV)")
+	plt.scatter(energy_LIST, opt_be_right_LIST, label='right')
+	plt.scatter(energy_LIST, opt_be_left_LIST, label='left')
+	plt.legend()
+	plt.show()
 
 
 

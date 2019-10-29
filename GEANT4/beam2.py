@@ -104,7 +104,7 @@ class Plotter(object):
 		if posf[0] > 0 and posf[1] > 0 and posf[2] > 0 and position > bound_lower and position < bound_upper:
 			pos_3D_right.append(position)
 
-		print("DATA STORED")
+		# print("DATA STORED")
 		# print len(self.px), "\n", len(self.py), "\n", len(self.pz), "\n"
 
 	def dataAnalysis(self):
@@ -164,7 +164,7 @@ class Plotter(object):
 		ax.set_zlabel('Z position units')
 
 		ax.scatter(px, py, pz)
-
+		plt.title("3D Positions of Randomly Scattered e+")
 		plt.show()
 
 	def paramReturner(self):
@@ -215,12 +215,12 @@ class MyRunAction(G4UserRunAction):
 	"My Run Action"
 
 	def EndOfRunAction(self, run):
-		# PLT.grapher()
+		PLT.grapher()
 		PLT.dataAnalysis()
 		WIPE.wipe()
-		print "*** End of Run"
-		print "- Run sammary : (id= %d, #events= %d)" \
-		% (run.GetRunID(), run.GetNumberOfEventToBeProcessed())
+		# print "*** End of Run"
+		# print "- Run sammary : (id= %d, #events= %d)" \
+		# % (run.GetRunID(), run.GetNumberOfEventToBeProcessed())
 
 # ------------------------------------------------------------------
 class MyEventAction(G4UserEventAction):
