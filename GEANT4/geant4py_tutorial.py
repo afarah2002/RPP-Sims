@@ -24,7 +24,111 @@ PLT = Plotter()
 WIPE = WipeData()
 
 # energy_LIST = list(np.arange(2., 9., 1.)) # MeV
-energy_LIST = [2.5]
+# energy_LIST = list(np.arange(1., 50., 1.)) # MeV
+energy_LIST = []
+dummy_x  = list(np.arange(1., 50., 1.)) # MeV
+dummy_y = [0.0001]*49
+
+gathered_data_right = [6e-05, \
+8e-05, \
+0.00013, \
+8e-05, \
+4e-05, \
+5e-05, \
+5e-05, \
+0.00011, \
+5e-05, \
+4e-05, \
+6e-05, \
+8e-05, \
+6e-05, \
+6e-05, \
+7e-05, \
+4e-05, \
+4e-05, \
+5e-05, \
+9e-05, \
+5e-05, \
+7e-05, \
+6e-05, \
+5e-05, \
+3e-05, \
+5e-05, \
+3e-05, \
+4e-05, \
+9e-05, \
+8e-05, \
+5e-05, \
+9e-05, \
+7e-05, \
+7e-05, \
+5e-05, \
+5e-05, \
+4e-05, \
+3e-05, \
+6e-05, \
+6e-05, \
+4e-05, \
+3e-05, \
+5e-05, \
+8e-05, \
+5e-05, \
+8e-05, \
+7e-05, \
+2e-05, \
+5e-05, \
+2e-05, \
+]
+gathered_data_left = [5e-05, \
+6e-05, \
+5e-05, \
+5e-05, \
+7e-05, \
+0.00011, \
+6e-05, \
+6e-05, \
+0.00016, \
+7e-05, \
+9e-05, \
+6e-05, \
+6e-05, \
+6e-05, \
+3e-05, \
+8e-05, \
+3e-05, \
+4e-05, \
+4e-05, \
+7e-05, \
+5e-05, \
+0.0001, \
+8e-05, \
+0.00011, \
+4e-05, \
+3e-05, \
+4e-05, \
+3e-05, \
+6e-05, \
+7e-05, \
+4e-05, \
+0.00012, \
+3e-05, \
+9e-05, \
+3e-05, \
+3e-05, \
+4e-05, \
+4e-05, \
+5e-05, \
+4e-05, \
+6e-05, \
+6e-05, \
+9e-05, \
+7e-05, \
+5e-05, \
+7e-05, \
+3e-05, \
+3e-05, \
+0.00015, \
+]
 
 global opt_be_right_LIST
 global opt_be_left_LIST
@@ -141,23 +245,26 @@ zoom = 1.5
 if __name__ == '__main__':
 	print(energy_LIST)
 	time.sleep(1)
+	data_right = open("data_right.txt", "a")
+	data_left = open("data_left.txt", "a")
+
 	for e in energy_LIST:
 		WIPE.wipeComps()
 		energy = e
 		# energy = 2.5
-
 		be_step = 1.e-5
 
-		tickMarks = np.arange(1e-7, 1e-2, be_step*5.)
-		be_ratio = np.arange(1e-4, 2.1e-4, be_step) # ratio between magnetic field (varied) and particle energy (fixed @ 2.5 MeV)
+		tickMarks = np.arange(1e-7, 2.5e-4, be_step*5.)
+		be_ratio = np.arange(1e-7, 2.5e-4, be_step) # ratio between magnetic field (varied) and particle energy (fixed @ 2.5 MeV)
 		# be_ratio = [1.e-4, 2.e-4, be_step] # 2.5 MeV after all tests, used to verify best be_ratio, should display 3D position plot
-		# be_ratio = [9.90385e-5] # 0.5 MeV after all tests, used to verify best be_ratio, should display 3D position plot
+		# be_ratio = [6e-5] # 0.5 MeV after all tests, used to verify best be_ratio, should display 3D position plot
 		print energy, "\n"
 
 		print("be len: ", len(be_ratio))
 		time.sleep(1)
 
 		for be in be_ratio:
+			# angle += 10
 			# angle += 0.075 # +0.075 is a recommended delta theta
 
 			# set user actions ...
@@ -203,6 +310,7 @@ if __name__ == '__main__':
 				opt_be = n_sd.index(max_n_sd) * be_step # find the be_ratio that produces that max n/sd 
 
 				opt_be_right_LIST.append(opt_be)
+				data_right.write(str(opt_be)+"\n")
 			else: # left cluster
 				print "NSD LEFT"
 				time.sleep(1)
@@ -210,7 +318,7 @@ if __name__ == '__main__':
 				opt_be = n_sd.index(max_n_sd) * be_step # find the be_ratio that produces that max n/sd 
 
 				opt_be_left_LIST.append(opt_be)
-
+				data_left.write(str(opt_be)+"\n")
 
 		function = rational3_3
 
@@ -221,52 +329,57 @@ if __name__ == '__main__':
 				"cluster_size" : n_LIST \
 				}
 
-		fig, (sd, n_sd, n) = plt.subplots(3, sharex=True, sharey=False)
-		# plt.tight_layout()
-		plt.xlabel("Ratio of B-field to Particle Beam Energy (T/MeV) ", fontsize=9)
+		# fig, (sd, n_sd, n) = plt.subplots(3, sharex=True, sharey=False)
+		# # plt.tight_layout()
+		# plt.xlabel("Ratio of B-field to Particle Beam Energy (T/MeV) ", fontsize=18)
+
+		# fontdict = {'fontsize': 18,
+		# 			'fontweight': 5,
+		# 			}
+
+		# for dep_var_name, dep_var_LIST in data.items():
+
+		# 	for dep_var in dep_var_LIST:
+
+		# 		if dep_var_LIST.index(dep_var) == 0:
+		# 			label = 'right'
+		# 		if dep_var_LIST.index(dep_var) == 1:
+		# 			label = 'left'
+
+		# 		if dep_var_name == 'SD':
+		# 			sd.plot(be_ratio, dep_var, label=label)	
+		# 			sd.set(ylabel=dep_var_name)
+		# 			title = dep_var_name + " vs be_ratio (T/MeV)"
+		# 			sd.set_title(title, fontdict=fontdict)
+		# 			# popt = CF.fit(function, be_ratio, dep_var)
+		# 			# sd.plot(be_ratio, function(be_ratio, *popt), label=label)
+
+		# 		if dep_var_name == "n/sd":
+		# 			n_sd.plot(be_ratio, dep_var, label=label)	
+		# 			n_sd.set(ylabel=dep_var_name)
+		# 			title = dep_var_name + " vs be_ratio (T/MeV)"
+		# 			n_sd.set_title(title, fontdict=fontdict)
 
 
+		# 		if dep_var_name == "cluster_size":				
+		# 			n.plot(be_ratio, dep_var, label=label)
+		# 			n.set(ylabel=dep_var_name)
+		# 			title = dep_var_name + " vs be_ratio (T/MeV)"
+		# 			n.set_title(title, fontdict=fontdict)
 
-		for dep_var_name, dep_var_LIST in data.items():
-
-			for dep_var in dep_var_LIST:
-
-				if dep_var_LIST.index(dep_var) == 0:
-					label = 'right'
-				if dep_var_LIST.index(dep_var) == 1:
-					label = 'left'
-
-				if dep_var_name == 'SD':
-					sd.plot(be_ratio, dep_var, label=label)	
-					sd.set(ylabel=dep_var_name)
-					title = dep_var_name + " vs be_ratio (T/MeV)"
-					sd.set_title(title)
-					# popt = CF.fit(function, be_ratio, dep_var)
-					# sd.plot(be_ratio, function(be_ratio, *popt), label=label)
-
-				if dep_var_name == "n/sd":
-					n_sd.plot(be_ratio, dep_var, label=label)	
-					n_sd.set(ylabel=dep_var_name)
-					title = dep_var_name + " vs be_ratio (T/MeV)"
-					n_sd.set_title(title)
-
-
-				if dep_var_name == "cluster_size":				
-					n.plot(be_ratio, dep_var, label=label)
-					n.set(ylabel=dep_var_name)
-					title = dep_var_name + " vs be_ratio (T/MeV)"
-					n.set_title(title)
-
-		plt.xticks(tickMarks)
-		plt.legend()
+		# plt.xticks(tickMarks)
+		# plt.legend()
 		# plt.show()
-	# plt.figure()
-	# plt.xlabel("Energy (MeV)")
-	# plt.ylabel("Optimal B/E ratio (T/MeV)")
-	# plt.scatter(energy_LIST, opt_be_right_LIST, label='right')
-	# plt.scatter(energy_LIST, opt_be_left_LIST, label='left')
-	# plt.legend()
-	# plt.show()
+	plt.figure()
+	plt.xlabel("Energy (MeV)", fontsize=18)
+	plt.ylabel("Optimal B/E ratio (T/MeV)", fontsize=18)
+	plt.ylim(0,0.0002)
+	plt.title("Optimal B/E ratio (T/MeV) vs. e+ Energy (MeV)", fontsize=24)
+	plt.plot(dummy_x, gathered_data_right, label='right')
+	plt.plot(dummy_x, gathered_data_left, label='left')
+	# plt.ticklabel_format(axis='both', style='sci', scilimits=(-7,0))
+	plt.legend()
+	plt.show()
 
 
 
