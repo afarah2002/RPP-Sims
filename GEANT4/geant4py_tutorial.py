@@ -242,6 +242,10 @@ finalMomenta = []
 angle = 35
 zoom = 1.5
 
+def reject_outliers(data, m=2):
+
+    return np.array(data)[abs(data - np.mean(data)) < m * np.std(data)]
+
 if __name__ == '__main__':
 	print(energy_LIST)
 	time.sleep(1)
@@ -372,11 +376,17 @@ if __name__ == '__main__':
 		# plt.show()
 	plt.figure()
 	plt.xlabel("Energy (MeV)", fontsize=18)
-	plt.ylabel("Optimal B/E ratio (T/MeV)", fontsize=18)
-	plt.ylim(0,0.0002)
-	plt.title("Optimal B/E ratio (T/MeV) vs. e+ Energy (MeV)", fontsize=24)
-	plt.scatter(dummy_x, gathered_data_right, label='right')
-	plt.scatter(dummy_x, gathered_data_left, label='left')
+	plt.ylabel("Optimal B/E ratio (mT/MeV)", fontsize=18)
+	plt.ylim(0,0.0002*1000)
+	plt.title("Optimal B/E ratio (mT/MeV) vs. e+ Energy (MeV)", fontsize=24)
+	# right = reject_outliers(gathered_data_right)
+	# for i in right:
+	# 	data_right.write(str(i) + "\n")
+	# left = reject_outliers(gathered_data_left)
+	# for i in left:
+	# 	data_left.write(str(i) + "\n")
+	plt.plot(dummy_x, np.multiply(gathered_data_right, 1000), label='right')
+	plt.plot(dummy_x, np.multiply(gathered_data_left, 1000), label='left')
 	# plt.ticklabel_format(axis='both', style='sci', scilimits=(-7,0))
 	plt.legend()
 	plt.show()
