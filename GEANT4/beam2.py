@@ -215,9 +215,9 @@ class MyRunAction(G4UserRunAction):
 	"My Run Action"
 
 	def EndOfRunAction(self, run):
-		# PLT.grapher()
+		PLT.grapher()
 		PLT.dataAnalysis()
-		WIPE.wipe()
+		# WIPE.wipe()
 		# print "*** End of Run"
 		# print "- Run sammary : (id= %d, #events= %d)" \
 		# % (run.GetRunID(), run.GetNumberOfEventToBeProcessed())

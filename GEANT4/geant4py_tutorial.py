@@ -23,9 +23,16 @@ from beam2 import MyPrimaryGeneratorAction, MyRunAction, MyEventAction, MySteppi
 PLT = Plotter()
 WIPE = WipeData()
 
+spherical_coor_LIST = []
+pi = np.pi
+for angle in np.arange(0, 2*pi, pi/4):
+	# for theta in np.arange(0, 2*pi, pi/4):
+	sph_coor = [angle, angle]
+	spherical_coor_LIST.append(sph_coor)
+
 # energy_LIST = list(np.arange(2., 9., 1.)) # MeV
 # energy_LIST = list(np.arange(1., 50., 1.)) # MeV
-energy_LIST = []
+energy_LIST = [2.5]
 dummy_x  = list(np.arange(1., 50., 1.)) # MeV
 dummy_y = [0.0001]*49
 
@@ -247,149 +254,154 @@ def reject_outliers(data, m=2):
     return np.array(data)[abs(data - np.mean(data)) < m * np.std(data)]
 
 if __name__ == '__main__':
-	print(energy_LIST)
+	# print(energy_LIST)
+	print(spherical_coor_LIST)
 	time.sleep(1)
 	data_right = open("data_right.txt", "a")
 	data_left = open("data_left.txt", "a")
+	for sph_coor in spherical_coor_LIST:
+		phi = sph_coor[0]
+		theta = sph_coor[1]
 
-	for e in energy_LIST:
-		WIPE.wipeComps()
-		energy = e
-		# energy = 2.5
-		be_step = 1.e-5
+		print "coors = (", phi, ",", theta, ")"
+		for e in energy_LIST:
+			WIPE.wipeComps()
+			energy = e
+			# energy = 2.5
+			be_step = 1.e-5
 
-		tickMarks = np.arange(1e-7, 2.5e-4, be_step*5.)
-		be_ratio = np.arange(1e-7, 2.5e-4, be_step) # ratio between magnetic field (varied) and particle energy (fixed @ 2.5 MeV)
-		# be_ratio = [1.e-4, 2.e-4, be_step] # 2.5 MeV after all tests, used to verify best be_ratio, should display 3D position plot
-		# be_ratio = [6e-5] # 0.5 MeV after all tests, used to verify best be_ratio, should display 3D position plot
-		print energy, "\n"
+			tickMarks = np.arange(1e-7, 2.5e-4, be_step*5.)
+			be_ratio = [1e-4]
+			# be_ratio = np.arange(1e-7, 2.5e-4, be_step) # ratio between magnetic field (varied) and particle energy (fixed @ 2.5 MeV)
+			# be_ratio = [1.e-4, 2.e-4, be_step] # 2.5 MeV after all tests, used to verify best be_ratio, should display 3D position plot
+			# be_ratio = [6e-5] # 0.5 MeV after all tests, used to verify best be_ratio, should display 3D position plot
+			print energy, "\n"
 
-		print("be len: ", len(be_ratio))
-		time.sleep(1)
+			print("be len: ", len(be_ratio))
+			time.sleep(1)
 
-		for be in be_ratio:
-			# angle += 10
-			# angle += 0.075 # +0.075 is a recommended delta theta
+			for be in be_ratio:
+				# angle += 10
+				# angle += 0.075 # +0.075 is a recommended delta theta
 
-			# set user actions ...
-			PGA_1 = MyPrimaryGeneratorAction(energy)
-			gRunManager.SetUserAction(PGA_1)
+				# set user actions ...
+				PGA_1 = MyPrimaryGeneratorAction(energy)
+				gRunManager.SetUserAction(PGA_1)
 
-			myEA = MyEventAction()
-			gRunManager.SetUserAction(myEA)
+				myEA = MyEventAction()
+				gRunManager.SetUserAction(myEA)
 
-			mySA = MySteppingAction()
-			gRunManager.SetUserAction(mySA)
-
-
-			vectorList = [list(np.multiply([energy, energy, energy], be))]
-
-			for v in vectorList: 
-				fieldMgr = gTransportationManager.GetFieldManager()
-				myField = G4UniformMagField(G4ThreeVector(v[0],v[1],v[2]))
-				# myField = MyField(1)
-				fieldMgr.SetDetectorField(myField)
-				fieldMgr.CreateChordFinder(myField)
-				# print "|B-field| = ", vectorList[0][0]
-
-			myRA = MyRunAction()
-			gRunManager.SetUserAction(myRA)
-
-			gRunManager.Initialize()
-
-			gRunManager.BeamOn(1)
-
-			VIS.visualizer(angle)
-
-			# std_devs_LIST, means_LIST, n_LIST, n_sd_LIST = PLT.dataReturner()
-			std_devs_LIST, n_LIST, n_sd_LIST = PLT.dataReturner() # for 3D positions
-
-			# PLT.wipeData() #clean lists before starting another run
-
-		for num, n_sd in enumerate(n_sd_LIST):
-			if num == 0: # right cluster
-				print "NSD RIGHT"
-				time.sleep(1)
-				max_n_sd = max(n_sd) # gets the peak n/sd that shows the greatest clustering efficiency
-				opt_be = n_sd.index(max_n_sd) * be_step # find the be_ratio that produces that max n/sd 
-
-				opt_be_right_LIST.append(opt_be)
-				data_right.write(str(opt_be)+"\n")
-			else: # left cluster
-				print "NSD LEFT"
-				time.sleep(1)
-				max_n_sd = max(n_sd) # gets the peak n/sd that shows the greatest clustering efficiency
-				opt_be = n_sd.index(max_n_sd) * be_step # find the be_ratio that produces that max n/sd 
-
-				opt_be_left_LIST.append(opt_be)
-				data_left.write(str(opt_be)+"\n")
-
-		function = rational3_3
-
-		data  = {
-				"SD" : std_devs_LIST, \
-				# "means" : means_LIST, \
-				"n/sd" : n_sd_LIST, \
-				"cluster_size" : n_LIST \
-				}
-
-		# fig, (sd, n_sd, n) = plt.subplots(3, sharex=True, sharey=False)
-		# # plt.tight_layout()
-		# plt.xlabel("Ratio of B-field to Particle Beam Energy (T/MeV) ", fontsize=18)
-
-		# fontdict = {'fontsize': 18,
-		# 			'fontweight': 5,
-		# 			}
-
-		# for dep_var_name, dep_var_LIST in data.items():
-
-		# 	for dep_var in dep_var_LIST:
-
-		# 		if dep_var_LIST.index(dep_var) == 0:
-		# 			label = 'right'
-		# 		if dep_var_LIST.index(dep_var) == 1:
-		# 			label = 'left'
-
-		# 		if dep_var_name == 'SD':
-		# 			sd.plot(be_ratio, dep_var, label=label)	
-		# 			sd.set(ylabel=dep_var_name)
-		# 			title = dep_var_name + " vs be_ratio (T/MeV)"
-		# 			sd.set_title(title, fontdict=fontdict)
-		# 			# popt = CF.fit(function, be_ratio, dep_var)
-		# 			# sd.plot(be_ratio, function(be_ratio, *popt), label=label)
-
-		# 		if dep_var_name == "n/sd":
-		# 			n_sd.plot(be_ratio, dep_var, label=label)	
-		# 			n_sd.set(ylabel=dep_var_name)
-		# 			title = dep_var_name + " vs be_ratio (T/MeV)"
-		# 			n_sd.set_title(title, fontdict=fontdict)
+				mySA = MySteppingAction()
+				gRunManager.SetUserAction(mySA)
 
 
-		# 		if dep_var_name == "cluster_size":				
-		# 			n.plot(be_ratio, dep_var, label=label)
-		# 			n.set(ylabel=dep_var_name)
-		# 			title = dep_var_name + " vs be_ratio (T/MeV)"
-		# 			n.set_title(title, fontdict=fontdict)
+				vectorList = [list(np.multiply([energy, energy, energy], be))]
 
-		# plt.xticks(tickMarks)
+				for v in vectorList: 
+					fieldMgr = gTransportationManager.GetFieldManager()
+					myField = G4UniformMagField(G4ThreeVector(v[0]*np.sin(phi)*np.cos(theta), \
+															  v[1]*np.sin(phi)*np.sin(theta), \
+															  v[2]*np.cos(phi)))
+					# myField = MyField(1)
+					fieldMgr.SetDetectorField(myField)
+					fieldMgr.CreateChordFinder(myField)
+					# print "|B-field| = ", vectorList[0][0]
+
+				myRA = MyRunAction()
+				gRunManager.SetUserAction(myRA)
+
+				gRunManager.Initialize()
+
+				gRunManager.BeamOn(1)
+
+				VIS.visualizer(angle)
+
+				# std_devs_LIST, means_LIST, n_LIST, n_sd_LIST = PLT.dataReturner()
+				std_devs_LIST, n_LIST, n_sd_LIST = PLT.dataReturner() # for 3D positions
+
+				# PLT.wipeData() #clean lists before starting another run
+
+			for num, n_sd in enumerate(n_sd_LIST):
+				if num == 0: # right cluster
+					print "NSD RIGHT"
+					time.sleep(1)
+					max_n_sd = max(n_sd) # gets the peak n/sd that shows the greatest clustering efficiency
+					opt_be = n_sd.index(max_n_sd) * be_step # find the be_ratio that produces that max n/sd 
+
+					opt_be_right_LIST.append(opt_be)
+					data_right.write(str(opt_be)+"\n")
+				else: # left cluster
+					print "NSD LEFT"
+					time.sleep(1)
+					max_n_sd = max(n_sd) # gets the peak n/sd that shows the greatest clustering efficiency
+					opt_be = n_sd.index(max_n_sd) * be_step # find the be_ratio that produces that max n/sd 
+
+					opt_be_left_LIST.append(opt_be)
+					data_left.write(str(opt_be)+"\n")
+
+			function = rational3_3
+
+			data  = {
+					"SD" : std_devs_LIST, \
+					# "means" : means_LIST, \
+					"n/sd" : n_sd_LIST, \
+					"cluster_size" : n_LIST \
+					}
+
+			# fig, (sd, n_sd, n) = plt.subplots(3, sharex=True, sharey=False)
+			# # plt.tight_layout()
+			# plt.xlabel("Ratio of B-field to Particle Beam Energy (T/MeV) ", fontsize=18)
+
+			# fontdict = {'fontsize': 18,
+			# 			'fontweight': 5,
+			# 			}
+
+		# 	for dep_var_name, dep_var_LIST in data.items():
+
+		# 		for dep_var in dep_var_LIST:
+
+		# 			if dep_var_LIST.index(dep_var) == 0:
+		# 				label = 'right'
+		# 			if dep_var_LIST.index(dep_var) == 1:
+		# 				label = 'left'
+
+		# 			if dep_var_name == 'SD':
+		# 				sd.plot(be_ratio, dep_var, label=label)	
+		# 				sd.set(ylabel=dep_var_name)
+		# 				title = dep_var_name + " vs be_ratio (T/MeV)"
+		# 				sd.set_title(title, fontdict=fontdict)
+		# 				# popt = CF.fit(function, be_ratio, dep_var)
+		# 				# sd.plot(be_ratio, function(be_ratio, *popt), label=label)
+
+		# 			if dep_var_name == "n/sd":
+		# 				n_sd.plot(be_ratio, dep_var, label=label)	
+		# 				n_sd.set(ylabel=dep_var_name)
+		# 				title = dep_var_name + " vs be_ratio (T/MeV)"
+		# 				n_sd.set_title(title, fontdict=fontdict)
+
+
+		# 			if dep_var_name == "cluster_size":				
+		# 				n.plot(be_ratio, dep_var, label=label)
+		# 				n.set(ylabel=dep_var_name)
+		# 				title = dep_var_name + " vs be_ratio (T/MeV)"
+		# 				n.set_title(title, fontdict=fontdict)
+
+		# 	plt.xticks(tickMarks)
+		# 	plt.legend()
+		# plt.show()
+
+
+		#### plotting E vs optimal B/E ####
+		# plt.figure()
+		# plt.xlabel("Energy (MeV)", fontsize=18)
+		# plt.ylabel("Optimal B/E ratio (mT/MeV)", fontsize=18)
+		# plt.ylim(0,0.0002*1000)
+		# plt.title("Optimal B/E ratio (mT/MeV) vs. e+ Energy (MeV)", fontsize=24)
+		# plt.plot(dummy_x, np.multiply(gathered_data_right, 1000), label='right')
+		# plt.plot(dummy_x, np.multiply(gathered_data_left, 1000), label='left')
+		# # plt.ticklabel_format(axis='both', style='sci', scilimits=(-7,0))
 		# plt.legend()
 		# plt.show()
-	plt.figure()
-	plt.xlabel("Energy (MeV)", fontsize=18)
-	plt.ylabel("Optimal B/E ratio (mT/MeV)", fontsize=18)
-	plt.ylim(0,0.0002*1000)
-	plt.title("Optimal B/E ratio (mT/MeV) vs. e+ Energy (MeV)", fontsize=24)
-	# right = reject_outliers(gathered_data_right)
-	# for i in right:
-	# 	data_right.write(str(i) + "\n")
-	# left = reject_outliers(gathered_data_left)
-	# for i in left:
-	# 	data_left.write(str(i) + "\n")
-	plt.plot(dummy_x, np.multiply(gathered_data_right, 1000), label='right')
-	plt.plot(dummy_x, np.multiply(gathered_data_left, 1000), label='left')
-	# plt.ticklabel_format(axis='both', style='sci', scilimits=(-7,0))
-	plt.legend()
-	plt.show()
 
 
 
