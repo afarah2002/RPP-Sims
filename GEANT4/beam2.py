@@ -20,7 +20,7 @@ global bound_lower
 global bound_upper
 
 bound_lower = 400 # only consider the cluster within these bounds, range of 100
-bound_upper = bound_lower + 700
+bound_upper = bound_lower + 200
 # bound_upper = 550
 
 global vectorCount
@@ -30,7 +30,7 @@ vectorCount = 500 # number of scattered e+ per run
 # energy = SP.sendEnergy()
 
 global pos_3D_right
-pos_3D_right= []
+pos_3D_right = []
 global n_sd_pos_3D_right_LIST
 sd_pos_3D_right_LIST = []
 global n_pos_3D_right_LIST
@@ -46,6 +46,9 @@ global n_pos_3D_left_LIST
 n_pos_3D_left_LIST = []
 global n_sd_pos_3D_left_LIST
 n_sd_pos_3D_left_LIST = []
+
+global cluster_time_LIST
+cluster_time_LIST = []
 
 global px
 global py
@@ -69,6 +72,9 @@ class WipeData(object):
 		py[:] = []
 		pz[:] = []
 
+	def wipeTime(self):
+		cluster_time_LIST[:] = []
+
 	def wipeComps(self):
 
 		sd_pos_3D_right_LIST[:] = []
@@ -88,7 +94,7 @@ class Plotter(object):
 	def __init__(self):
 		pass
 
-	def dataCollection(self, posf, momf):
+	def dataCollection(self, posf, momf, tcluster):
 
 		# time.sleep(1)
 		# print px, "\n", py, "\n", pz, "\n"
@@ -97,12 +103,29 @@ class Plotter(object):
 		py.append(posf[1])
 		pz.append(posf[2])
 
-		position = np.sqrt(np.square(posf[0]) + np.square(posf[1]) + np.square(posf[2]))
 
-		if posf[0] < 0 and posf[1] < 0 and posf[2] < 0 and -position < -bound_lower and -position > -bound_upper:
-			pos_3D_left.append(position)
-		if posf[0] > 0 and posf[1] > 0 and posf[2] > 0 and position > bound_lower and position < bound_upper:
-			pos_3D_right.append(position)
+		radius = np.sqrt(np.square(posf[0]) + np.square(posf[1]) + np.square(posf[2]))
+		# if tcluster > 25: # weird set of outlier <---- INTERESTING PHENOMENON
+		# 	print radius
+
+		# if radius < bound_lower:
+		# 	print tcluster
+
+		# if posf[0] < 0 and posf[1] < 0 and posf[2] < 0 and -radius < -bound_lower and -radius > -bound_upper:
+		# 	pos_3D_left.append(radius)
+		# 	cluster_time_LIST.append(tcluster)
+		# if posf[0] > 0 and posf[1] > 0 and posf[2] > 0 and radius > bound_lower and radius < bound_upper:
+		# 	pos_3D_right.append(radius)
+		# 	cluster_time_LIST.append(tcluster)
+
+		radius_lower = np.sqrt(3 * np.square(bound_lower))
+		radius_upper = np.sqrt(3 * np.square(bound_upper))
+
+
+		if radius > radius_lower and radius < radius_upper:
+			cluster_time_LIST.append(tcluster)
+			print tcluster
+
 
 		# print("DATA STORED")
 		# print len(self.px), "\n", len(self.py), "\n", len(self.pz), "\n"
@@ -140,7 +163,8 @@ class Plotter(object):
 
 		return [sd_pos_3D_right_LIST, sd_pos_3D_left_LIST], \
 			   [n_pos_3D_right_LIST, n_pos_3D_left_LIST], \
-			   [n_sd_pos_3D_right_LIST, n_sd_pos_3D_left_LIST]
+			   [n_sd_pos_3D_right_LIST, n_sd_pos_3D_left_LIST], \
+			   cluster_time_LIST
 
 
 
@@ -217,7 +241,7 @@ class MyRunAction(G4UserRunAction):
 	def EndOfRunAction(self, run):
 		PLT.grapher()
 		PLT.dataAnalysis()
-		# WIPE.wipe()
+		WIPE.wipe()
 		# print "*** End of Run"
 		# print "- Run sammary : (id= %d, #events= %d)" \
 		# % (run.GetRunID(), run.GetNumberOfEventToBeProcessed())
@@ -247,8 +271,9 @@ class MySteppingAction(G4UserSteppingAction):
 		# finalKE = postStepPoint.GetKineticEnergy()
 
 		m = [track.GetMomentum().x, track.GetMomentum().y, track.GetMomentum().z] # equal to the postStepPoint momentum
-		p = [postStepPoint.GetPosition().x, postStepPoint.GetPosition().y, postStepPoint.GetPosition().z]
+		p = [postStepPoint.GetPosition().x, postStepPoint.GetPosition().y, postStepPoint.GetPosition().z] # (mm)
 		mm = np.sqrt((m[0])**2 + (m[1])**2 + (m[2])**2)
+		t = track.GetGlobalTime() # (ns)
 
 		# momenta - PRE
 		initialMomentum = [preStepPoint.GetMomentum().x, preStepPoint.GetMomentum().y, preStepPoint.GetMomentum().z]
@@ -259,7 +284,7 @@ class MySteppingAction(G4UserSteppingAction):
 		# energy = step.GetTotalEnergyDeposit()
 
 
-		PLT.dataCollection(p, m) # calls data collection and analysis on final positions and momenta
+		PLT.dataCollection(p, m, t) # calls data collection and analysis on final positions and momenta
 		# return initialMomentum, finalMomentum 
 
 class MyField(G4MagneticField): ### used when mag field NOT parameterized in main filed

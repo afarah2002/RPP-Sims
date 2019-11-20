@@ -6,8 +6,10 @@ import g4py.NISTmaterials
 import g4py.EMSTDpl
 import g4py.ParticleGun, g4py.MedicalBeam
 
+import scipy.stats as ss
 import matplotlib
 import matplotlib.pyplot as plt
+import matplotlib.mlab as mlab
 from matplotlib.backends.backend_pdf import PdfPages
 import random
 import time
@@ -25,12 +27,12 @@ WIPE = WipeData()
 
 spherical_coor_LIST = []
 pi = np.pi
-for angle in np.arange(0, 2*pi, pi/4):
+for angle in np.arange(0, 2*pi, pi/4): # smaller steps means more clusters
 	# for theta in np.arange(0, 2*pi, pi/4):
-	sph_coor = [angle, angle]
+	sph_coor = [angle, angle] # phi, theta
 	spherical_coor_LIST.append(sph_coor)
 
-# energy_LIST = list(np.arange(2., 9., 1.)) # MeV
+# energy_LIST = lists(np.arange(2., 9., 1.)) # MeV
 # energy_LIST = list(np.arange(1., 50., 1.)) # MeV
 energy_LIST = [2.5]
 dummy_x  = list(np.arange(1., 50., 1.)) # MeV
@@ -271,7 +273,7 @@ if __name__ == '__main__':
 			be_step = 1.e-5
 
 			tickMarks = np.arange(1e-7, 2.5e-4, be_step*5.)
-			be_ratio = [1e-4]
+			be_ratio = [1.25e-4]
 			# be_ratio = np.arange(1e-7, 2.5e-4, be_step) # ratio between magnetic field (varied) and particle energy (fixed @ 2.5 MeV)
 			# be_ratio = [1.e-4, 2.e-4, be_step] # 2.5 MeV after all tests, used to verify best be_ratio, should display 3D position plot
 			# be_ratio = [6e-5] # 0.5 MeV after all tests, used to verify best be_ratio, should display 3D position plot
@@ -299,8 +301,8 @@ if __name__ == '__main__':
 
 				for v in vectorList: 
 					fieldMgr = gTransportationManager.GetFieldManager()
-					myField = G4UniformMagField(G4ThreeVector(v[0]*np.sin(phi)*np.cos(theta), \
-															  v[1]*np.sin(phi)*np.sin(theta), \
+					myField = G4UniformMagField(G4ThreeVector(v[0]*(np.sin(phi)*np.cos(theta)), \
+															  v[1]*(np.sin(phi)*np.sin(theta)), \
 															  v[2]*np.cos(phi)))
 					# myField = MyField(1)
 					fieldMgr.SetDetectorField(myField)
@@ -317,7 +319,7 @@ if __name__ == '__main__':
 				VIS.visualizer(angle)
 
 				# std_devs_LIST, means_LIST, n_LIST, n_sd_LIST = PLT.dataReturner()
-				std_devs_LIST, n_LIST, n_sd_LIST = PLT.dataReturner() # for 3D positions
+				std_devs_LIST, n_LIST, n_sd_LIST, cluster_time_LIST = PLT.dataReturner() # for 3D positions
 
 				# PLT.wipeData() #clean lists before starting another run
 
@@ -347,6 +349,16 @@ if __name__ == '__main__':
 					"n/sd" : n_sd_LIST, \
 					"cluster_size" : n_LIST \
 					}
+
+			# graph the cluster time distribution
+			n_bins = 200
+			mu, sigma = np.mean(cluster_time_LIST), np.std(cluster_time_LIST)
+			n, bins, patches = plt.hist(cluster_time_LIST, n_bins, normed=0, facecolor='blue', alpha=0.5)
+			y = mlab.normpdf(bins, mu, sigma)
+			plt.plot(bins, y, 'r--', linewidth=1)
+			plt.show()
+			# WIPE.wipeTime()
+
 
 			# fig, (sd, n_sd, n) = plt.subplots(3, sharex=True, sharey=False)
 			# # plt.tight_layout()
