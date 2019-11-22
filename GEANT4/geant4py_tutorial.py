@@ -27,8 +27,9 @@ WIPE = WipeData()
 
 spherical_coor_LIST = []
 pi = np.pi
-for phi in np.arange(0, pi, pi/4): # smaller steps means more clusters, range goes to pi since clusters are double sided
-	for theta in np.arange(0, pi, pi/4):
+step = 8
+for phi in np.arange(0, pi, pi/step): # smaller steps means more clusters, range goes to pi since clusters are double sided
+	for theta in np.arange(0, pi, pi/step):
 		sph_coor = [theta, phi] # phi, theta
 		spherical_coor_LIST.append(sph_coor)
 
@@ -348,6 +349,9 @@ if __name__ == '__main__':
 					"n/sd" : n_sd_LIST, \
 					"cluster_size" : n_LIST \
 					}
+			median = np.median(cluster_time_LIST)
+			cluster_time_median_LIST.append(median)
+			'''					
 			# graph the cluster time distribution
 			n_bins = 50
 			# mu, sigma = np.mean(cluster_time_LIST), np.std(cluster_time_LIST)
@@ -360,15 +364,14 @@ if __name__ == '__main__':
 
 			# cluster_time_LIST = [round(t, 2) for t in cluster_time_LIST]
 			# print cluster_time_LIST
-			median = np.median(cluster_time_LIST)
-			cluster_time_median_LIST.append(median)
 			print "time median (ns): ", median, "\n"
 			   #    "time mean (ns): ", np.mean(cluster_time_LIST), "\n", \
 				  # "time mode (ns): ", stats.mode(cluster_time_LIST).mode[0], "\n" 
-			'''SUMMARY - MODE IS THE BEST ESTIMATE OF THE CENTER BECAUSE 
+			SUMMARY - MODE IS THE BEST ESTIMATE OF THE CENTER BECAUSE 
 				  	 MEAN IS HIGHER THAN MOST OF THE DATA AND MODE IS LOWER THAN
-				  	 MOST OF THE DATA'''
+				  	 MOST OF THE DATA
 			plt.show()
+			'''
 			# WIPE.wipeTime()
 
 
@@ -426,8 +429,11 @@ if __name__ == '__main__':
 		# # plt.ticklabel_format(axis='both', style='sci', scilimits=(-7,0))
 		# plt.legend()
 		# plt.show()
-
-
+	plt.figure()
+	plt.ylabel("Median cluster time (ns)", fontsize=18)
+	plt.xlabel("Run number", fontsize=18)
+	plt.plot(np.arange(0, len(cluster_time_median_LIST)),cluster_time_median_LIST)
+	plt.show()
 
 
 

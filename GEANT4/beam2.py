@@ -243,7 +243,7 @@ class MyRunAction(G4UserRunAction):
 	"My Run Action"
 
 	def EndOfRunAction(self, run):
-		PLT.grapher()
+		# PLT.grapher()
 		PLT.dataAnalysis()
 		# WIPE.wipe()
 		# print "*** End of Run"
