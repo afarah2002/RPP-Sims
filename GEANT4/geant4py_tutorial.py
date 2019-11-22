@@ -258,7 +258,7 @@ zoom = 1.5
 if __name__ == '__main__':
 	# print(energy_LIST)
 	print(spherical_coor_LIST)
-	time.sleep(1)
+	# time.sleep(1)
 	data_right = open("data_right.txt", "a")
 	data_left = open("data_left.txt", "a")
 	for sph_coor in spherical_coor_LIST:
@@ -280,7 +280,7 @@ if __name__ == '__main__':
 			print energy, "\n"
 
 			print("be len: ", len(be_ratio))
-			time.sleep(1)
+			# time.sleep(1)
 
 			for be in be_ratio:
 				# angle += 10
@@ -326,7 +326,7 @@ if __name__ == '__main__':
 			for num, n_sd in enumerate(n_sd_LIST):
 				if num == 0: # right cluster
 					print "NSD RIGHT"
-					time.sleep(1)
+					# time.sleep(1)
 					max_n_sd = max(n_sd) # gets the peak n/sd that shows the greatest clustering efficiency
 					opt_be = n_sd.index(max_n_sd) * be_step # find the be_ratio that produces that max n/sd 
 
@@ -334,14 +334,14 @@ if __name__ == '__main__':
 					data_right.write(str(opt_be)+"\n")
 				else: # left cluster
 					print "NSD LEFT"
-					time.sleep(1)
+					# time.sleep(1)
 					max_n_sd = max(n_sd) # gets the peak n/sd that shows the greatest clustering efficiency
 					opt_be = n_sd.index(max_n_sd) * be_step # find the be_ratio that produces that max n/sd 
 
 					opt_be_left_LIST.append(opt_be)
 					data_left.write(str(opt_be)+"\n")
 
-			function = rational3_3
+			
 
 			data  = {
 					"SD" : std_devs_LIST, \
@@ -429,10 +429,18 @@ if __name__ == '__main__':
 		# # plt.ticklabel_format(axis='both', style='sci', scilimits=(-7,0))
 		# plt.legend()
 		# plt.show()
+
+	# fit median data
+	x = np.arange(0, len(cluster_time_median_LIST))
+	y = cluster_time_median_LIST
+	function = rational3_3
+	popt = CF.fit(function, x, y)
+
 	plt.figure()
 	plt.ylabel("Median cluster time (ns)", fontsize=18)
 	plt.xlabel("Run number", fontsize=18)
-	plt.plot(np.arange(0, len(cluster_time_median_LIST)),cluster_time_median_LIST)
+	# plt.plot(x,y)
+	plt.plot(np.arange(-60, 60, 1), function(np.arange(-60, 60, 1), *popt))
 	plt.show()
 
 
