@@ -27,10 +27,12 @@ WIPE = WipeData()
 
 spherical_coor_LIST = []
 pi = np.pi
-for angle in np.arange(0, 2*pi, pi/4): # smaller steps means more clusters
-	# for theta in np.arange(0, 2*pi, pi/4):
-	sph_coor = [angle, angle] # phi, theta
-	spherical_coor_LIST.append(sph_coor)
+theta = pi/4
+for phi in np.arange(0, pi, pi/3): # smaller steps means more clusters
+	for theta in np.arange(0, pi, pi/3):
+		sph_coor = [theta, phi] # phi, theta
+		spherical_coor_LIST.append(sph_coor)
+
 
 # energy_LIST = lists(np.arange(2., 9., 1.)) # MeV
 # energy_LIST = list(np.arange(1., 50., 1.)) # MeV
@@ -251,10 +253,6 @@ finalMomenta = []
 angle = 35
 zoom = 1.5
 
-def reject_outliers(data, m=2):
-
-    return np.array(data)[abs(data - np.mean(data)) < m * np.std(data)]
-
 if __name__ == '__main__':
 	# print(energy_LIST)
 	print(spherical_coor_LIST)
@@ -298,16 +296,16 @@ if __name__ == '__main__':
 
 
 				vectorList = [list(np.multiply([energy, energy, energy], be))]
+				radius = np.sqrt(np.square(vectorList[0][0]) + np.square(vectorList[0][1]) + np.square(vectorList[0][2]))
 
-				for v in vectorList: 
-					fieldMgr = gTransportationManager.GetFieldManager()
-					myField = G4UniformMagField(G4ThreeVector(v[0]*(np.sin(phi)*np.cos(theta)), \
-															  v[1]*(np.sin(phi)*np.sin(theta)), \
-															  v[2]*np.cos(phi)))
-					# myField = MyField(1)
-					fieldMgr.SetDetectorField(myField)
-					fieldMgr.CreateChordFinder(myField)
-					# print "|B-field| = ", vectorList[0][0]
+				fieldMgr = gTransportationManager.GetFieldManager()
+				myField = G4UniformMagField(G4ThreeVector(vectorList[0][0]*(np.sin(phi)*np.cos(theta)), \
+														  vectorList[0][1]*(np.sin(phi)*np.sin(theta)), \
+														  vectorList[0][2]*np.cos(phi)))
+				# myField = MyField(1)
+				fieldMgr.SetDetectorField(myField)
+				fieldMgr.CreateChordFinder(myField)
+				# print "|B-field| = ", vectorList[0][0]
 
 				myRA = MyRunAction()
 				gRunManager.SetUserAction(myRA)
@@ -352,11 +350,17 @@ if __name__ == '__main__':
 
 			# graph the cluster time distribution
 			n_bins = 200
-			mu, sigma = np.mean(cluster_time_LIST), np.std(cluster_time_LIST)
-			n, bins, patches = plt.hist(cluster_time_LIST, n_bins, normed=0, facecolor='blue', alpha=0.5)
-			y = mlab.normpdf(bins, mu, sigma)
-			plt.plot(bins, y, 'r--', linewidth=1)
-			plt.show()
+			# mu, sigma = np.mean(cluster_time_LIST), np.std(cluster_time_LIST)
+
+			# n, bins, patches = plt.hist(cluster_time_LIST, n_bins, normed=0, facecolor='blue', alpha=0.5)
+			# plt.xlabel("Clustering time (ns)")
+			# plt.ylabel("Frequency")
+			# plt.title("Clustering Time distribution (ns)")
+
+			# print "time median (ns): ", np.median(cluster_time_LIST), "\n", len(cluster_time_LIST)
+			# # y = mlab.normpdf(bins, mu, sigma)
+			# # plt.plot(bins, y, 'r--', linewidth=1)
+			# plt.show()
 			# WIPE.wipeTime()
 
 

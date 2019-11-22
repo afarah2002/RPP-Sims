@@ -19,8 +19,8 @@ import time
 global bound_lower
 global bound_upper
 
-bound_lower = 400 # only consider the cluster within these bounds, range of 100
-bound_upper = bound_lower + 200
+bound_lower = 500 # only consider the cluster within these bounds, range of 100
+bound_upper = bound_lower + 400
 # bound_upper = 550
 
 global vectorCount
@@ -95,21 +95,22 @@ class Plotter(object):
 		pass
 
 	def dataCollection(self, posf, momf, tcluster):
-
 		# time.sleep(1)
 		# print px, "\n", py, "\n", pz, "\n"
 		# time.sleep(1)
-		px.append(posf[0])
-		py.append(posf[1])
-		pz.append(posf[2])
 
 
 		radius = np.sqrt(np.square(posf[0]) + np.square(posf[1]) + np.square(posf[2]))
 		# if tcluster > 25: # weird set of outlier <---- INTERESTING PHENOMENON
+		# if tcluster > 24:
+		px.append(posf[0])
+		py.append(posf[1])
+		pz.append(posf[2])
+			# print radius
 		# 	print radius
 
 		# if radius < bound_lower:
-		# 	print tcluster
+		# print tcluster, ",", radius
 
 		# if posf[0] < 0 and posf[1] < 0 and posf[2] < 0 and -radius < -bound_lower and -radius > -bound_upper:
 		# 	pos_3D_left.append(radius)
@@ -122,9 +123,12 @@ class Plotter(object):
 		radius_upper = np.sqrt(3 * np.square(bound_upper))
 
 
-		if radius > radius_lower and radius < radius_upper:
+		if radius > bound_lower and radius < bound_upper:
 			cluster_time_LIST.append(tcluster)
-			print tcluster
+		# else:
+			# print tcluster
+			# print radius
+			# print tcluster
 
 
 		# print("DATA STORED")
@@ -241,7 +245,7 @@ class MyRunAction(G4UserRunAction):
 	def EndOfRunAction(self, run):
 		PLT.grapher()
 		PLT.dataAnalysis()
-		WIPE.wipe()
+		# WIPE.wipe()
 		# print "*** End of Run"
 		# print "- Run sammary : (id= %d, #events= %d)" \
 		# % (run.GetRunID(), run.GetNumberOfEventToBeProcessed())
