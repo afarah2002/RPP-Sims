@@ -19,7 +19,7 @@ import time
 global bound_lower
 global bound_upper
 
-bound_lower = 500 # only consider the cluster within these bounds, range of 100
+bound_lower = 490 # only consider the cluster within these bounds, range of 100
 bound_upper = bound_lower + 400
 # bound_upper = 550
 

@@ -15,7 +15,7 @@ import random
 import time
 import thread
 import numpy as np
-from scipy import optimize
+from scipy import optimize, stats
 #----file imports--------#
 from geom_constructor import GeomConstructor 
 # from beam import BeamInitializer
@@ -27,9 +27,8 @@ WIPE = WipeData()
 
 spherical_coor_LIST = []
 pi = np.pi
-theta = pi/4
-for phi in np.arange(0, pi, pi/3): # smaller steps means more clusters
-	for theta in np.arange(0, pi, pi/3):
+for phi in np.arange(0, pi, pi/4): # smaller steps means more clusters, range goes to pi since clusters are double sided
+	for theta in np.arange(0, pi, pi/4):
 		sph_coor = [theta, phi] # phi, theta
 		spherical_coor_LIST.append(sph_coor)
 
@@ -39,6 +38,8 @@ for phi in np.arange(0, pi, pi/3): # smaller steps means more clusters
 energy_LIST = [2.5]
 dummy_x  = list(np.arange(1., 50., 1.)) # MeV
 dummy_y = [0.0001]*49
+
+cluster_time_median_LIST = []
 
 gathered_data_right = [6e-05, \
 8e-05, \
@@ -347,20 +348,27 @@ if __name__ == '__main__':
 					"n/sd" : n_sd_LIST, \
 					"cluster_size" : n_LIST \
 					}
-
 			# graph the cluster time distribution
-			n_bins = 200
+			n_bins = 50
 			# mu, sigma = np.mean(cluster_time_LIST), np.std(cluster_time_LIST)
 
-			# n, bins, patches = plt.hist(cluster_time_LIST, n_bins, normed=0, facecolor='blue', alpha=0.5)
-			# plt.xlabel("Clustering time (ns)")
-			# plt.ylabel("Frequency")
-			# plt.title("Clustering Time distribution (ns)")
+			n, bins, patches = plt.hist(cluster_time_LIST, n_bins, normed=0, facecolor='red', alpha=0.5)
+			plt.xlabel("Clustering time (ns)")
+			plt.ylabel("Frequency")
+			plt.title("Clustering Time distribution (ns)")
 
-			# print "time median (ns): ", np.median(cluster_time_LIST), "\n", len(cluster_time_LIST)
-			# # y = mlab.normpdf(bins, mu, sigma)
-			# # plt.plot(bins, y, 'r--', linewidth=1)
-			# plt.show()
+
+			# cluster_time_LIST = [round(t, 2) for t in cluster_time_LIST]
+			# print cluster_time_LIST
+			median = np.median(cluster_time_LIST)
+			cluster_time_median_LIST.append(median)
+			print "time median (ns): ", median, "\n"
+			   #    "time mean (ns): ", np.mean(cluster_time_LIST), "\n", \
+				  # "time mode (ns): ", stats.mode(cluster_time_LIST).mode[0], "\n" 
+			'''SUMMARY - MODE IS THE BEST ESTIMATE OF THE CENTER BECAUSE 
+				  	 MEAN IS HIGHER THAN MOST OF THE DATA AND MODE IS LOWER THAN
+				  	 MOST OF THE DATA'''
+			plt.show()
 			# WIPE.wipeTime()
 
 
