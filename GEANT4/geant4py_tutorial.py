@@ -27,7 +27,7 @@ WIPE = WipeData()
 
 spherical_coor_LIST = []
 pi = np.pi
-step = 8
+step = 3
 for phi in np.arange(0, pi, pi/step): # smaller steps means more clusters, range goes to pi since clusters are double sided
 	for theta in np.arange(0, pi, pi/step):
 		sph_coor = [theta, phi] # phi, theta
@@ -296,7 +296,6 @@ if __name__ == '__main__':
 				mySA = MySteppingAction()
 				gRunManager.SetUserAction(mySA)
 
-
 				vectorList = [list(np.multiply([energy, energy, energy], be))]
 				radius = np.sqrt(np.square(vectorList[0][0]) + np.square(vectorList[0][1]) + np.square(vectorList[0][2]))
 
@@ -431,16 +430,16 @@ if __name__ == '__main__':
 		# plt.show()
 
 	# fit median data
-	x = np.arange(0, len(cluster_time_median_LIST))
-	y = cluster_time_median_LIST
-	function = rational3_3
-	popt = CF.fit(function, x, y)
-
-	plt.figure()
-	plt.ylabel("Median cluster time (ns)", fontsize=18)
-	plt.xlabel("Run number", fontsize=18)
+	# x = np.arange(0, len(cluster_time_median_LIST))
+	# y = cluster_time_median_LIST
+	# function = rational3_3
+	# popt = CF.fit(function, x, y)
+	PLT.grapher()
+	# plt.figure()
+	# plt.ylabel("Median cluster time (ns)", fontsize=18)
+	# plt.xlabel("Run number", fontsize=18)
 	# plt.plot(x,y)
-	plt.plot(np.arange(-60, 60, 1), function(np.arange(-60, 60, 1), *popt))
+	# plt.plot(np.arange(-60, 60, 1), function(np.arange(-60, 60, 1), *popt))
 	plt.show()
 
 

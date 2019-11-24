@@ -10,6 +10,8 @@ import seaborn as sns  # for nicer graphics
 import matplotlib.pyplot as plt
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
+from matplotlib.patches import FancyArrowPatch
+from mpl_toolkits.mplot3d import proj3d
 from time import sleep
 from matplotlib import colors
 from matplotlib.ticker import PercentFormatter
@@ -58,7 +60,13 @@ px = []
 py = []
 pz = []
 
+global mx
+global my
+global mz
 
+mx = []
+my = []
+mz = []
 
 #----------code starts here!----------#
 
@@ -88,6 +96,24 @@ class WipeData(object):
 
 WIPE = WipeData()
 
+class Arrow3D(FancyArrowPatch):
+    def __init__(self, xs, ys, zs, *args, **kwargs):
+        FancyArrowPatch.__init__(self, (0,0), (0,0), *args, **kwargs)
+        self._verts3d = xs, ys, zs
+
+    def draw(self, renderer):
+        xs3d, ys3d, zs3d = self._verts3d
+        xs, ys, zs = proj3d.proj_transform(xs3d, ys3d, zs3d, renderer.M)
+        self.set_positions((xs[0],ys[0]),(xs[1],ys[1]))
+        FancyArrowPatch.draw(self, renderer)
+
+####################################################
+# This part is just for reference if
+# you are interested where the data is
+# coming from
+# The plot is at the bottom
+#####################################################
+
 class Plotter(object):
 	"graphs 3D positions"
 
@@ -95,19 +121,19 @@ class Plotter(object):
 		pass
 
 	def dataCollection(self, posf, momf, tcluster):
-		# time.sleep(1)
-		# print px, "\n", py, "\n", pz, "\n"
-		# time.sleep(1)
-
 
 		radius = np.sqrt(np.square(posf[0]) + np.square(posf[1]) + np.square(posf[2]))
 		# if tcluster > 25: # weird set of outlier <---- INTERESTING PHENOMENON
-		# if tcluster > 24:
+		# if tcluster > 3 and tcluster < 4:
 		px.append(posf[0])
 		py.append(posf[1])
 		pz.append(posf[2])
-			# print radius
-		# 	print radius
+
+		mx.append(momf[0]*100)
+		my.append(momf[1]*100)
+		mz.append(momf[2]*100)
+
+		# print(momf)
 
 		# if radius < bound_lower:
 		# print tcluster, ",", radius
@@ -175,12 +201,14 @@ class Plotter(object):
 		pass
 
 	def grapher(self):
+		# new = np.add(posf, np.multiply(momf, 10))
+
 		fig = plt.figure()
 		# Axes3D.scatter(self.px, self.py, self.pz)
 
 		# first subplot: a 3D scatter plot of positions
 		ax = fig.add_subplot(111, projection='3d')
-		axmin = -600 # what units are these???????
+		axmin = -600 
 		axmax = 600
 		axes = plt.gca()
 		axes.set_xlim([axmin,axmax])
@@ -192,7 +220,16 @@ class Plotter(object):
 		ax.set_zlabel('Z position units')
 
 		ax.scatter(px, py, pz)
+		for i in np.arange(0, len(px)):
+			a = Arrow3D([px[i], px[i] + mx[i]], [py[i], py[i] + my[i]], [pz[i], pz[i] + mz[i]], mutation_scale=20, lw=1, arrowstyle="-|>", color="r")
+			ax.add_artist(a)
+		# for i in np.arange(0, len(px)):
+		# 	ax.plot([px[i], px[i] + mx[i]], [py[i], py[i] + my[i]], zs=[pz[i], pz[i] + mz[i]])
+		# ax.plot([py, py + my])
+		# ax.plot([pz, pz + mz])
+
 		plt.title("3D Positions of Randomly Scattered e+")
+		plt.draw() 
 		plt.show()
 
 	def paramReturner(self):
@@ -265,6 +302,7 @@ class MySteppingAction(G4UserSteppingAction):
 		preStepPoint = step.GetPreStepPoint()
 		postStepPoint = step.GetPostStepPoint()
 
+		# change = step.particleChange()
 		track = step.GetTrack()
 		touchable = track.GetTouchable()
 		KE = track.GetKineticEnergy()
@@ -274,22 +312,31 @@ class MySteppingAction(G4UserSteppingAction):
 		# kinetic energy in MeV - POST
 		# finalKE = postStepPoint.GetKineticEnergy()
 
-		m = [track.GetMomentum().x, track.GetMomentum().y, track.GetMomentum().z] # equal to the postStepPoint momentum
-		p = [postStepPoint.GetPosition().x, postStepPoint.GetPosition().y, postStepPoint.GetPosition().z] # (mm)
-		mm = np.sqrt((m[0])**2 + (m[1])**2 + (m[2])**2)
-		t = track.GetGlobalTime() # (ns)
 
+		p_test = [step.GetDeltaPosition().x,step.GetDeltaPosition().y,step.GetDeltaPosition().z]
+		p = [postStepPoint.GetPosition().x, postStepPoint.GetPosition().y, postStepPoint.GetPosition().z] # (mm)
+		# p and p_test are the SAME 
+		t_test = step.GetDeltaTime()
+		t = track.GetGlobalTime() # (ns)
+		# t and t_test are the SAME
+
+		m = [postStepPoint.GetMomentum().x, postStepPoint.GetMomentum().y, postStepPoint.GetMomentum().z]
+		# m = [step.GetDeltaMomentum().x, step.GetDeltaMomentum().y, step.GetDeltaMomentum().z] # equal to the postStepPoint momentum
+		mm = np.sqrt((m[0])**2 + (m[1])**2 + (m[2])**2)
 		# momenta - PRE
 		initialMomentum = [preStepPoint.GetMomentum().x, preStepPoint.GetMomentum().y, preStepPoint.GetMomentum().z]
 		# momenta - POST
-		finalMomentum = [postStepPoint.GetMomentum().x, postStepPoint.GetMomentum().y, postStepPoint.GetMomentum().z]
-
 		# print KE, "\n", p, "\n", initialMomentum, "\n", finalMomentum, "\n\n" 
 		# energy = step.GetTotalEnergyDeposit()
-
-
+		# print test
 		PLT.dataCollection(p, m, t) # calls data collection and analysis on final positions and momenta
 		# return initialMomentum, finalMomentum 
+
+# class MyTracjectoryAction(G4TrackTrajectory):
+# 	"Tracking Trajectory"
+# 	def UserTrajectoryAction(self, traj):
+# 		pass
+
 
 class MyField(G4MagneticField): ### used when mag field NOT parameterized in main filed
 	"My Magnetic Field"
