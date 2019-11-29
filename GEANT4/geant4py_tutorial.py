@@ -16,6 +16,7 @@ import time
 import thread
 import numpy as np
 from scipy import optimize, stats
+import collections
 #----file imports--------#
 from geom_constructor import GeomConstructor 
 # from beam import BeamInitializer
@@ -26,17 +27,21 @@ PLT = Plotter()
 WIPE = WipeData()
 
 spherical_coor_LIST = []
+# spherical_coor_LIST = [[0,0]]
 pi = np.pi
 step = 3
+
 for phi in np.arange(0, pi, pi/step): # smaller steps means more clusters, range goes to pi since clusters are double sided
 	for theta in np.arange(0, pi, pi/step):
 		sph_coor = [theta, phi] # phi, theta
 		spherical_coor_LIST.append(sph_coor)
 
 
-# energy_LIST = lists(np.arange(2., 9., 1.)) # MeV
-# energy_LIST = list(np.arange(1., 50., 1.)) # MeV
-energy_LIST = [2.5]
+
+# energy_LIST = list(np.arange(2., 9., 1.)) # MeV
+
+# energy_LIST = list(np.logspace(0., 9., num=10, endpoint=True, base=10)) # eV
+energy_LIST = [0.25]
 dummy_x  = list(np.arange(1., 50., 1.)) # MeV
 dummy_y = [0.0001]*49
 
@@ -240,11 +245,45 @@ class CurveFitter(object):
 		return popt
 CF = CurveFitter()
 
+uniqueClusters = [[None, None, None]]
+class FieldDesign(object):
 
-	# def fit(self):
-	# 	pass
-	# def grapher(self):
-	# 	pass
+	def fieldParam(self, energy, be, phi, theta):
+
+		vectorList = [list(np.multiply([energy, energy, energy], be))]
+		radius = np.sqrt(np.square(vectorList[0][0]) + np.square(vectorList[0][1]) + np.square(vectorList[0][2]))
+
+		mag0 = vectorList[0][0]*(np.sin(phi)*np.cos(theta))
+		mag1 = vectorList[0][1]*(np.sin(phi)*np.sin(theta))
+		mag2 = vectorList[0][2]*np.cos(phi)
+
+		magVec = [mag0, mag1, mag2] 
+		
+		# get index of "max" value in magVec, most significant axis
+		maxIndex = list(np.abs(magVec)).index(max(np.abs(magVec))) 
+
+		#get scaling factor
+		scale = 500 / np.abs(magVec[maxIndex])
+		magVecScaled = np.multiply(magVec, scale)
+
+
+		# if the magVecScaled is not in the uniqueClusters list, append to it
+		flag = 0
+		for elem in uniqueClusters:
+			if collections.Counter(elem) == collections.Counter(magVecScaled):
+				flag = 1
+
+		if flag == 0:
+			uniqueClusters.append(magVecScaled)
+		else: 
+			pass
+
+
+		return magVec, magVecScaled
+
+FD = FieldDesign()
+
+
 Constructor = Constructor()
 Constructor.construct()
 VIS = Visualizer()
@@ -255,6 +294,7 @@ finalMomenta = []
 angle = 35
 zoom = 1.5
 
+
 if __name__ == '__main__':
 	# print(energy_LIST)
 	print(spherical_coor_LIST)
@@ -262,6 +302,7 @@ if __name__ == '__main__':
 	data_right = open("data_right.txt", "a")
 	data_left = open("data_left.txt", "a")
 	for sph_coor in spherical_coor_LIST:
+
 		phi = sph_coor[0]
 		theta = sph_coor[1]
 
@@ -270,11 +311,13 @@ if __name__ == '__main__':
 			WIPE.wipeComps()
 			energy = e
 			# energy = 2.5
-			be_step = 1.e-5
+			energyExponent = np.log(energy)
+
+			be_step = 1*10**(energyExponent-11)
 
 			tickMarks = np.arange(1e-7, 2.5e-4, be_step*5.)
 			be_ratio = [1.25e-4]
-			# be_ratio = np.arange(1e-7, 2.5e-4, be_step) # ratio between magnetic field (varied) and particle energy (fixed @ 2.5 MeV)
+			# be_ratio = np.arange(1e-20, 2.5*10**(energyExponent-10), be_step) # ratio between magnetic field (varied) and particle energy (fixed @ 2.5 MeV)
 			# be_ratio = [1.e-4, 2.e-4, be_step] # 2.5 MeV after all tests, used to verify best be_ratio, should display 3D position plot
 			# be_ratio = [6e-5] # 0.5 MeV after all tests, used to verify best be_ratio, should display 3D position plot
 			print energy, "\n"
@@ -285,7 +328,7 @@ if __name__ == '__main__':
 			for be in be_ratio:
 				# angle += 10
 				# angle += 0.075 # +0.075 is a recommended delta theta
-
+				print energy, " MeV", "\n", be, "T/MeV", "\n\n"
 				# set user actions ...
 				PGA_1 = MyPrimaryGeneratorAction(energy)
 				gRunManager.SetUserAction(PGA_1)
@@ -296,13 +339,11 @@ if __name__ == '__main__':
 				mySA = MySteppingAction()
 				gRunManager.SetUserAction(mySA)
 
-				vectorList = [list(np.multiply([energy, energy, energy], be))]
-				radius = np.sqrt(np.square(vectorList[0][0]) + np.square(vectorList[0][1]) + np.square(vectorList[0][2]))
+				magVec, magVecScaled = FD.fieldParam(energy, be, phi, theta)
 
 				fieldMgr = gTransportationManager.GetFieldManager()
-				myField = G4UniformMagField(G4ThreeVector(vectorList[0][0]*(np.sin(phi)*np.cos(theta)), \
-														  vectorList[0][1]*(np.sin(phi)*np.sin(theta)), \
-														  vectorList[0][2]*np.cos(phi)))
+				myField = G4UniformMagField(G4ThreeVector(magVec[0], magVec[1], magVec[2]))
+
 				# myField = MyField(1)
 				fieldMgr.SetDetectorField(myField)
 				fieldMgr.CreateChordFinder(myField)
@@ -321,7 +362,7 @@ if __name__ == '__main__':
 				std_devs_LIST, n_LIST, n_sd_LIST, cluster_time_LIST = PLT.dataReturner() # for 3D positions
 
 				# PLT.wipeData() #clean lists before starting another run
-
+			'''
 			for num, n_sd in enumerate(n_sd_LIST):
 				if num == 0: # right cluster
 					print "NSD RIGHT"
@@ -339,7 +380,7 @@ if __name__ == '__main__':
 
 					opt_be_left_LIST.append(opt_be)
 					data_left.write(str(opt_be)+"\n")
-
+			'''
 			
 
 			data  = {
@@ -350,15 +391,15 @@ if __name__ == '__main__':
 					}
 			median = np.median(cluster_time_LIST)
 			cluster_time_median_LIST.append(median)
-			'''					
+							
 			# graph the cluster time distribution
-			n_bins = 50
-			# mu, sigma = np.mean(cluster_time_LIST), np.std(cluster_time_LIST)
+			# n_bins = 50
+			# # mu, sigma = np.mean(cluster_time_LIST), np.std(cluster_time_LIST)
 
-			n, bins, patches = plt.hist(cluster_time_LIST, n_bins, normed=0, facecolor='red', alpha=0.5)
-			plt.xlabel("Clustering time (ns)")
-			plt.ylabel("Frequency")
-			plt.title("Clustering Time distribution (ns)")
+			# n, bins, patches = plt.hist(cluster_time_LIST, n_bins, normed=0, facecolor='red', alpha=0.5)
+			# plt.xlabel("Clustering time (ns)")
+			# plt.ylabel("Frequency")
+			# plt.title("Clustering Time distribution (ns)")
 
 
 			# cluster_time_LIST = [round(t, 2) for t in cluster_time_LIST]
@@ -366,55 +407,56 @@ if __name__ == '__main__':
 			print "time median (ns): ", median, "\n"
 			   #    "time mean (ns): ", np.mean(cluster_time_LIST), "\n", \
 				  # "time mode (ns): ", stats.mode(cluster_time_LIST).mode[0], "\n" 
-			SUMMARY - MODE IS THE BEST ESTIMATE OF THE CENTER BECAUSE 
+			'''SUMMARY - MODE IS THE BEST ESTIMATE OF THE CENTER BECAUSE 
 				  	 MEAN IS HIGHER THAN MOST OF THE DATA AND MODE IS LOWER THAN
-				  	 MOST OF THE DATA
-			plt.show()
+				  	 MOST OF THE DATA'''
+			# plt.show()
+			
+			WIPE.wipeTime()
+
 			'''
-			# WIPE.wipeTime()
+			fig, (sd, n_sd, n) = plt.subplots(3, sharex=True, sharey=False)
+			# plt.tight_layout()
+			plt.xlabel("Ratio of B-field to Particle Beam Energy (T/keV) ", fontsize=18)
+
+			fontdict = {'fontsize': 18,
+						'fontweight': 5,
+						}
+
+			for dep_var_name, dep_var_LIST in data.items():
+
+				for dep_var in dep_var_LIST:
+
+					if dep_var_LIST.index(dep_var) == 0:
+						label = 'right'
+					if dep_var_LIST.index(dep_var) == 1:
+						label = 'left'
+
+					if dep_var_name == 'SD':
+						sd.plot(be_ratio, dep_var, label=label)	
+						sd.set(ylabel=dep_var_name)
+						title = dep_var_name + " vs be_ratio (T/eV)"
+						sd.set_title(title, fontdict=fontdict)
+						# popt = CF.fit(function, be_ratio, dep_var)
+						# sd.plot(be_ratio, function(be_ratio, *popt), label=label)
+
+					if dep_var_name == "n/sd":
+						n_sd.plot(be_ratio, dep_var, label=label)	
+						n_sd.set(ylabel=dep_var_name)
+						title = dep_var_name + " vs be_ratio (T/eV)"
+						n_sd.set_title(title, fontdict=fontdict)
 
 
-			# fig, (sd, n_sd, n) = plt.subplots(3, sharex=True, sharey=False)
-			# # plt.tight_layout()
-			# plt.xlabel("Ratio of B-field to Particle Beam Energy (T/MeV) ", fontsize=18)
+					if dep_var_name == "cluster_size":				
+						n.plot(be_ratio, dep_var, label=label)
+						n.set(ylabel=dep_var_name)
+						title = dep_var_name + " vs be_ratio (T/eV)"
+						n.set_title(title, fontdict=fontdict)
 
-			# fontdict = {'fontsize': 18,
-			# 			'fontweight': 5,
-			# 			}
-
-		# 	for dep_var_name, dep_var_LIST in data.items():
-
-		# 		for dep_var in dep_var_LIST:
-
-		# 			if dep_var_LIST.index(dep_var) == 0:
-		# 				label = 'right'
-		# 			if dep_var_LIST.index(dep_var) == 1:
-		# 				label = 'left'
-
-		# 			if dep_var_name == 'SD':
-		# 				sd.plot(be_ratio, dep_var, label=label)	
-		# 				sd.set(ylabel=dep_var_name)
-		# 				title = dep_var_name + " vs be_ratio (T/MeV)"
-		# 				sd.set_title(title, fontdict=fontdict)
-		# 				# popt = CF.fit(function, be_ratio, dep_var)
-		# 				# sd.plot(be_ratio, function(be_ratio, *popt), label=label)
-
-		# 			if dep_var_name == "n/sd":
-		# 				n_sd.plot(be_ratio, dep_var, label=label)	
-		# 				n_sd.set(ylabel=dep_var_name)
-		# 				title = dep_var_name + " vs be_ratio (T/MeV)"
-		# 				n_sd.set_title(title, fontdict=fontdict)
-
-
-		# 			if dep_var_name == "cluster_size":				
-		# 				n.plot(be_ratio, dep_var, label=label)
-		# 				n.set(ylabel=dep_var_name)
-		# 				title = dep_var_name + " vs be_ratio (T/MeV)"
-		# 				n.set_title(title, fontdict=fontdict)
-
-		# 	plt.xticks(tickMarks)
-		# 	plt.legend()
+			plt.xticks(tickMarks)
+			plt.legend()
 		# plt.show()
+		'''
 
 
 		#### plotting E vs optimal B/E ####
@@ -434,13 +476,17 @@ if __name__ == '__main__':
 	# y = cluster_time_median_LIST
 	# function = rational3_3
 	# popt = CF.fit(function, x, y)
+
 	PLT.grapher()
 	# plt.figure()
 	# plt.ylabel("Median cluster time (ns)", fontsize=18)
 	# plt.xlabel("Run number", fontsize=18)
 	# plt.plot(x,y)
 	# plt.plot(np.arange(-60, 60, 1), function(np.arange(-60, 60, 1), *popt))
+	cluster_count = 2* (len(uniqueClusters)-1)
+	print "There are ", cluster_count, " clusters"
 	plt.show()
+
 
 
 

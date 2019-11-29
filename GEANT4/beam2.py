@@ -60,6 +60,14 @@ px = []
 py = []
 pz = []
 
+global px2
+global py2
+global pz2
+
+px2 = []
+py2 = []
+pz2 = []
+
 global mx
 global my
 global mz
@@ -76,6 +84,8 @@ class WipeData(object):
 	def wipe(self):
 		pos_3D_right[:] = []
 		pos_3D_left[:] = []
+
+	def wipeAxes(self):
 		px[:] = []
 		py[:] = []
 		pz[:] = []
@@ -84,15 +94,12 @@ class WipeData(object):
 		cluster_time_LIST[:] = []
 
 	def wipeComps(self):
-
 		sd_pos_3D_right_LIST[:] = []
 		n_pos_3D_right_LIST[:] = []
 		n_sd_pos_3D_right_LIST[:] = []
 		sd_pos_3D_left_LIST[:] = []
 		n_pos_3D_left_LIST[:] = []
 		n_sd_pos_3D_left_LIST[:] = []
-
-
 
 WIPE = WipeData()
 
@@ -106,13 +113,6 @@ class Arrow3D(FancyArrowPatch):
         xs, ys, zs = proj3d.proj_transform(xs3d, ys3d, zs3d, renderer.M)
         self.set_positions((xs[0],ys[0]),(xs[1],ys[1]))
         FancyArrowPatch.draw(self, renderer)
-
-####################################################
-# This part is just for reference if
-# you are interested where the data is
-# coming from
-# The plot is at the bottom
-#####################################################
 
 class Plotter(object):
 	"graphs 3D positions"
@@ -129,6 +129,10 @@ class Plotter(object):
 		py.append(posf[1])
 		pz.append(posf[2])
 
+		px2.append(posf[0])
+		py2.append(posf[1])
+		pz2.append(posf[2])
+
 		mx.append(momf[0]*100)
 		my.append(momf[1]*100)
 		mz.append(momf[2]*100)
@@ -138,12 +142,12 @@ class Plotter(object):
 		# if radius < bound_lower:
 		# print tcluster, ",", radius
 
-		# if posf[0] < 0 and posf[1] < 0 and posf[2] < 0 and -radius < -bound_lower and -radius > -bound_upper:
-		# 	pos_3D_left.append(radius)
-		# 	cluster_time_LIST.append(tcluster)
-		# if posf[0] > 0 and posf[1] > 0 and posf[2] > 0 and radius > bound_lower and radius < bound_upper:
-		# 	pos_3D_right.append(radius)
-		# 	cluster_time_LIST.append(tcluster)
+		if posf[0] < 0 and posf[1] < 0 and posf[2] < 0 and -radius < -bound_lower and -radius > -bound_upper:
+			pos_3D_left.append(radius)
+			cluster_time_LIST.append(tcluster)
+		if posf[0] > 0 and posf[1] > 0 and posf[2] > 0 and radius > bound_lower and radius < bound_upper:
+			pos_3D_right.append(radius)
+			cluster_time_LIST.append(tcluster)
 
 		radius_lower = np.sqrt(3 * np.square(bound_lower))
 		radius_upper = np.sqrt(3 * np.square(bound_upper))
@@ -218,28 +222,29 @@ class Plotter(object):
 		ax.set_xlabel('X position units')
 		ax.set_ylabel('Y position units')
 		ax.set_zlabel('Z position units')
+# 
 
 		ax.scatter(px, py, pz)
-		for i in np.arange(0, len(px)):
-			a = Arrow3D([px[i], px[i] + mx[i]], [py[i], py[i] + my[i]], [pz[i], pz[i] + mz[i]], mutation_scale=20, lw=1, arrowstyle="-|>", color="r")
-			ax.add_artist(a)
 		# for i in np.arange(0, len(px)):
-		# 	ax.plot([px[i], px[i] + mx[i]], [py[i], py[i] + my[i]], zs=[pz[i], pz[i] + mz[i]])
-		# ax.plot([py, py + my])
-		# ax.plot([pz, pz + mz])
+		# 	a = Arrow3D([px[i], px[i] + mx[i]], [py[i], py[i] + my[i]], [pz[i], pz[i] + mz[i]], mutation_scale=20, lw=1, arrowstyle="-|>", color="r")
+		# 	ax.add_artist(a)
+
 
 		plt.title("3D Positions of Randomly Scattered e+")
-		plt.draw() 
+		# plt.draw() 
 		plt.show()
 
 	def paramReturner(self):
 		return bound_lower, bound_upper, vectorCount, energy
 
-
-		 
-
-
 PLT = Plotter()
+
+class ClusterIsolation(object):
+	# uses p_2 to keep lists throughout runs
+	def getClusterCenter(self):
+		pass
+
+CI = ClusterIsolation()
 
 class MyPrimaryGeneratorAction(G4VUserPrimaryGeneratorAction):
 	"My Primary Generator Action"
@@ -282,6 +287,7 @@ class MyRunAction(G4UserRunAction):
 	def EndOfRunAction(self, run):
 		# PLT.grapher()
 		PLT.dataAnalysis()
+		CI.getClusterCenter()
 		# WIPE.wipe()
 		# print "*** End of Run"
 		# print "- Run sammary : (id= %d, #events= %d)" \
@@ -328,7 +334,7 @@ class MySteppingAction(G4UserSteppingAction):
 		# momenta - POST
 		# print KE, "\n", p, "\n", initialMomentum, "\n", finalMomentum, "\n\n" 
 		# energy = step.GetTotalEnergyDeposit()
-		# print test
+		# print p 
 		PLT.dataCollection(p, m, t) # calls data collection and analysis on final positions and momenta
 		# return initialMomentum, finalMomentum 
 
