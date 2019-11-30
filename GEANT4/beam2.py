@@ -3,6 +3,7 @@ from Geant4 import *
 import random
 import numpy as np
 import scipy.stats as ss
+from scipy.signal import find_peaks
 import pandas as pd
 import seaborn as sns  # for nicer graphics
 
@@ -76,9 +77,8 @@ mx = []
 my = []
 mz = []
 
-global position_LIST
-position_LIST = []
-
+global cluster_sizes_LIST
+cluster_sizes_LIST = []
 #----------code starts here!----------#
 class WipeData(object):
 	# wipe lists for next data collection
@@ -90,7 +90,8 @@ class WipeData(object):
 		pz[:] = []
 
 	def wipeCluster(self):
-		position_LIST[:] = []
+		# position_LIST[:] = []
+		pass
 
 	def wipeTime(self):
 		cluster_time_LIST[:] = []
@@ -139,11 +140,6 @@ class Plotter(object):
 		my.append(momf[1]*100)
 		mz.append(momf[2]*100)
 
-		# print(momf)
-
-		# if radius < bound_lower:
-		# print tcluster, ",", radius
-
 		if posf[0] < 0 and posf[1] < 0 and posf[2] < 0 and -radius < -bound_lower and -radius > -bound_upper:
 			pos_3D_left.append(radius)
 			cluster_time_LIST.append(tcluster)
@@ -157,15 +153,7 @@ class Plotter(object):
 
 		if radius > bound_lower and radius < bound_upper:
 			cluster_time_LIST.append(tcluster)
-		# else:
-			# print tcluster
-			# print radius
-			# print tcluster
 
-
-
-		# print("DATA STORED")
-		# print len(self.px), "\n", len(self.py), "\n", len(self.pz), "\n"
 
 	def dataAnalysis(self):
 		# results = open("RESULTS/results_10212019_1.txt", "a")
@@ -201,7 +189,8 @@ class Plotter(object):
 		return [sd_pos_3D_right_LIST, sd_pos_3D_left_LIST], \
 			   [n_pos_3D_right_LIST, n_pos_3D_left_LIST], \
 			   [n_sd_pos_3D_right_LIST, n_sd_pos_3D_left_LIST], \
-			   cluster_time_LIST
+			   cluster_time_LIST, \
+			   cluster_sizes_LIST
 		pass
 
 	def grapher(self):
@@ -225,9 +214,9 @@ class Plotter(object):
 # 
 
 		ax.scatter(px, py, pz)
-		# for i in np.arange(0, len(px)):
-		# 	a = Arrow3D([px[i], px[i] + mx[i]], [py[i], py[i] + my[i]], [pz[i], pz[i] + mz[i]], mutation_scale=20, lw=1, arrowstyle="-|>", color="r")
-		# 	ax.add_artist(a)
+		for i in np.arange(0, len(px)):
+			a = Arrow3D([px[i], px[i] + mx[i]], [py[i], py[i] + my[i]], [pz[i], pz[i] + mz[i]], mutation_scale=20, lw=1, arrowstyle="-|>", color="r")
+			ax.add_artist(a)
 
 
 		plt.title("3D Positions of Randomly Scattered e+")
@@ -237,14 +226,44 @@ class Plotter(object):
 		# second subplot: a histogram of positions
 		fig, axs = plt.subplots(3, sharey=True, sharex=False, tight_layout=False)
 		n_bins = 25
-		axs[0].hist(px, bins=n_bins) # histogram of 3D position x
-		axs[1].hist(py, bins=n_bins) # histogram of 3D position y
-		axs[2].hist(pz, bins=n_bins) # histogram of 3D position z
+		position_LIST = [px, py, pz]
+
+		for i in position_LIST:
+			fig2, ax2 = plt.subplots(2, sharey=True, sharex=False, tight_layout=False)
+			range_LIST = []
+			positive = []
+			negative = []
+			counts, bins, bars = axs[position_LIST.index(i)].hist(i, bins=n_bins) 
+			# print counts, "\n\n", bins
+
+			# separate x, y, z into positive and negative
+			for pos in i:
+				if pos > 0:
+					positive.append(pos)
+				if pos < 0:
+					negative.append(pos)
+			frame = 0
+			for i in [positive, negative]:
+				# print "sign change" , i, "\n"
+				counts, bins, bars = ax2[frame].hist(positive, bins=n_bins)
+				counts = list(counts)
+				# print counts, "\n\n", "bins", "\n", bins
+				for freq in counts:
+					# gets rid of any outliers
+					if freq not in np.arange(5, 150): 
+						index = counts.index(freq)
+						np.delete(bins, index)
+				# takes the range of each pos/neg without outliers
+				rng = np.max(bins) - np.min(bins)
+				range_LIST.append(rng)
+				frame += 1
+			#combines the pos/neg ranges to get the real range
+			true_range = np.sum(range_LIST)
+			if true_range < 200:
+				cluster_sizes_LIST.append(true_range)
+				print "\n", "Range = ", true_range, "\n"
 
 		plt.show()
-
-	def paramReturner(self):
-		return bound_lower, bound_upper, vectorCount, energy
 
 PLT = Plotter()
 
@@ -306,6 +325,7 @@ class MyRunAction(G4UserRunAction):
 
 	def EndOfRunAction(self, run):
 		PLT.grapher()
+		print(cluster_sizes_LIST)
 		PLT.dataAnalysis()
 		# CI.getClusterWidth()
 		# WIPE.wipeCluster()

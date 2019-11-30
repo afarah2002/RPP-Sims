@@ -31,7 +31,7 @@ WIPE = WipeData()
 spherical_coor_LIST = []
 # spherical_coor_LIST = [[0,0]]
 pi = np.pi
-step = 4
+step = 3
 
 for phi in np.arange(0, pi, pi/step): # smaller steps means more clusters, range goes to pi since clusters are double sided
 	for theta in np.arange(0, pi, pi/step):
@@ -366,7 +366,7 @@ if __name__ == '__main__':
 				VIS.visualizer(angle)
 
 				# std_devs_LIST, means_LIST, n_LIST, n_sd_LIST = PLT.dataReturner()
-				std_devs_LIST, n_LIST, n_sd_LIST, cluster_time_LIST = PLT.dataReturner() # for 3D positions
+				std_devs_LIST, n_LIST, n_sd_LIST, cluster_time_LIST, cluster_size_LIST = PLT.dataReturner() # for 3D positions
 
 				WIPE.wipeCluster()
 				# PLT.wipeData() #clean lists before starting another run
