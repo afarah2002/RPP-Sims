@@ -76,19 +76,21 @@ mx = []
 my = []
 mz = []
 
+global position_LIST
+position_LIST = []
+
 #----------code starts here!----------#
-
-
 class WipeData(object):
 	# wipe lists for next data collection
 	def wipe(self):
 		pos_3D_right[:] = []
 		pos_3D_left[:] = []
-
-	def wipeAxes(self):
 		px[:] = []
 		py[:] = []
 		pz[:] = []
+
+	def wipeCluster(self):
+		position_LIST[:] = []
 
 	def wipeTime(self):
 		cluster_time_LIST[:] = []
@@ -161,6 +163,7 @@ class Plotter(object):
 			# print tcluster
 
 
+
 		# print("DATA STORED")
 		# print len(self.px), "\n", len(self.py), "\n", len(self.pz), "\n"
 
@@ -199,9 +202,6 @@ class Plotter(object):
 			   [n_pos_3D_right_LIST, n_pos_3D_left_LIST], \
 			   [n_sd_pos_3D_right_LIST, n_sd_pos_3D_left_LIST], \
 			   cluster_time_LIST
-
-
-
 		pass
 
 	def grapher(self):
@@ -232,6 +232,15 @@ class Plotter(object):
 
 		plt.title("3D Positions of Randomly Scattered e+")
 		# plt.draw() 
+
+
+		# second subplot: a histogram of positions
+		fig, axs = plt.subplots(3, sharey=True, sharex=False, tight_layout=False)
+		n_bins = 25
+		axs[0].hist(px, bins=n_bins) # histogram of 3D position x
+		axs[1].hist(py, bins=n_bins) # histogram of 3D position y
+		axs[2].hist(pz, bins=n_bins) # histogram of 3D position z
+
 		plt.show()
 
 	def paramReturner(self):
@@ -241,15 +250,26 @@ PLT = Plotter()
 
 class ClusterIsolation(object):
 	# uses p_2 to keep lists throughout runs
-	def getClusterCenter(self):
-		pass
+
+	# def __init__(self):
+	# 	self.clusterCenter = clusterCenter
+
+	def getClusterWidth(self):
+		# isolate cluster
+		max_x = max(px)
+		min_x = min(px)
+		max_y = max(py)
+		min_y = min(py)
+		max_z = max(pz)
+		min_z = min(pz)
+
 
 CI = ClusterIsolation()
 
 class MyPrimaryGeneratorAction(G4VUserPrimaryGeneratorAction):
 	"My Primary Generator Action"
 
-	def __init__(self,energy):
+	def __init__(self, energy):
 		G4VUserPrimaryGeneratorAction.__init__(self)
 		self.particleGun = G4ParticleGun(1)
 		# print("\n Particle gun defined \n")
@@ -285,10 +305,11 @@ class MyRunAction(G4UserRunAction):
 	"My Run Action"
 
 	def EndOfRunAction(self, run):
-		# PLT.grapher()
+		PLT.grapher()
 		PLT.dataAnalysis()
-		CI.getClusterCenter()
-		# WIPE.wipe()
+		# CI.getClusterWidth()
+		# WIPE.wipeCluster()
+		WIPE.wipe()
 		# print "*** End of Run"
 		# print "- Run sammary : (id= %d, #events= %d)" \
 		# % (run.GetRunID(), run.GetNumberOfEventToBeProcessed())
@@ -338,10 +359,6 @@ class MySteppingAction(G4UserSteppingAction):
 		PLT.dataCollection(p, m, t) # calls data collection and analysis on final positions and momenta
 		# return initialMomentum, finalMomentum 
 
-# class MyTracjectoryAction(G4TrackTrajectory):
-# 	"Tracking Trajectory"
-# 	def UserTrajectoryAction(self, traj):
-# 		pass
 
 
 class MyField(G4MagneticField): ### used when mag field NOT parameterized in main filed

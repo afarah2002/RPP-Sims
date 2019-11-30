@@ -20,16 +20,18 @@ import collections
 #----file imports--------#
 from geom_constructor import GeomConstructor 
 # from beam import BeamInitializer
-from beam2 import MyPrimaryGeneratorAction, MyRunAction, MyEventAction, MySteppingAction, MyField, Plotter, WipeData
+from beam2 import MyPrimaryGeneratorAction, MyRunAction, MyEventAction,MySteppingAction, MyField, \
+				  Plotter, WipeData, ClusterIsolation
 
 
 PLT = Plotter()
 WIPE = WipeData()
 
+
 spherical_coor_LIST = []
 # spherical_coor_LIST = [[0,0]]
 pi = np.pi
-step = 3
+step = 4
 
 for phi in np.arange(0, pi, pi/step): # smaller steps means more clusters, range goes to pi since clusters are double sided
 	for theta in np.arange(0, pi, pi/step):
@@ -306,7 +308,7 @@ if __name__ == '__main__':
 		phi = sph_coor[0]
 		theta = sph_coor[1]
 
-		print "coors = (", phi, ",", theta, ")"
+		# print "coors = (", phi, ",", theta, ")"
 		for e in energy_LIST:
 			WIPE.wipeComps()
 			energy = e
@@ -316,11 +318,11 @@ if __name__ == '__main__':
 			be_step = 1*10**(energyExponent-11)
 
 			tickMarks = np.arange(1e-7, 2.5e-4, be_step*5.)
-			be_ratio = [1.25e-4]
+			be_ratio = [2e-4]
 			# be_ratio = np.arange(1e-20, 2.5*10**(energyExponent-10), be_step) # ratio between magnetic field (varied) and particle energy (fixed @ 2.5 MeV)
 			# be_ratio = [1.e-4, 2.e-4, be_step] # 2.5 MeV after all tests, used to verify best be_ratio, should display 3D position plot
 			# be_ratio = [6e-5] # 0.5 MeV after all tests, used to verify best be_ratio, should display 3D position plot
-			print energy, "\n"
+			# print energy, "\n"
 
 			print("be len: ", len(be_ratio))
 			# time.sleep(1)
@@ -328,7 +330,10 @@ if __name__ == '__main__':
 			for be in be_ratio:
 				# angle += 10
 				# angle += 0.075 # +0.075 is a recommended delta theta
-				print energy, " MeV", "\n", be, "T/MeV", "\n\n"
+				# print energy, " MeV", "\n", be, "T/MeV", "\n\n"
+				magVec, magVecScaled = FD.fieldParam(energy, be, phi, theta)
+
+
 				# set user actions ...
 				PGA_1 = MyPrimaryGeneratorAction(energy)
 				gRunManager.SetUserAction(PGA_1)
@@ -339,7 +344,6 @@ if __name__ == '__main__':
 				mySA = MySteppingAction()
 				gRunManager.SetUserAction(mySA)
 
-				magVec, magVecScaled = FD.fieldParam(energy, be, phi, theta)
 
 				fieldMgr = gTransportationManager.GetFieldManager()
 				myField = G4UniformMagField(G4ThreeVector(magVec[0], magVec[1], magVec[2]))
@@ -348,6 +352,9 @@ if __name__ == '__main__':
 				fieldMgr.SetDetectorField(myField)
 				fieldMgr.CreateChordFinder(myField)
 				# print "|B-field| = ", vectorList[0][0]
+				# CI = ClusterIsolation(magVecScaled)
+				# CI
+				# CI.getClusterWidth()
 
 				myRA = MyRunAction()
 				gRunManager.SetUserAction(myRA)
@@ -361,6 +368,7 @@ if __name__ == '__main__':
 				# std_devs_LIST, means_LIST, n_LIST, n_sd_LIST = PLT.dataReturner()
 				std_devs_LIST, n_LIST, n_sd_LIST, cluster_time_LIST = PLT.dataReturner() # for 3D positions
 
+				WIPE.wipeCluster()
 				# PLT.wipeData() #clean lists before starting another run
 			'''
 			for num, n_sd in enumerate(n_sd_LIST):
@@ -404,7 +412,7 @@ if __name__ == '__main__':
 
 			# cluster_time_LIST = [round(t, 2) for t in cluster_time_LIST]
 			# print cluster_time_LIST
-			print "time median (ns): ", median, "\n"
+			# print "time median (ns): ", median, "\n"
 			   #    "time mean (ns): ", np.mean(cluster_time_LIST), "\n", \
 				  # "time mode (ns): ", stats.mode(cluster_time_LIST).mode[0], "\n" 
 			'''SUMMARY - MODE IS THE BEST ESTIMATE OF THE CENTER BECAUSE 
