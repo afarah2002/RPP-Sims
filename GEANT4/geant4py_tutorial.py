@@ -31,7 +31,7 @@ WIPE = WipeData()
 spherical_coor_LIST = []
 # spherical_coor_LIST = [[0,0]]
 pi = np.pi
-step = 3
+step = 8
 
 for phi in np.arange(0, pi, pi/step): # smaller steps means more clusters, range goes to pi since clusters are double sided
 	for theta in np.arange(0, pi, pi/step):
@@ -485,7 +485,12 @@ if __name__ == '__main__':
 	# function = rational3_3
 	# popt = CF.fit(function, x, y)
 
-	PLT.grapher()
+	# PLT.grapher()
+
+	fig, ax = plt.subplots(1, sharey=True, sharex=False, tight_layout=False)
+	n_bins = 10
+	ax.hist(cluster_size_LIST, n_bins)
+	plt.title("Cluster sizes (mm)")
 	# plt.figure()
 	# plt.ylabel("Median cluster time (ns)", fontsize=18)
 	# plt.xlabel("Run number", fontsize=18)

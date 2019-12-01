@@ -194,7 +194,6 @@ class Plotter(object):
 		pass
 
 	def grapher(self):
-		# new = np.add(posf, np.multiply(momf, 10))
 
 		fig = plt.figure()
 		# Axes3D.scatter(self.px, self.py, self.pz)
@@ -211,7 +210,6 @@ class Plotter(object):
 		ax.set_xlabel('X position units')
 		ax.set_ylabel('Y position units')
 		ax.set_zlabel('Z position units')
-# 
 
 		ax.scatter(px, py, pz)
 		for i in np.arange(0, len(px)):
@@ -220,20 +218,23 @@ class Plotter(object):
 
 
 		plt.title("3D Positions of Randomly Scattered e+")
-		# plt.draw() 
 
+		# plt.draw() 
+		
+		plt.show()
 
 		# second subplot: a histogram of positions
-		fig, axs = plt.subplots(3, sharey=True, sharex=False, tight_layout=False)
+		# fig, axs = plt.subplots(3, sharey=True, sharex=False, tight_layout=False)
+
+	def computeClusterSize(self):
 		n_bins = 25
 		position_LIST = [px, py, pz]
-
 		for i in position_LIST:
-			fig2, ax2 = plt.subplots(2, sharey=True, sharex=False, tight_layout=False)
+			# fig2, ax2 = plt.subplots(2, sharey=True, sharex=False, tight_layout=False)
 			range_LIST = []
 			positive = []
 			negative = []
-			counts, bins, bars = axs[position_LIST.index(i)].hist(i, bins=n_bins) 
+			# counts, bins, bars = axs[position_LIST.index(i)].hist(i, bins=n_bins) 
 			# print counts, "\n\n", bins
 
 			# separate x, y, z into positive and negative
@@ -245,7 +246,7 @@ class Plotter(object):
 			frame = 0
 			for i in [positive, negative]:
 				# print "sign change" , i, "\n"
-				counts, bins, bars = ax2[frame].hist(positive, bins=n_bins)
+				counts, bins = np.histogram(positive, bins=n_bins)
 				counts = list(counts)
 				# print counts, "\n\n", "bins", "\n", bins
 				for freq in counts:
@@ -263,7 +264,7 @@ class Plotter(object):
 				cluster_sizes_LIST.append(true_range)
 				print "\n", "Range = ", true_range, "\n"
 
-		plt.show()
+		# plt.show()
 
 PLT = Plotter()
 
@@ -324,12 +325,13 @@ class MyRunAction(G4UserRunAction):
 	"My Run Action"
 
 	def EndOfRunAction(self, run):
-		PLT.grapher()
+		# PLT.grapher()
+		PLT.computeClusterSize()
 		print(cluster_sizes_LIST)
 		PLT.dataAnalysis()
 		# CI.getClusterWidth()
 		# WIPE.wipeCluster()
-		WIPE.wipe()
+		# WIPE.wipe()
 		# print "*** End of Run"
 		# print "- Run sammary : (id= %d, #events= %d)" \
 		# % (run.GetRunID(), run.GetNumberOfEventToBeProcessed())
