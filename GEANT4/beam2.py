@@ -212,9 +212,9 @@ class Plotter(object):
 		ax.set_zlabel('Z position units')
 
 		ax.scatter(px, py, pz)
-		for i in np.arange(0, len(px)):
-			a = Arrow3D([px[i], px[i] + mx[i]], [py[i], py[i] + my[i]], [pz[i], pz[i] + mz[i]], mutation_scale=20, lw=1, arrowstyle="-|>", color="r")
-			ax.add_artist(a)
+		# for i in np.arange(0, len(px)):
+		# 	a = Arrow3D([px[i], px[i] + mx[i]], [py[i], py[i] + my[i]], [pz[i], pz[i] + mz[i]], mutation_scale=20, lw=1, arrowstyle="-|>", color="r")
+		# 	ax.add_artist(a)
 
 
 		plt.title("3D Positions of Randomly Scattered e+")
@@ -327,7 +327,7 @@ class MyRunAction(G4UserRunAction):
 	def EndOfRunAction(self, run):
 		# PLT.grapher()
 		PLT.computeClusterSize()
-		print(cluster_sizes_LIST)
+		# print(cluster_sizes_LIST)
 		PLT.dataAnalysis()
 		# CI.getClusterWidth()
 		# WIPE.wipeCluster()

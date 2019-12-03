@@ -11,7 +11,7 @@ import g4py.EMSTDpl
 class GeomConstructor(object):
 
 	def ConstructBox(self, nameString, material, locationArray, unit, dimensionsArray):
-		box = G4EzVolume(nameString) #i nitialize volume
+		box = G4EzVolume(nameString) #initialize volume
 		boxPos = G4ThreeVector(locationArray[0]*unit, locationArray[1]*unit, locationArray[2]*unit) # specify xyz location of volume
 		box.CreateBoxVolume(material, dimensionsArray[0]*unit, dimensionsArray[1]*unit, dimensionsArray[2]*unit)# create volume
 		box.PlaceIt(boxPos) # add volume to space

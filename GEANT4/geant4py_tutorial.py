@@ -26,13 +26,13 @@ from beam2 import MyPrimaryGeneratorAction, MyRunAction, MyEventAction,MySteppin
 
 PLT = Plotter()
 WIPE = WipeData()
-
+GC = GeomConstructor()
 
 spherical_coor_LIST = []
 # spherical_coor_LIST = [[0,0]]
 pi = np.pi
-step = 8
-
+step = 10
+factor1 = 1.25
 for phi in np.arange(0, pi, pi/step): # smaller steps means more clusters, range goes to pi since clusters are double sided
 	for theta in np.arange(0, pi, pi/step):
 		sph_coor = [theta, phi] # phi, theta
@@ -48,107 +48,6 @@ dummy_x  = list(np.arange(1., 50., 1.)) # MeV
 dummy_y = [0.0001]*49
 
 cluster_time_median_LIST = []
-
-gathered_data_right = [6e-05, \
-8e-05, \
-0.00013, \
-8e-05, \
-4e-05, \
-5e-05, \
-5e-05, \
-0.00011, \
-5e-05, \
-4e-05, \
-6e-05, \
-8e-05, \
-6e-05, \
-6e-05, \
-7e-05, \
-4e-05, \
-4e-05, \
-5e-05, \
-9e-05, \
-5e-05, \
-7e-05, \
-6e-05, \
-5e-05, \
-3e-05, \
-5e-05, \
-3e-05, \
-4e-05, \
-9e-05, \
-8e-05, \
-5e-05, \
-9e-05, \
-7e-05, \
-7e-05, \
-5e-05, \
-5e-05, \
-4e-05, \
-3e-05, \
-6e-05, \
-6e-05, \
-4e-05, \
-3e-05, \
-5e-05, \
-8e-05, \
-5e-05, \
-8e-05, \
-7e-05, \
-2e-05, \
-5e-05, \
-2e-05, \
-]
-gathered_data_left = [5e-05, \
-6e-05, \
-5e-05, \
-5e-05, \
-7e-05, \
-0.00011, \
-6e-05, \
-6e-05, \
-0.00016, \
-7e-05, \
-9e-05, \
-6e-05, \
-6e-05, \
-6e-05, \
-3e-05, \
-8e-05, \
-3e-05, \
-4e-05, \
-4e-05, \
-7e-05, \
-5e-05, \
-0.0001, \
-8e-05, \
-0.00011, \
-4e-05, \
-3e-05, \
-4e-05, \
-3e-05, \
-6e-05, \
-7e-05, \
-4e-05, \
-0.00012, \
-3e-05, \
-9e-05, \
-3e-05, \
-3e-05, \
-4e-05, \
-4e-05, \
-5e-05, \
-4e-05, \
-6e-05, \
-6e-05, \
-9e-05, \
-7e-05, \
-5e-05, \
-7e-05, \
-3e-05, \
-3e-05, \
-0.00015, \
-]
 
 global opt_be_right_LIST
 global opt_be_left_LIST
@@ -175,24 +74,24 @@ class Constructor(object):
 
 	def construct(self):
 		# dummy box
-		GC = GeomConstructor()
+		# GC = GeomConstructor()
 		# GC.ConstructBox("Detector Box", air, [0., 0., 0.], cm, [20., 20., 40.])
 
 		# calorimeter placed inside the box
 		# cal= G4EzVolume("Calorimeter") #initialize volume
 		nai= gNistManager.FindOrBuildMaterial("G4_SODIUM_IODIDE")
-		material1 = G4Material.GetMaterial("G4_W")
 
 		# GC.ConstructOrb("Orb", nai, [10., 10., 10.], cm, 10.)
 
-		# GC.ConstructTube("Tube", au, [-1., -1., -1.], cm, 10., 30., 30., 0, 300.)
+		# GC.ConstructTube("Tube", nai, [-1., -1., -1.], cm, 10., 30., 30., 0, 300.)
 		scale_factor = 5
 		# GC.ConstructSphere("Sphere", material1 , [0., 0., 0.], cm, 0, 1., 0., 360., 0., 180)
 		# GC.ConstructSphere("Sphere", material1 , [0., 0., 0.], cm, 9.5*scale_factor, 10.*scale_factor, 0., 360., 0., 180)
 
-	# GC.ConstructCone("Cone", nai, [-20., -20., -20.], cm, 0., 20., 0., 0., 25., 0., 180) # dphi = 359.9999 is basically 360, but we can still see it
-		# gRunManager.Initialize()
 
+		# GC.ConstructCone("Cone", nai, [-20., -20., -20.], cm, 0., 20., 0., 0., 25., 0., 180) # dphi = 359.9999 is basically 360, but we can still see it
+		# gRunManager.Initialize()
+ 
 
 class Visualizer(object):
 
@@ -268,6 +167,14 @@ class FieldDesign(object):
 		scale = 500 / np.abs(magVec[maxIndex])
 		magVecScaled = np.multiply(magVec, scale)
 
+		receiverDimScaled = [150, 150, 150]
+		receiverDimScaled[maxIndex] = 1
+
+		print "Receiver DIMENSIONS  ", receiverDimScaled
+
+		material1 = G4Material.GetMaterial("G4_W")
+		GC.ConstructBox("Receiver", material1, magVecScaled, mm, receiverDimScaled)
+		GC.ConstructBox("Receiver", material1, np.multiply(magVecScaled, -1), mm, receiverDimScaled) # receiver for opposite cluster
 
 		# if the magVecScaled is not in the uniqueClusters list, append to it
 		flag = 0
@@ -293,7 +200,7 @@ VIS = Visualizer()
 initialMomenta = []
 finalMomenta = []
 
-angle = 35
+angle = 0
 zoom = 1.5
 
 
@@ -304,7 +211,6 @@ if __name__ == '__main__':
 	data_right = open("data_right.txt", "a")
 	data_left = open("data_left.txt", "a")
 	for sph_coor in spherical_coor_LIST:
-
 		phi = sph_coor[0]
 		theta = sph_coor[1]
 
@@ -485,7 +391,7 @@ if __name__ == '__main__':
 	# function = rational3_3
 	# popt = CF.fit(function, x, y)
 
-	# PLT.grapher()
+	PLT.grapher()
 
 	fig, ax = plt.subplots(1, sharey=True, sharex=False, tight_layout=False)
 	n_bins = 10
