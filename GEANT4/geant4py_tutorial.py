@@ -32,11 +32,24 @@ spherical_coor_LIST = []
 # spherical_coor_LIST = [[0,0]]
 pi = np.pi
 step = 10
-factor1 = 1.25
-for phi in np.arange(0, pi, pi/step): # smaller steps means more clusters, range goes to pi since clusters are double sided
-	for theta in np.arange(0, pi, pi/step):
+factor1 = 1
+factor2 = 1
+for phi in np.arange(0, pi, factor1*pi/step): # smaller steps means more clusters, range goes to pi since clusters are double sided
+	for theta in np.arange(0, pi, factor2*pi/step):
 		sph_coor = [theta, phi] # phi, theta
 		spherical_coor_LIST.append(sph_coor)
+
+cluster_coor_LIST = []
+cluster_width = 150
+for x in np.arange(-500, 500, cluster_width):
+	for y in np.arange(-500, 500, cluster_width):
+		for z in np.arange(-500, 500, cluster_width):
+			cluster_coor = [x,y,z]
+			for i in cluster_coor:
+				if np.abs(i) == 500:
+					cluster_coor_LIST.append(cluster_coor)
+					break
+
 
 
 
@@ -95,7 +108,7 @@ class Constructor(object):
 
 class Visualizer(object):
 
-	def visualizer(self, view_angle):
+	def visualizer(self, viz_theta, viz_phi):
 		# time.sleep(.1)
 
 		gApplyUICommand("/vis/sceneHandler/create OGLSX OGLSX")
@@ -112,7 +125,7 @@ class Visualizer(object):
 		gApplyUICommand("/vis/scene/endOfEventAction accumulate")
 		gApplyUICommand("/vis/scene/endOfRunAction accumulate")
 
-		gApplyUICommand("/vis/viewer/set/viewpointThetaPhi 0" + str(angle))
+		gApplyUICommand("/vis/viewer/set/viewpointThetaPhi " + str(viz_theta) + " " + str(viz_phi))
 		gApplyUICommand("/vis/viewer/zoom 1.00001")
 		
 		gApplyUICommand("/vis/viewer/update")
@@ -149,7 +162,49 @@ CF = CurveFitter()
 uniqueClusters = [[None, None, None]]
 class FieldDesign(object):
 
-	def fieldParam(self, energy, be, phi, theta):
+	def cartesianfieldParam(self, energy, be, x, y, z):
+		
+		vectorList = [list(np.multiply([energy, energy, energy], be))]
+		radius = np.sqrt(np.square(x) + np.square(y) + np.square(z))
+
+		mag0 = x*vectorList[0][0]/radius
+		mag1 = y*vectorList[0][1]/radius
+		mag2 = z*vectorList[0][2]/radius
+
+		magVec = [mag0, mag1, mag2] 
+		print magVec
+		
+		# get index of "max" value in magVec, most significant axis
+		maxIndex = list(np.abs(magVec)).index(max(np.abs(magVec))) 
+
+		#get scaling factor
+		scale = 500 / np.abs(magVec[maxIndex])
+		magVecScaled = np.multiply(magVec, scale)
+
+		receiverDimScaled = [150, 150, 150]
+		receiverDimScaled[maxIndex] = 1
+
+		print "Receiver DIMENSIONS  ", receiverDimScaled
+
+		material1 = G4Material.GetMaterial("G4_W")
+		GC.ConstructBox("Receiver", material1, magVecScaled, mm, receiverDimScaled)
+		GC.ConstructBox("Receiver", material1, np.multiply(magVecScaled, -1), mm, receiverDimScaled) # receiver for opposite cluster
+
+		# if the magVecScaled is not in the uniqueClusters list, append to it
+		flag = 0
+		for elem in uniqueClusters:
+			if collections.Counter(elem) == collections.Counter(magVecScaled):
+				flag = 1
+
+		if flag == 0:
+			uniqueClusters.append(magVecScaled)
+		else: 
+			pass
+
+
+		return magVec, magVecScaled
+
+	def spherefieldParam(self, energy, be, phi, theta):
 
 		vectorList = [list(np.multiply([energy, energy, energy], be))]
 		radius = np.sqrt(np.square(vectorList[0][0]) + np.square(vectorList[0][1]) + np.square(vectorList[0][2]))
@@ -200,20 +255,29 @@ VIS = Visualizer()
 initialMomenta = []
 finalMomenta = []
 
-angle = 0
+viz_theta = 35
+viz_phi = 35
 zoom = 1.5
 
 
 if __name__ == '__main__':
 	# print(energy_LIST)
-	print(spherical_coor_LIST)
+	print(cluster_coor_LIST)
 	# time.sleep(1)
 	data_right = open("data_right.txt", "a")
 	data_left = open("data_left.txt", "a")
-	for sph_coor in spherical_coor_LIST:
-		phi = sph_coor[0]
-		theta = sph_coor[1]
+	# for sph_coor in spherical_coor_LIST:
+	for cart_coor in cluster_coor_LIST:
 
+		print cart_coor
+
+		x = cart_coor[0]
+		y = cart_coor[1]
+		z = cart_coor[2]
+
+		# phi = sph_coor[0]
+		# theta = sph_coor[1]
+		# angle += 0.75
 		# print "coors = (", phi, ",", theta, ")"
 		for e in energy_LIST:
 			WIPE.wipeComps()
@@ -237,7 +301,8 @@ if __name__ == '__main__':
 				# angle += 10
 				# angle += 0.075 # +0.075 is a recommended delta theta
 				# print energy, " MeV", "\n", be, "T/MeV", "\n\n"
-				magVec, magVecScaled = FD.fieldParam(energy, be, phi, theta)
+				magVec, magVecScaled = FD.cartesianfieldParam(energy, be, x, y ,z)
+				# magVec, magVecScaled = FD.spherefieldParam(energy, be, phi, theta)
 
 
 				# set user actions ...
@@ -269,7 +334,7 @@ if __name__ == '__main__':
 
 				gRunManager.BeamOn(1)
 
-				VIS.visualizer(angle)
+				VIS.visualizer(viz_theta, viz_phi)
 
 				# std_devs_LIST, means_LIST, n_LIST, n_sd_LIST = PLT.dataReturner()
 				std_devs_LIST, n_LIST, n_sd_LIST, cluster_time_LIST, cluster_size_LIST = PLT.dataReturner() # for 3D positions
