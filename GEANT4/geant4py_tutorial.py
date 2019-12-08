@@ -25,7 +25,9 @@ WIPE = WipeData()
 
 # energy_LIST = list(np.arange(2., 9., 1.)) # MeV
 # energy_LIST = list(np.arange(1., 50., 1.)) # MeV
-energy_LIST = []
+energy_LIST = list(np.logspace(0., 9., num=10, endpoint=True, base=10)) # eV
+
+# energy_LIST = []
 dummy_x  = list(np.arange(1., 50., 1.)) # MeV
 dummy_y = [0.0001]*49
 
@@ -248,7 +250,7 @@ def reject_outliers(data, m=2):
 
 if __name__ == '__main__':
 	print(energy_LIST)
-	time.sleep(1)
+	# time.sleep(1)
 	data_right = open("data_right.txt", "a")
 	data_left = open("data_left.txt", "a")
 
@@ -265,7 +267,7 @@ if __name__ == '__main__':
 		print energy, "\n"
 
 		print("be len: ", len(be_ratio))
-		time.sleep(1)
+		# time.sleep(1)
 
 		for be in be_ratio:
 			# angle += 10
@@ -309,7 +311,7 @@ if __name__ == '__main__':
 		for num, n_sd in enumerate(n_sd_LIST):
 			if num == 0: # right cluster
 				print "NSD RIGHT"
-				time.sleep(1)
+				# time.sleep(1)
 				max_n_sd = max(n_sd) # gets the peak n/sd that shows the greatest clustering efficiency
 				opt_be = n_sd.index(max_n_sd) * be_step # find the be_ratio that produces that max n/sd 
 
@@ -317,7 +319,7 @@ if __name__ == '__main__':
 				data_right.write(str(opt_be)+"\n")
 			else: # left cluster
 				print "NSD LEFT"
-				time.sleep(1)
+				# time.sleep(1)
 				max_n_sd = max(n_sd) # gets the peak n/sd that shows the greatest clustering efficiency
 				opt_be = n_sd.index(max_n_sd) * be_step # find the be_ratio that produces that max n/sd 
 

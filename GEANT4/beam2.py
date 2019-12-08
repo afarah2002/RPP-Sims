@@ -193,7 +193,7 @@ class MyPrimaryGeneratorAction(G4VUserPrimaryGeneratorAction):
 
 		particle = "e+"
 		# energy_2 = 2.5
-		energyUnit = MeV 
+		energyUnit = eV 
 		dimensionUnit = cm
 
 		energy = self.energy
