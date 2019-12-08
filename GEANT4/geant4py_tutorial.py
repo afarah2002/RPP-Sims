@@ -260,218 +260,222 @@ viz_phi = 35
 zoom = 1.5
 
 
-if __name__ == '__main__':
-	# print(energy_LIST)
-	print(cluster_coor_LIST)
-	# time.sleep(1)
-	data_right = open("data_right.txt", "a")
-	data_left = open("data_left.txt", "a")
-	# for sph_coor in spherical_coor_LIST:
-	for cart_coor in cluster_coor_LIST:
+class ClusterClass(object):
 
-		print cart_coor
+	def run(self):
+		# print(energy_LIST)
+		print(cluster_coor_LIST)
+		# time.sleep(1)
+		data_right = open("data_right.txt", "a")
+		data_left = open("data_left.txt", "a")
+		# for sph_coor in spherical_coor_LIST:
+		for cart_coor in cluster_coor_LIST:
 
-		x = cart_coor[0]
-		y = cart_coor[1]
-		z = cart_coor[2]
+			print cart_coor
 
-		# phi = sph_coor[0]
-		# theta = sph_coor[1]
-		# angle += 0.75
-		# print "coors = (", phi, ",", theta, ")"
-		for e in energy_LIST:
-			WIPE.wipeComps()
-			energy = e
-			# energy = 2.5
-			energyExponent = np.log(energy)
+			x = cart_coor[0]
+			y = cart_coor[1]
+			z = cart_coor[2]
 
-			be_step = 1*10**(energyExponent-11)
+			# phi = sph_coor[0]
+			# theta = sph_coor[1]
+			# angle += 0.75
+			# print "coors = (", phi, ",", theta, ")"
+			for e in energy_LIST:
+				WIPE.wipeComps()
+				energy = e
+				# energy = 2.5
+				energyExponent = np.log(energy)
 
-			tickMarks = np.arange(1e-7, 2.5e-4, be_step*5.)
-			be_ratio = [2e-4]
-			# be_ratio = np.arange(1e-20, 2.5*10**(energyExponent-10), be_step) # ratio between magnetic field (varied) and particle energy (fixed @ 2.5 MeV)
-			# be_ratio = [1.e-4, 2.e-4, be_step] # 2.5 MeV after all tests, used to verify best be_ratio, should display 3D position plot
-			# be_ratio = [6e-5] # 0.5 MeV after all tests, used to verify best be_ratio, should display 3D position plot
-			# print energy, "\n"
+				be_step = 1*10**(energyExponent-11)
 
-			print("be len: ", len(be_ratio))
-			# time.sleep(1)
+				tickMarks = np.arange(1e-7, 2.5e-4, be_step*5.)
+				be_ratio = [2e-4]
+				# be_ratio = np.arange(1e-20, 2.5*10**(energyExponent-10), be_step) # ratio between magnetic field (varied) and particle energy (fixed @ 2.5 MeV)
+				# be_ratio = [1.e-4, 2.e-4, be_step] # 2.5 MeV after all tests, used to verify best be_ratio, should display 3D position plot
+				# be_ratio = [6e-5] # 0.5 MeV after all tests, used to verify best be_ratio, should display 3D position plot
+				# print energy, "\n"
 
-			for be in be_ratio:
-				# angle += 10
-				# angle += 0.075 # +0.075 is a recommended delta theta
-				# print energy, " MeV", "\n", be, "T/MeV", "\n\n"
-				magVec, magVecScaled = FD.cartesianfieldParam(energy, be, x, y ,z)
-				# magVec, magVecScaled = FD.spherefieldParam(energy, be, phi, theta)
+				print("be len: ", len(be_ratio))
+				# time.sleep(1)
 
-
-				# set user actions ...
-				PGA_1 = MyPrimaryGeneratorAction(energy)
-				gRunManager.SetUserAction(PGA_1)
-
-				myEA = MyEventAction()
-				gRunManager.SetUserAction(myEA)
-
-				mySA = MySteppingAction()
-				gRunManager.SetUserAction(mySA)
+				for be in be_ratio:
+					# angle += 10
+					# angle += 0.075 # +0.075 is a recommended delta theta
+					# print energy, " MeV", "\n", be, "T/MeV", "\n\n"
+					magVec, magVecScaled = FD.cartesianfieldParam(energy, be, x, y ,z)
+					# magVec, magVecScaled = FD.spherefieldParam(energy, be, phi, theta)
 
 
-				fieldMgr = gTransportationManager.GetFieldManager()
-				myField = G4UniformMagField(G4ThreeVector(magVec[0], magVec[1], magVec[2]))
+					# set user actions ...
+					PGA_1 = MyPrimaryGeneratorAction(energy)
+					gRunManager.SetUserAction(PGA_1)
 
-				# myField = MyField(1)
-				fieldMgr.SetDetectorField(myField)
-				fieldMgr.CreateChordFinder(myField)
-				# print "|B-field| = ", vectorList[0][0]
-				# CI = ClusterIsolation(magVecScaled)
-				# CI
-				# CI.getClusterWidth()
+					myEA = MyEventAction()
+					gRunManager.SetUserAction(myEA)
 
-				myRA = MyRunAction()
-				gRunManager.SetUserAction(myRA)
-
-				gRunManager.Initialize()
-
-				gRunManager.BeamOn(1)
-
-				VIS.visualizer(viz_theta, viz_phi)
-
-				# std_devs_LIST, means_LIST, n_LIST, n_sd_LIST = PLT.dataReturner()
-				std_devs_LIST, n_LIST, n_sd_LIST, cluster_time_LIST, cluster_size_LIST = PLT.dataReturner() # for 3D positions
-
-				WIPE.wipeCluster()
-				# PLT.wipeData() #clean lists before starting another run
-			'''
-			for num, n_sd in enumerate(n_sd_LIST):
-				if num == 0: # right cluster
-					print "NSD RIGHT"
-					# time.sleep(1)
-					max_n_sd = max(n_sd) # gets the peak n/sd that shows the greatest clustering efficiency
-					opt_be = n_sd.index(max_n_sd) * be_step # find the be_ratio that produces that max n/sd 
-
-					opt_be_right_LIST.append(opt_be)
-					data_right.write(str(opt_be)+"\n")
-				else: # left cluster
-					print "NSD LEFT"
-					# time.sleep(1)
-					max_n_sd = max(n_sd) # gets the peak n/sd that shows the greatest clustering efficiency
-					opt_be = n_sd.index(max_n_sd) * be_step # find the be_ratio that produces that max n/sd 
-
-					opt_be_left_LIST.append(opt_be)
-					data_left.write(str(opt_be)+"\n")
-			'''
-			
-
-			data  = {
-					"SD" : std_devs_LIST, \
-					# "means" : means_LIST, \
-					"n/sd" : n_sd_LIST, \
-					"cluster_size" : n_LIST \
-					}
-			median = np.median(cluster_time_LIST)
-			cluster_time_median_LIST.append(median)
-							
-			# graph the cluster time distribution
-			# n_bins = 50
-			# # mu, sigma = np.mean(cluster_time_LIST), np.std(cluster_time_LIST)
-
-			# n, bins, patches = plt.hist(cluster_time_LIST, n_bins, normed=0, facecolor='red', alpha=0.5)
-			# plt.xlabel("Clustering time (ns)")
-			# plt.ylabel("Frequency")
-			# plt.title("Clustering Time distribution (ns)")
+					mySA = MySteppingAction()
+					gRunManager.SetUserAction(mySA)
 
 
-			# cluster_time_LIST = [round(t, 2) for t in cluster_time_LIST]
-			# print cluster_time_LIST
-			# print "time median (ns): ", median, "\n"
-			   #    "time mean (ns): ", np.mean(cluster_time_LIST), "\n", \
-				  # "time mode (ns): ", stats.mode(cluster_time_LIST).mode[0], "\n" 
-			'''SUMMARY - MODE IS THE BEST ESTIMATE OF THE CENTER BECAUSE 
-				  	 MEAN IS HIGHER THAN MOST OF THE DATA AND MODE IS LOWER THAN
-				  	 MOST OF THE DATA'''
-			# plt.show()
-			
-			WIPE.wipeTime()
+					fieldMgr = gTransportationManager.GetFieldManager()
+					myField = G4UniformMagField(G4ThreeVector(magVec[0], magVec[1], magVec[2]))
 
-			'''
-			fig, (sd, n_sd, n) = plt.subplots(3, sharex=True, sharey=False)
-			# plt.tight_layout()
-			plt.xlabel("Ratio of B-field to Particle Beam Energy (T/keV) ", fontsize=18)
+					# myField = MyField(1)
+					fieldMgr.SetDetectorField(myField)
+					fieldMgr.CreateChordFinder(myField)
+					# print "|B-field| = ", vectorList[0][0]
+					# CI = ClusterIsolation(magVecScaled)
+					# CI
+					# CI.getClusterWidth()
 
-			fontdict = {'fontsize': 18,
-						'fontweight': 5,
+					myRA = MyRunAction()
+					gRunManager.SetUserAction(myRA)
+
+					gRunManager.Initialize()
+
+					gRunManager.BeamOn(1)
+
+					VIS.visualizer(viz_theta, viz_phi)
+
+					# std_devs_LIST, means_LIST, n_LIST, n_sd_LIST = PLT.dataReturner()
+					std_devs_LIST, n_LIST, n_sd_LIST, cluster_time_LIST, cluster_size_LIST = PLT.dataReturner() # for 3D positions
+
+					WIPE.wipeCluster()
+					# PLT.wipeData() #clean lists before starting another run
+				'''
+				for num, n_sd in enumerate(n_sd_LIST):
+					if num == 0: # right cluster
+						print "NSD RIGHT"
+						# time.sleep(1)
+						max_n_sd = max(n_sd) # gets the peak n/sd that shows the greatest clustering efficiency
+						opt_be = n_sd.index(max_n_sd) * be_step # find the be_ratio that produces that max n/sd 
+
+						opt_be_right_LIST.append(opt_be)
+						data_right.write(str(opt_be)+"\n")
+					else: # left cluster
+						print "NSD LEFT"
+						# time.sleep(1)
+						max_n_sd = max(n_sd) # gets the peak n/sd that shows the greatest clustering efficiency
+						opt_be = n_sd.index(max_n_sd) * be_step # find the be_ratio that produces that max n/sd 
+
+						opt_be_left_LIST.append(opt_be)
+						data_left.write(str(opt_be)+"\n")
+				'''
+				
+
+				data  = {
+						"SD" : std_devs_LIST, \
+						# "means" : means_LIST, \
+						"n/sd" : n_sd_LIST, \
+						"cluster_size" : n_LIST \
 						}
+				median = np.median(cluster_time_LIST)
+				cluster_time_median_LIST.append(median)
+								
+				# graph the cluster time distribution
+				# n_bins = 50
+				# # mu, sigma = np.mean(cluster_time_LIST), np.std(cluster_time_LIST)
 
-			for dep_var_name, dep_var_LIST in data.items():
-
-				for dep_var in dep_var_LIST:
-
-					if dep_var_LIST.index(dep_var) == 0:
-						label = 'right'
-					if dep_var_LIST.index(dep_var) == 1:
-						label = 'left'
-
-					if dep_var_name == 'SD':
-						sd.plot(be_ratio, dep_var, label=label)	
-						sd.set(ylabel=dep_var_name)
-						title = dep_var_name + " vs be_ratio (T/eV)"
-						sd.set_title(title, fontdict=fontdict)
-						# popt = CF.fit(function, be_ratio, dep_var)
-						# sd.plot(be_ratio, function(be_ratio, *popt), label=label)
-
-					if dep_var_name == "n/sd":
-						n_sd.plot(be_ratio, dep_var, label=label)	
-						n_sd.set(ylabel=dep_var_name)
-						title = dep_var_name + " vs be_ratio (T/eV)"
-						n_sd.set_title(title, fontdict=fontdict)
+				# n, bins, patches = plt.hist(cluster_time_LIST, n_bins, normed=0, facecolor='red', alpha=0.5)
+				# plt.xlabel("Clustering time (ns)")
+				# plt.ylabel("Frequency")
+				# plt.title("Clustering Time distribution (ns)")
 
 
-					if dep_var_name == "cluster_size":				
-						n.plot(be_ratio, dep_var, label=label)
-						n.set(ylabel=dep_var_name)
-						title = dep_var_name + " vs be_ratio (T/eV)"
-						n.set_title(title, fontdict=fontdict)
+				# cluster_time_LIST = [round(t, 2) for t in cluster_time_LIST]
+				# print cluster_time_LIST
+				# print "time median (ns): ", median, "\n"
+				   #    "time mean (ns): ", np.mean(cluster_time_LIST), "\n", \
+					  # "time mode (ns): ", stats.mode(cluster_time_LIST).mode[0], "\n" 
+				'''SUMMARY - MODE IS THE BEST ESTIMATE OF THE CENTER BECAUSE 
+					  	 MEAN IS HIGHER THAN MOST OF THE DATA AND MODE IS LOWER THAN
+					  	 MOST OF THE DATA'''
+				# plt.show()
+				
+				WIPE.wipeTime()
 
-			plt.xticks(tickMarks)
-			plt.legend()
-		# plt.show()
-		'''
+				'''
+				fig, (sd, n_sd, n) = plt.subplots(3, sharex=True, sharey=False)
+				# plt.tight_layout()
+				plt.xlabel("Ratio of B-field to Particle Beam Energy (T/keV) ", fontsize=18)
+
+				fontdict = {'fontsize': 18,
+							'fontweight': 5,
+							}
+
+				for dep_var_name, dep_var_LIST in data.items():
+
+					for dep_var in dep_var_LIST:
+
+						if dep_var_LIST.index(dep_var) == 0:
+							label = 'right'
+						if dep_var_LIST.index(dep_var) == 1:
+							label = 'left'
+
+						if dep_var_name == 'SD':
+							sd.plot(be_ratio, dep_var, label=label)	
+							sd.set(ylabel=dep_var_name)
+							title = dep_var_name + " vs be_ratio (T/eV)"
+							sd.set_title(title, fontdict=fontdict)
+							# popt = CF.fit(function, be_ratio, dep_var)
+							# sd.plot(be_ratio, function(be_ratio, *popt), label=label)
+
+						if dep_var_name == "n/sd":
+							n_sd.plot(be_ratio, dep_var, label=label)	
+							n_sd.set(ylabel=dep_var_name)
+							title = dep_var_name + " vs be_ratio (T/eV)"
+							n_sd.set_title(title, fontdict=fontdict)
 
 
-		#### plotting E vs optimal B/E ####
+						if dep_var_name == "cluster_size":				
+							n.plot(be_ratio, dep_var, label=label)
+							n.set(ylabel=dep_var_name)
+							title = dep_var_name + " vs be_ratio (T/eV)"
+							n.set_title(title, fontdict=fontdict)
+
+				plt.xticks(tickMarks)
+				plt.legend()
+			# plt.show()
+			'''
+
+
+			#### plotting E vs optimal B/E ####
+			# plt.figure()
+			# plt.xlabel("Energy (MeV)", fontsize=18)
+			# plt.ylabel("Optimal B/E ratio (mT/MeV)", fontsize=18)
+			# plt.ylim(0,0.0002*1000)
+			# plt.title("Optimal B/E ratio (mT/MeV) vs. e+ Energy (MeV)", fontsize=24)
+			# plt.plot(dummy_x, np.multiply(gathered_data_right, 1000), label='right')
+			# plt.plot(dummy_x, np.multiply(gathered_data_left, 1000), label='left')
+			# # plt.ticklabel_format(axis='both', style='sci', scilimits=(-7,0))
+			# plt.legend()
+			# plt.show()
+
+		# fit median data
+		# x = np.arange(0, len(cluster_time_median_LIST))
+		# y = cluster_time_median_LIST
+		# function = rational3_3
+		# popt = CF.fit(function, x, y)
+
+		PLT.grapher()
+
+		fig, ax = plt.subplots(1, sharey=True, sharex=False, tight_layout=False)
+		n_bins = 10
+		ax.hist(cluster_size_LIST, n_bins)
+		plt.title("Cluster sizes (mm)")
 		# plt.figure()
-		# plt.xlabel("Energy (MeV)", fontsize=18)
-		# plt.ylabel("Optimal B/E ratio (mT/MeV)", fontsize=18)
-		# plt.ylim(0,0.0002*1000)
-		# plt.title("Optimal B/E ratio (mT/MeV) vs. e+ Energy (MeV)", fontsize=24)
-		# plt.plot(dummy_x, np.multiply(gathered_data_right, 1000), label='right')
-		# plt.plot(dummy_x, np.multiply(gathered_data_left, 1000), label='left')
-		# # plt.ticklabel_format(axis='both', style='sci', scilimits=(-7,0))
-		# plt.legend()
-		# plt.show()
+		# plt.ylabel("Median cluster time (ns)", fontsize=18)
+		# plt.xlabel("Run number", fontsize=18)
+		# plt.plot(x,y)
+		# plt.plot(np.arange(-60, 60, 1), function(np.arange(-60, 60, 1), *popt))
+		cluster_count = 2* (len(uniqueClusters)-1)
+		print "There are ", cluster_count, " clusters"
+		plt.show()
 
-	# fit median data
-	# x = np.arange(0, len(cluster_time_median_LIST))
-	# y = cluster_time_median_LIST
-	# function = rational3_3
-	# popt = CF.fit(function, x, y)
-
-	PLT.grapher()
-
-	fig, ax = plt.subplots(1, sharey=True, sharex=False, tight_layout=False)
-	n_bins = 10
-	ax.hist(cluster_size_LIST, n_bins)
-	plt.title("Cluster sizes (mm)")
-	# plt.figure()
-	# plt.ylabel("Median cluster time (ns)", fontsize=18)
-	# plt.xlabel("Run number", fontsize=18)
-	# plt.plot(x,y)
-	# plt.plot(np.arange(-60, 60, 1), function(np.arange(-60, 60, 1), *popt))
-	cluster_count = 2* (len(uniqueClusters)-1)
-	print "There are ", cluster_count, " clusters"
-	plt.show()
-
-
+CC = ClusterClass()
+if __name__ == '__main__':
+	CC.run()
 
 
 

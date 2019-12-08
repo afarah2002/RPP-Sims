@@ -19,8 +19,8 @@ from scipy import optimize, stats
 #----file imports--------#
 from geom_constructor import GeomConstructor 
 # from beam import BeamInitializer
-from beam2 import MyPrimaryGeneratorAction, MyRunAction, MyEventAction, MySteppingAction, MyField, Plotter, WipeData
-from geant4py_tutorial import Constructor, Visualizer
+from beam3 import MyPrimaryGeneratorAction, MyRunAction, MyEventAction, MySteppingAction, Plotter, WipeData
+from geant4py_tutorial import Constructor, Visualizer, ClusterClass
 
 #----------code starts here!----------#
 
@@ -28,25 +28,28 @@ Constructor = Constructor
 Constructor
 Constructor.construct()
 VIS = Visualizer()
+CC = ClusterClass()
 
-angle = 35
-energy = 2.5 
+viz_theta = 35
+viz_phi = 35
+energy = .250 # MeV 
+
 if __name__ == '__main__':
+	while True: 
+		PGA_1 = MyPrimaryGeneratorAction(energy, [0,0,0], [1,1,1])
+		gRunManager.SetUserAction(PGA_1)
 
-	PGA_1 = MyPrimaryGeneratorAction(energy)
-	gRunManager.SetUserAction(PGA_1)
+		myEA = MyEventAction()
+		gRunManager.SetUserAction(myEA)
 
-	myEA = MyEventAction()
-	gRunManager.SetUserAction(myEA)
+		mySA = MySteppingAction()
+		gRunManager.SetUserAction(mySA)
 
-	mySA = MySteppingAction()
-	gRunManager.SetUserAction(mySA)
+		myRA = MyRunAction()
+		gRunManager.SetUserAction(myRA)
 
-	myRA = MyRunAction()
-	gRunManager.SetUserAction(myRA)
+		gRunManager.Initialize()
 
-	gRunManager.Initialize()
+		gRunManager.BeamOn(1)
 
-	gRunManager.BeamOn(1)
-
-	VIS.visualizer(angle)
+		VIS.visualizer(viz_theta, viz_phi)
