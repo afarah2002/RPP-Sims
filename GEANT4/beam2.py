@@ -79,6 +79,9 @@ mz = []
 
 global cluster_sizes_LIST
 cluster_sizes_LIST = []
+
+global SEE_count
+SEE_count = 0
 #----------code starts here!----------#
 class WipeData(object):
 	# wipe lists for next data collection
@@ -89,8 +92,8 @@ class WipeData(object):
 		py[:] = []
 		pz[:] = []
 
-	def wipeCluster(self):
-		# position_LIST[:] = []
+	def wipeElectronCounter(self):
+		SEE_count = 0
 		pass
 
 	def wipeTime(self):
@@ -116,6 +119,8 @@ class Arrow3D(FancyArrowPatch):
         xs, ys, zs = proj3d.proj_transform(xs3d, ys3d, zs3d, renderer.M)
         self.set_positions((xs[0],ys[0]),(xs[1],ys[1]))
         FancyArrowPatch.draw(self, renderer)
+
+# class RecordMomenta
 
 class Plotter(object):
 	"graphs 3D positions"
@@ -262,7 +267,7 @@ class Plotter(object):
 			true_range = np.sum(range_LIST)
 			if true_range < 200:
 				cluster_sizes_LIST.append(true_range)
-				print "\n", "Range = ", true_range, "\n"
+				# print "\n", "Range = ", true_range, "\n"
 
 		# plt.show()
 
@@ -289,11 +294,12 @@ CI = ClusterIsolation()
 class MyPrimaryGeneratorAction(G4VUserPrimaryGeneratorAction):
 	"My Primary Generator Action"
 
-	def __init__(self, energy):
+	def __init__(self, energy, energyUnit):
 		G4VUserPrimaryGeneratorAction.__init__(self)
 		self.particleGun = G4ParticleGun(1)
 		# print("\n Particle gun defined \n")
 		self.energy = energy
+		self.energyUnit = energyUnit
 	def GeneratePrimaries(self, event):
 
 
@@ -303,7 +309,7 @@ class MyPrimaryGeneratorAction(G4VUserPrimaryGeneratorAction):
 
 		particle = "e+"
 		# energy_2 = 2.5
-		energyUnit = MeV 
+		energyUnit = self.energyUnit 
 		dimensionUnit = cm
 
 		energy = self.energy
@@ -330,7 +336,11 @@ class MyRunAction(G4UserRunAction):
 		# print(cluster_sizes_LIST)
 		PLT.dataAnalysis()
 		# CI.getClusterWidth()
-		# WIPE.wipeCluster()
+		WIPE.wipeElectronCounter()
+		global SEE_count
+		print SEE_count/2
+		time.sleep(1)
+		SEE_count = 0
 		# WIPE.wipe()
 		# print "*** End of Run"
 		# print "- Run sammary : (id= %d, #events= %d)" \
@@ -341,6 +351,7 @@ class MyEventAction(G4UserEventAction):
 	"My Event Action"
 
 	def EndOfEventAction(self, event):
+		# print "See count", SEE_count
 		pass
 
 # ------------------------------------------------------------------
@@ -353,6 +364,9 @@ class MySteppingAction(G4UserSteppingAction):
 
 		# change = step.particleChange()
 		track = step.GetTrack()
+		parentId = track.GetParentID()
+		particleName = track.GetDefinition().GetParticleName() 
+		# print particleName
 		touchable = track.GetTouchable()
 		KE = track.GetKineticEnergy()
 
@@ -361,25 +375,31 @@ class MySteppingAction(G4UserSteppingAction):
 		# kinetic energy in MeV - POST
 		# finalKE = postStepPoint.GetKineticEnergy()
 
+		if particleName == 'e+':
+			# print "positron"
+			p_test = [step.GetDeltaPosition().x,step.GetDeltaPosition().y,step.GetDeltaPosition().z]
+			p = [postStepPoint.GetPosition().x, postStepPoint.GetPosition().y, postStepPoint.GetPosition().z] # (mm)
+			# p and p_test are the SAME 
+			t_test = step.GetDeltaTime()
+			t = track.GetGlobalTime() # (ns)
+			# t and t_test are the SAME
 
-		p_test = [step.GetDeltaPosition().x,step.GetDeltaPosition().y,step.GetDeltaPosition().z]
-		p = [postStepPoint.GetPosition().x, postStepPoint.GetPosition().y, postStepPoint.GetPosition().z] # (mm)
-		# p and p_test are the SAME 
-		t_test = step.GetDeltaTime()
-		t = track.GetGlobalTime() # (ns)
-		# t and t_test are the SAME
-
-		m = [postStepPoint.GetMomentum().x, postStepPoint.GetMomentum().y, postStepPoint.GetMomentum().z]
-		# m = [step.GetDeltaMomentum().x, step.GetDeltaMomentum().y, step.GetDeltaMomentum().z] # equal to the postStepPoint momentum
-		mm = np.sqrt((m[0])**2 + (m[1])**2 + (m[2])**2)
-		# momenta - PRE
-		initialMomentum = [preStepPoint.GetMomentum().x, preStepPoint.GetMomentum().y, preStepPoint.GetMomentum().z]
-		# momenta - POST
-		# print KE, "\n", p, "\n", initialMomentum, "\n", finalMomentum, "\n\n" 
-		# energy = step.GetTotalEnergyDeposit()
-		# print p 
-		PLT.dataCollection(p, m, t) # calls data collection and analysis on final positions and momenta
-		# return initialMomentum, finalMomentum 
+			m = [postStepPoint.GetMomentum().x, postStepPoint.GetMomentum().y, postStepPoint.GetMomentum().z]
+			# m = [step.GetDeltaMomentum().x, step.GetDeltaMomentum().y, step.GetDeltaMomentum().z] # equal to the postStepPoint momentum
+			mm = np.sqrt((m[0])**2 + (m[1])**2 + (m[2])**2)
+			# momenta - PRE
+			initialMomentum = [preStepPoint.GetMomentum().x, preStepPoint.GetMomentum().y, preStepPoint.GetMomentum().z]
+			# momenta - POST
+			# print KE, "\n", p, "\n", initialMomentum, "\n", finalMomentum, "\n\n" 
+			# energy = step.GetTotalEnergyDeposit()
+			# print p 
+			PLT.dataCollection(p, m, t) # calls data collection and analysis on final positions and momenta
+			# return initialMomentum, finalMomentum 
+		if particleName == 'e-':
+			global SEE_count
+			# print "electron"
+			SEE_count += 1
+			# print SEE_count
 
 
 

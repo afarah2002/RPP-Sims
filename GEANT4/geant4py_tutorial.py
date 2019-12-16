@@ -56,7 +56,11 @@ for x in np.arange(-500, 500, cluster_width):
 # energy_LIST = list(np.arange(2., 9., 1.)) # MeV
 
 # energy_LIST = list(np.logspace(0., 9., num=10, endpoint=True, base=10)) # eV
-energy_LIST = [0.25]
+energy_LIST = [500.] # eV
+global energyUnit
+energyUnit = eV
+# energy_LIST = [1e-6] # eV
+
 dummy_x  = list(np.arange(1., 50., 1.)) # MeV
 dummy_y = [0.0001]*49
 
@@ -88,21 +92,22 @@ class Constructor(object):
 	def construct(self):
 		# dummy box
 		# GC = GeomConstructor()
-		# GC.ConstructBox("Detector Box", air, [0., 0., 0.], cm, [20., 20., 40.])
 
 		# calorimeter placed inside the box
 		# cal= G4EzVolume("Calorimeter") #initialize volume
-		nai= gNistManager.FindOrBuildMaterial("G4_SODIUM_IODIDE")
+		NaI= gNistManager.FindOrBuildMaterial("G4_SODIUM_IODIDE")
+		C = gNistManager.FindOrBuildMaterial("G4_C")
+		# GC.ConstructBox("Detector Box", C, [0., 0., 0.], cm, [100., 100., 100.])
 
-		# GC.ConstructOrb("Orb", nai, [10., 10., 10.], cm, 10.)
+		# GC.ConstructOrb("Orb", NaI, [10., 10., 10.], cm, 10.)
 
-		# GC.ConstructTube("Tube", nai, [-1., -1., -1.], cm, 10., 30., 30., 0, 300.)
+		# GC.ConstructTube("Tube", NaI, [-1., -1., -1.], cm, 10., 30., 30., 0, 300.)
 		scale_factor = 5
 		# GC.ConstructSphere("Sphere", material1 , [0., 0., 0.], cm, 0, 1., 0., 360., 0., 180)
-		# GC.ConstructSphere("Sphere", material1 , [0., 0., 0.], cm, 9.5*scale_factor, 10.*scale_factor, 0., 360., 0., 180)
+		GC.ConstructSphere("Sphere", C , [0., 0., 0.], cm, 9.5*scale_factor, 10.*scale_factor, 0., 360., 0., 180)
 
 
-		# GC.ConstructCone("Cone", nai, [-20., -20., -20.], cm, 0., 20., 0., 0., 25., 0., 180) # dphi = 359.9999 is basically 360, but we can still see it
+		# GC.ConstructCone("Cone", NaI, [-20., -20., -20.], cm, 0., 20., 0., 0., 25., 0., 180) # dphi = 359.9999 is basically 360, but we can still see it
 		# gRunManager.Initialize()
  
 
@@ -165,14 +170,15 @@ class FieldDesign(object):
 	def cartesianfieldParam(self, energy, be, x, y, z):
 		
 		vectorList = [list(np.multiply([energy, energy, energy], be))]
+		B_mag = energy*be
 		radius = np.sqrt(np.square(x) + np.square(y) + np.square(z))
 
-		mag0 = x*vectorList[0][0]/radius
-		mag1 = y*vectorList[0][1]/radius
-		mag2 = z*vectorList[0][2]/radius
+		mag0 = x*B_mag/radius
+		mag1 = y*B_mag/radius
+		mag2 = z*B_mag/radius
 
 		magVec = [mag0, mag1, mag2] 
-		print magVec
+		# print magVec
 		
 		# get index of "max" value in magVec, most significant axis
 		maxIndex = list(np.abs(magVec)).index(max(np.abs(magVec))) 
@@ -184,16 +190,17 @@ class FieldDesign(object):
 		receiverDimScaled = [150, 150, 150]
 		receiverDimScaled[maxIndex] = 1
 
-		print "Receiver DIMENSIONS  ", receiverDimScaled
+		# print "Receiver DIMENSIONS  ", receiverDimScaled
 
 		material1 = G4Material.GetMaterial("G4_W")
-		GC.ConstructBox("Receiver", material1, magVecScaled, mm, receiverDimScaled)
-		GC.ConstructBox("Receiver", material1, np.multiply(magVecScaled, -1), mm, receiverDimScaled) # receiver for opposite cluster
+		# GC.ConstructBox("Receiver", material1, magVecScaled, mm, receiverDimScaled)
+		# GC.ConstructBox("Receiver", material1, np.multiply(magVecScaled, -1), mm, receiverDimScaled) # receiver for opposite cluster
 
 		# if the magVecScaled is not in the uniqueClusters list, append to it
 		flag = 0
 		for elem in uniqueClusters:
 			if collections.Counter(elem) == collections.Counter(magVecScaled):
+				# print True
 				flag = 1
 
 		if flag == 0:
@@ -225,11 +232,11 @@ class FieldDesign(object):
 		receiverDimScaled = [150, 150, 150]
 		receiverDimScaled[maxIndex] = 1
 
-		print "Receiver DIMENSIONS  ", receiverDimScaled
+		# print "Receiver DIMENSIONS  ", receiverDimScaled
 
 		material1 = G4Material.GetMaterial("G4_W")
-		GC.ConstructBox("Receiver", material1, magVecScaled, mm, receiverDimScaled)
-		GC.ConstructBox("Receiver", material1, np.multiply(magVecScaled, -1), mm, receiverDimScaled) # receiver for opposite cluster
+		# GC.ConstructBox("Receiver", material1, magVecScaled, mm, receiverDimScaled)
+		# GC.ConstructBox("Receiver", material1, np.multiply(magVecScaled, -1), mm, receiverDimScaled) # receiver for opposite cluster
 
 		# if the magVecScaled is not in the uniqueClusters list, append to it
 		flag = 0
@@ -271,7 +278,7 @@ class ClusterClass(object):
 		# for sph_coor in spherical_coor_LIST:
 		for cart_coor in cluster_coor_LIST:
 
-			print cart_coor
+			# print cart_coor
 
 			x = cart_coor[0]
 			y = cart_coor[1]
@@ -289,14 +296,15 @@ class ClusterClass(object):
 
 				be_step = 1*10**(energyExponent-11)
 
-				tickMarks = np.arange(1e-7, 2.5e-4, be_step*5.)
-				be_ratio = [2e-4]
+				# tickMarks = np.arange(1e-7, 2.5e-4, be_step*5.)
+				# be_ratio = [1e-7]
+				be_ratio = [3e-8]
 				# be_ratio = np.arange(1e-20, 2.5*10**(energyExponent-10), be_step) # ratio between magnetic field (varied) and particle energy (fixed @ 2.5 MeV)
 				# be_ratio = [1.e-4, 2.e-4, be_step] # 2.5 MeV after all tests, used to verify best be_ratio, should display 3D position plot
 				# be_ratio = [6e-5] # 0.5 MeV after all tests, used to verify best be_ratio, should display 3D position plot
 				# print energy, "\n"
 
-				print("be len: ", len(be_ratio))
+				# print("be len: ", len(be_ratio))
 				# time.sleep(1)
 
 				for be in be_ratio:
@@ -308,7 +316,7 @@ class ClusterClass(object):
 
 
 					# set user actions ...
-					PGA_1 = MyPrimaryGeneratorAction(energy)
+					PGA_1 = MyPrimaryGeneratorAction(energy, energyUnit)
 					gRunManager.SetUserAction(PGA_1)
 
 					myEA = MyEventAction()
@@ -341,7 +349,7 @@ class ClusterClass(object):
 					# std_devs_LIST, means_LIST, n_LIST, n_sd_LIST = PLT.dataReturner()
 					std_devs_LIST, n_LIST, n_sd_LIST, cluster_time_LIST, cluster_size_LIST = PLT.dataReturner() # for 3D positions
 
-					WIPE.wipeCluster()
+					# WIPE.wipeCluster()
 					# PLT.wipeData() #clean lists before starting another run
 				'''
 				for num, n_sd in enumerate(n_sd_LIST):
@@ -469,7 +477,8 @@ class ClusterClass(object):
 		# plt.xlabel("Run number", fontsize=18)
 		# plt.plot(x,y)
 		# plt.plot(np.arange(-60, 60, 1), function(np.arange(-60, 60, 1), *popt))
-		cluster_count = 2* (len(uniqueClusters)-1)
+		cluster_count = 2*len(cluster_coor_LIST)
+		# cluster_count = 2 * (len(uniqueClusters)-1)
 		print "There are ", cluster_count, " clusters"
 		plt.show()
 
