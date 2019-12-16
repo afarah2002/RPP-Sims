@@ -258,10 +258,10 @@ if __name__ == '__main__':
 		WIPE.wipeComps()
 		energy = e
 		# energy = 2.5
-		be_step = 1.e-5
+		be_step = 1.e-9
 
 		tickMarks = np.arange(1e-7, 2.5e-4, be_step*5.)
-		be_ratio = np.arange(1e-7, 2.5e-4, be_step) # ratio between magnetic field (varied) and particle energy (fixed @ 2.5 MeV)
+		be_ratio = np.arange(1e-10, 2.5e-4, be_step) # ratio between magnetic field (varied) and particle energy (fixed @ 2.5 MeV)
 		# be_ratio = [1.e-4, 2.e-4, be_step] # 2.5 MeV after all tests, used to verify best be_ratio, should display 3D position plot
 		# be_ratio = [6e-5] # 0.5 MeV after all tests, used to verify best be_ratio, should display 3D position plot
 		print energy, "\n"
@@ -376,22 +376,22 @@ if __name__ == '__main__':
 		# plt.xticks(tickMarks)
 		# plt.legend()
 		# plt.show()
-	plt.figure()
-	plt.xlabel("Energy (MeV)", fontsize=18)
-	plt.ylabel("Optimal B/E ratio (mT/MeV)", fontsize=18)
-	plt.ylim(0,0.0002*1000)
-	plt.title("Optimal B/E ratio (mT/MeV) vs. e+ Energy (MeV)", fontsize=24)
-	# right = reject_outliers(gathered_data_right)
-	# for i in right:
-	# 	data_right.write(str(i) + "\n")
-	# left = reject_outliers(gathered_data_left)
-	# for i in left:
-	# 	data_left.write(str(i) + "\n")
-	plt.plot(dummy_x, np.multiply(gathered_data_right, 1000), label='right')
-	plt.plot(dummy_x, np.multiply(gathered_data_left, 1000), label='left')
-	# plt.ticklabel_format(axis='both', style='sci', scilimits=(-7,0))
-	plt.legend()
-	plt.show()
+	# plt.figure()
+	# plt.xlabel("Energy (MeV)", fontsize=18)
+	# plt.ylabel("Optimal B/E ratio (mT/MeV)", fontsize=18)
+	# plt.ylim(0,0.0002*1000)
+	# plt.title("Optimal B/E ratio (mT/MeV) vs. e+ Energy (MeV)", fontsize=24)
+	# # right = reject_outliers(gathered_data_right)
+	# # for i in right:
+	# # 	data_right.write(str(i) + "\n")
+	# # left = reject_outliers(gathered_data_left)
+	# # for i in left:
+	# # 	data_left.write(str(i) + "\n")
+	# plt.plot(dummy_x, np.multiply(gathered_data_right, 1000), label='right')
+	# plt.plot(dummy_x, np.multiply(gathered_data_left, 1000), label='left')
+	# # plt.ticklabel_format(axis='both', style='sci', scilimits=(-7,0))
+	# plt.legend()
+	# plt.show()
 
 
 
