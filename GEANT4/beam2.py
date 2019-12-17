@@ -26,8 +26,8 @@ bound_upper = bound_lower + 700
 global vectorCount
 vectorCount = 500 # number of scattered e+ per run
 
-# global energy
-# energy = SP.sendEnergy()
+global cluster_sizes_LIST
+cluster_sizes_LIST = []
 
 global pos_3D_right
 pos_3D_right= []
@@ -140,7 +140,8 @@ class Plotter(object):
 
 		return [sd_pos_3D_right_LIST, sd_pos_3D_left_LIST], \
 			   [n_pos_3D_right_LIST, n_pos_3D_left_LIST], \
-			   [n_sd_pos_3D_right_LIST, n_sd_pos_3D_left_LIST]
+			   [n_sd_pos_3D_right_LIST, n_sd_pos_3D_left_LIST], \
+			   cluster_sizes_LIST
 
 
 
@@ -166,6 +167,45 @@ class Plotter(object):
 		ax.scatter(px, py, pz)
 		plt.title("3D Positions of Randomly Scattered e+")
 		plt.show()
+
+	def computeClusterSize(self):
+		n_bins = 25
+		position_LIST = [px, py, pz]
+		for i in position_LIST:
+			# fig2, ax2 = plt.subplots(2, sharey=True, sharex=False, tight_layout=False)
+			print i
+			range_LIST = []
+			positive = []
+			negative = []
+			# counts, bins, bars = axs[position_LIST.index(i)].hist(i, bins=n_bins) 
+			# print counts, "\n\n", bins
+
+			# separate x, y, z into positive and negative
+			for pos in i:
+				if pos > 0:
+					positive.append(pos)
+				if pos < 0:
+					negative.append(pos)
+			frame = 0
+			for i in [positive, negative]:
+				# print "sign change" , i, "\n"
+				counts, bins = np.histogram(positive, bins=n_bins)
+				counts = list(counts)
+				# print counts, "\n\n", "bins", "\n", bins
+				for freq in counts:
+					# gets rid of any outliers
+					if freq not in np.arange(5, 150): 
+						index = counts.index(freq)
+						np.delete(bins, index)
+				# takes the range of each pos/neg without outliers
+				rng = np.max(bins) - np.min(bins)
+				range_LIST.append(rng)
+				frame += 1
+			#combines the pos/neg ranges to get the real range
+			true_range = np.sum(range_LIST)
+			if true_range < 200:
+				cluster_sizes_LIST.append(true_range)
+				print "\n", "Range = ", true_range, "\n"
 
 	def paramReturner(self):
 		return bound_lower, bound_upper, vectorCount, energy
@@ -193,7 +233,7 @@ class MyPrimaryGeneratorAction(G4VUserPrimaryGeneratorAction):
 
 		particle = "e+"
 		# energy_2 = 2.5
-		energyUnit = eV 
+		energyUnit = MeV 
 		dimensionUnit = cm
 
 		energy = self.energy
@@ -216,6 +256,7 @@ class MyRunAction(G4UserRunAction):
 
 	def EndOfRunAction(self, run):
 		# PLT.grapher()
+		# PLT.computeClusterSize()
 		PLT.dataAnalysis()
 		WIPE.wipe()
 		# print "*** End of Run"

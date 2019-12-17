@@ -14,6 +14,8 @@ import time
 import thread
 import numpy as np
 from scipy import optimize
+from scipy.stats import linregress
+
 #----file imports--------#
 from geom_constructor import GeomConstructor 
 # from beam import BeamInitializer
@@ -25,7 +27,7 @@ WIPE = WipeData()
 
 # energy_LIST = list(np.arange(2., 9., 1.)) # MeV
 # energy_LIST = list(np.arange(1., 50., 1.)) # MeV
-energy_LIST = list(np.logspace(0., 9., num=10, endpoint=True, base=10)) # eV
+energy_LIST = list(np.logspace(-6., 3., num=500, endpoint=True, base=10)) # eV
 
 # energy_LIST = []
 dummy_x  = list(np.arange(1., 50., 1.)) # MeV
@@ -258,12 +260,13 @@ if __name__ == '__main__':
 		WIPE.wipeComps()
 		energy = e
 		# energy = 2.5
-		be_step = 1.e-9
+		be_step = 1.e-5
 
-		tickMarks = np.arange(1e-7, 2.5e-4, be_step*5.)
-		be_ratio = np.arange(1e-10, 2.5e-4, be_step) # ratio between magnetic field (varied) and particle energy (fixed @ 2.5 MeV)
+		tickMarks = np.arange(1e-7, 2.5e-3, be_step*5.)
+		be_ratio = np.arange(1e-10, 2.5e-3, be_step) # ratio between magnetic field (varied) and particle energy (fixed @ 2.5 MeV)
 		# be_ratio = [1.e-4, 2.e-4, be_step] # 2.5 MeV after all tests, used to verify best be_ratio, should display 3D position plot
 		# be_ratio = [6e-5] # 0.5 MeV after all tests, used to verify best be_ratio, should display 3D position plot
+		# be_ratio = [0.75e-4]
 		print energy, "\n"
 
 		print("be len: ", len(be_ratio))
@@ -272,7 +275,7 @@ if __name__ == '__main__':
 		for be in be_ratio:
 			# angle += 10
 			# angle += 0.075 # +0.075 is a recommended delta theta
-
+			print "energy: ", e*10e6, "eV", "\n", "B/E: ", be,"T/MeV"
 			# set user actions ...
 			PGA_1 = MyPrimaryGeneratorAction(energy)
 			gRunManager.SetUserAction(PGA_1)
@@ -304,7 +307,17 @@ if __name__ == '__main__':
 			VIS.visualizer(angle)
 
 			# std_devs_LIST, means_LIST, n_LIST, n_sd_LIST = PLT.dataReturner()
-			std_devs_LIST, n_LIST, n_sd_LIST = PLT.dataReturner() # for 3D positions
+			std_devs_LIST, n_LIST, n_sd_LIST, cluster_size_LIST = PLT.dataReturner() # for 3D positions
+			# print "CLUSTER SIZES", "\n", cluster_size_LIST
+			# # print len(n_sd_LIST[0])
+			if len(n_sd_LIST[0]) > 21:
+				# print "HIIIIII"
+				avg_change = np.mean(np.gradient(n_sd_LIST[0][-20:-1]))
+				print "avg change: ", avg_change
+				if avg_change < -.01:
+					break
+					break
+				
 
 			# PLT.wipeData() #clean lists before starting another run
 
