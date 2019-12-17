@@ -56,9 +56,9 @@ for x in np.arange(-500, 500, cluster_width):
 # energy_LIST = list(np.arange(2., 9., 1.)) # MeV
 
 # energy_LIST = list(np.logspace(0., 9., num=10, endpoint=True, base=10)) # eV
-energy_LIST = [500.] # eV
+energy_LIST = [0.0005] # eV
 global energyUnit
-energyUnit = eV
+energyUnit = MeV
 # energy_LIST = [1e-6] # eV
 
 dummy_x  = list(np.arange(1., 50., 1.)) # MeV
@@ -104,7 +104,7 @@ class Constructor(object):
 		# GC.ConstructTube("Tube", NaI, [-1., -1., -1.], cm, 10., 30., 30., 0, 300.)
 		scale_factor = 5
 		# GC.ConstructSphere("Sphere", material1 , [0., 0., 0.], cm, 0, 1., 0., 360., 0., 180)
-		GC.ConstructSphere("Sphere", C , [0., 0., 0.], cm, 9.5*scale_factor, 10.*scale_factor, 0., 360., 0., 180)
+		# GC.ConstructSphere("Sphere", C , [0., 0., 0.], cm, 9.5*scale_factor, 10.*scale_factor, 0., 360., 0., 180)
 
 
 		# GC.ConstructCone("Cone", NaI, [-20., -20., -20.], cm, 0., 20., 0., 0., 25., 0., 180) # dphi = 359.9999 is basically 360, but we can still see it
@@ -298,7 +298,7 @@ class ClusterClass(object):
 
 				# tickMarks = np.arange(1e-7, 2.5e-4, be_step*5.)
 				# be_ratio = [1e-7]
-				be_ratio = [3e-8]
+				be_ratio = [5e-3]
 				# be_ratio = np.arange(1e-20, 2.5*10**(energyExponent-10), be_step) # ratio between magnetic field (varied) and particle energy (fixed @ 2.5 MeV)
 				# be_ratio = [1.e-4, 2.e-4, be_step] # 2.5 MeV after all tests, used to verify best be_ratio, should display 3D position plot
 				# be_ratio = [6e-5] # 0.5 MeV after all tests, used to verify best be_ratio, should display 3D position plot
@@ -466,21 +466,21 @@ class ClusterClass(object):
 		# function = rational3_3
 		# popt = CF.fit(function, x, y)
 
-		PLT.grapher()
+		# PLT.grapher()
 
-		fig, ax = plt.subplots(1, sharey=True, sharex=False, tight_layout=False)
-		n_bins = 10
-		ax.hist(cluster_size_LIST, n_bins)
-		plt.title("Cluster sizes (mm)")
-		# plt.figure()
-		# plt.ylabel("Median cluster time (ns)", fontsize=18)
-		# plt.xlabel("Run number", fontsize=18)
-		# plt.plot(x,y)
-		# plt.plot(np.arange(-60, 60, 1), function(np.arange(-60, 60, 1), *popt))
-		cluster_count = 2*len(cluster_coor_LIST)
-		# cluster_count = 2 * (len(uniqueClusters)-1)
-		print "There are ", cluster_count, " clusters"
-		plt.show()
+		# fig, ax = plt.subplots(1, sharey=True, sharex=False, tight_layout=False)
+		# n_bins = 10
+		# ax.hist(cluster_size_LIST, n_bins)
+		# plt.title("Cluster sizes (mm)")
+		# # plt.figure()
+		# # plt.ylabel("Median cluster time (ns)", fontsize=18)
+		# # plt.xlabel("Run number", fontsize=18)
+		# # plt.plot(x,y)
+		# # plt.plot(np.arange(-60, 60, 1), function(np.arange(-60, 60, 1), *popt))
+		# cluster_count = 2*len(cluster_coor_LIST)
+		# # cluster_count = 2 * (len(uniqueClusters)-1)
+		# print "There are ", cluster_count, " clusters"
+		# plt.show()
 
 CC = ClusterClass()
 if __name__ == '__main__':

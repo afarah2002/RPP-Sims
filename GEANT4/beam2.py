@@ -339,7 +339,7 @@ class MyRunAction(G4UserRunAction):
 		WIPE.wipeElectronCounter()
 		global SEE_count
 		print SEE_count/2
-		time.sleep(1)
+		# time.sleep(1)
 		SEE_count = 0
 		# WIPE.wipe()
 		# print "*** End of Run"
