@@ -15,6 +15,7 @@ import thread
 import numpy as np
 from scipy import optimize
 from scipy.stats import linregress
+import math
 
 #----file imports--------#
 from geom_constructor import GeomConstructor 
@@ -29,113 +30,11 @@ WIPE = WipeData()
 # energy_LIST = list(np.arange(1., 50., 1.)) # MeV
 energy_LIST = list(np.logspace(-6., 3., num=500, endpoint=True, base=10)) # eV
 
+
 # energy_LIST = []
-dummy_x  = list(np.arange(1., 50., 1.)) # MeV
-dummy_y = [0.0001]*49
 
-gathered_data_right = [6e-05, \
-8e-05, \
-0.00013, \
-8e-05, \
-4e-05, \
-5e-05, \
-5e-05, \
-0.00011, \
-5e-05, \
-4e-05, \
-6e-05, \
-8e-05, \
-6e-05, \
-6e-05, \
-7e-05, \
-4e-05, \
-4e-05, \
-5e-05, \
-9e-05, \
-5e-05, \
-7e-05, \
-6e-05, \
-5e-05, \
-3e-05, \
-5e-05, \
-3e-05, \
-4e-05, \
-9e-05, \
-8e-05, \
-5e-05, \
-9e-05, \
-7e-05, \
-7e-05, \
-5e-05, \
-5e-05, \
-4e-05, \
-3e-05, \
-6e-05, \
-6e-05, \
-4e-05, \
-3e-05, \
-5e-05, \
-8e-05, \
-5e-05, \
-8e-05, \
-7e-05, \
-2e-05, \
-5e-05, \
-2e-05, \
-]
-gathered_data_left = [5e-05, \
-6e-05, \
-5e-05, \
-5e-05, \
-7e-05, \
-0.00011, \
-6e-05, \
-6e-05, \
-0.00016, \
-7e-05, \
-9e-05, \
-6e-05, \
-6e-05, \
-6e-05, \
-3e-05, \
-8e-05, \
-3e-05, \
-4e-05, \
-4e-05, \
-7e-05, \
-5e-05, \
-0.0001, \
-8e-05, \
-0.00011, \
-4e-05, \
-3e-05, \
-4e-05, \
-3e-05, \
-6e-05, \
-7e-05, \
-4e-05, \
-0.00012, \
-3e-05, \
-9e-05, \
-3e-05, \
-3e-05, \
-4e-05, \
-4e-05, \
-5e-05, \
-4e-05, \
-6e-05, \
-6e-05, \
-9e-05, \
-7e-05, \
-5e-05, \
-7e-05, \
-3e-05, \
-3e-05, \
-0.00015, \
-]
-
-global opt_be_right_LIST
-global opt_be_left_LIST
+global opt_b_right_LIST
+global opt_b_left_LIST
 opt_be_right_LIST = []
 opt_be_left_LIST = []
 
@@ -251,7 +150,7 @@ def reject_outliers(data, m=2):
     return np.array(data)[abs(data - np.mean(data)) < m * np.std(data)]
 
 if __name__ == '__main__':
-	print(energy_LIST)
+	print(len(energy_LIST))
 	# time.sleep(1)
 	data_right = open("data_right.txt", "a")
 	data_left = open("data_left.txt", "a")
@@ -266,11 +165,20 @@ if __name__ == '__main__':
 		be_ratio = np.arange(1e-10, 2.5e-3, be_step) # ratio between magnetic field (varied) and particle energy (fixed @ 2.5 MeV)
 		# be_ratio = [1.e-4, 2.e-4, be_step] # 2.5 MeV after all tests, used to verify best be_ratio, should display 3D position plot
 		# be_ratio = [6e-5] # 0.5 MeV after all tests, used to verify best be_ratio, should display 3D position plot
-		# be_ratio = [0.75e-4]
+		# be_ratio = [np.exp(1)**(-(np.log10(e)))] 
+		# be_ratio = [-1/(np.log10(e**-1/(e**e)-6)-np.log10(e)+6)] # <---- best so far
+		# be_ratio = [1/(-np.log(1/e))] # <---- best so far
+		# be_ratio = [-1/math.log(e, 1.2)]
+		# be_ratio = [10**(-.19*np.log10(e)-4)]
+
+		# be_ratio = [10**(1/np.log10(e))]
+		be_ratio = [1/(e)]
 		print energy, "\n"
 
-		print("be len: ", len(be_ratio))
 		# time.sleep(1)
+		b_step = 1.e-9
+		B = np.arange(1e-10, 2.5e-3, b_step)
+		# print("B len: ", len(B))
 
 		for be in be_ratio:
 			# angle += 10
@@ -286,16 +194,18 @@ if __name__ == '__main__':
 			mySA = MySteppingAction()
 			gRunManager.SetUserAction(mySA)
 
-
-			vectorList = [list(np.multiply([energy, energy, energy], be))]
-
-			for v in vectorList: 
-				fieldMgr = gTransportationManager.GetFieldManager()
-				myField = G4UniformMagField(G4ThreeVector(v[0],v[1],v[2]))
-				# myField = MyField(1)
-				fieldMgr.SetDetectorField(myField)
-				fieldMgr.CreateChordFinder(myField)
-				# print "|B-field| = ", vectorList[0][0]
+			# b = np.sqrt(3*(energy/100)**2)
+			b = e/(np.log(e))
+			# b = (np.log(e)-1)/(np.log(e)**2)
+			# vectorList = [list(np.multiply([energy, energy, energy], be))]
+			# vectorList = [[b, b, b]]
+			# for v in vectorList: 
+			fieldMgr = gTransportationManager.GetFieldManager()
+			myField = G4UniformMagField(G4ThreeVector(b,b,b))
+			# myField = MyField(1)
+			fieldMgr.SetDetectorField(myField)
+			fieldMgr.CreateChordFinder(myField)
+			# print "|B-field| = ", vectorList[0][0]
 
 			myRA = MyRunAction()
 			gRunManager.SetUserAction(myRA)
@@ -310,13 +220,13 @@ if __name__ == '__main__':
 			std_devs_LIST, n_LIST, n_sd_LIST, cluster_size_LIST = PLT.dataReturner() # for 3D positions
 			# print "CLUSTER SIZES", "\n", cluster_size_LIST
 			# # print len(n_sd_LIST[0])
-			if len(n_sd_LIST[0]) > 21:
-				# print "HIIIIII"
-				avg_change = np.mean(np.gradient(n_sd_LIST[0][-20:-1]))
-				print "avg change: ", avg_change
-				if avg_change < -.01:
-					break
-					break
+			# if len(n_sd_LIST[0]) > 101:
+			# 	# print "HIIIIII"
+			# 	avg_change = np.mean(np.gradient(n_sd_LIST[0][-100:-1]))
+			# 	print "avg change: ", avg_change
+			# 	if avg_change < -0.05:
+			# 		break
+			# 		break
 				
 
 			# PLT.wipeData() #clean lists before starting another run
@@ -330,6 +240,7 @@ if __name__ == '__main__':
 
 				opt_be_right_LIST.append(opt_be)
 				data_right.write(str(opt_be)+"\n")
+
 			else: # left cluster
 				print "NSD LEFT"
 				# time.sleep(1)
