@@ -168,7 +168,7 @@ if __name__ == '__main__':
 			B = np.arange(0, 5.e-2, b_step)
 			# B = [0.05]
 			# print("B len: ", len(B))
-			B = [np.sqrt(e*5.16e-16)]
+			B = [np.sqrt(e*4.644e-15)]
 
 			for b in B:
 				# angle += 10
@@ -195,7 +195,7 @@ if __name__ == '__main__':
 				# vectorList = [[b, b, b]]
 				# for v in vectorList: 
 				fieldMgr = gTransportationManager.GetFieldManager()
-				myField = G4UniformMagField(G4ThreeVector(np.sqrt(3*b**2),np.sqrt(3*b**2),np.sqrt(3*b**2)))
+				myField = G4UniformMagField(G4ThreeVector(np.sqrt(b**2/3),np.sqrt(b**2/3),np.sqrt(b**2/3)))
 				# myField = MyField(1)
 				fieldMgr.SetDetectorField(myField)
 				fieldMgr.CreateChordFinder(myField)
