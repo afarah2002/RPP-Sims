@@ -53,16 +53,9 @@ for x in np.arange(-500, 500, cluster_width):
 
 
 
-# energy_LIST = list(np.arange(2., 9., 1.)) # MeV
-
-# energy_LIST = list(np.logspace(0., 9., num=10, endpoint=True, base=10)) # eV
-energy_LIST = [.0001] # MeV
+energy_LIST = [1] # MeV
 global energyUnit
 energyUnit = MeV
-# energy_LIST = [1e-6] # eV
-
-dummy_x  = list(np.arange(1., 50., 1.)) # MeV
-dummy_y = [0.0001]*49
 
 cluster_time_median_LIST = []
 
@@ -169,11 +162,15 @@ class FieldDesign(object):
 
 	def cartesianfieldParam(self, energy, b, x, y, z):
 		
-		radius = np.sqrt(np.square(x) + np.square(y) + np.square(z))
+		radius = np.sqrt(x**2 + y**2 + z**2)
 
 		mag0 = x*b/radius
 		mag1 = y*b/radius
 		mag2 = z*b/radius
+
+		# mag0 = np.sqrt(3*b**2)
+		# mag1 = np.sqrt(3*b**2)
+		# mag2 = np.sqrt(3*b**2)
 
 		magVec = [mag0, mag1, mag2] 
 		# print magVec
@@ -191,8 +188,8 @@ class FieldDesign(object):
 		# print "Receiver DIMENSIONS  ", receiverDimScaled
 
 		material1 = G4Material.GetMaterial("G4_W")
-		# GC.ConstructBox("Receiver", material1, magVecScaled, mm, receiverDimScaled)
-		# GC.ConstructBox("Receiver", material1, np.multiply(magVecScaled, -1), mm, receiverDimScaled) # receiver for opposite cluster
+		GC.ConstructBox("Receiver", material1, magVecScaled, mm, receiverDimScaled)
+		GC.ConstructBox("Receiver", material1, np.multiply(magVecScaled, -1), mm, receiverDimScaled) # receiver for opposite cluster
 
 		# if the magVecScaled is not in the uniqueClusters list, append to it
 		flag = 0
@@ -213,9 +210,9 @@ class FieldDesign(object):
 
 		radius = np.sqrt(np.square(x) + np.square(y) + np.square(z))
 
-		mag0 = x*b/radius
-		mag1 = y*b/radius
-		mag2 = z*b/radius
+		mag0 = x*np.sqrt(3*b**2)/radius
+		mag1 = y*np.sqrt(3*b**2)/radius
+		mag2 = z*np.sqrt(3*b**2)/radius
 
 		magVec = [mag0, mag1, mag2] 
 		
@@ -295,12 +292,12 @@ class ClusterClass(object):
 
 				b = np.sqrt(e*constant)
 
-				magVec, magVecScaled = FD.cartesianfieldParam(energy, b, x, y ,z)
-				# magVec, magVecScaled = FD.spherefieldParam(energy, be, phi, theta)
+				magVec, magVecScaled = FD.cartesianfieldParam(e, b, x, y ,z)
+				# magVec, magVecScaled = FD.spherefieldParam(e, be, phi, theta)
 
 
 				# set user actions ...
-				PGA_1 = MyPrimaryGeneratorAction(energy, energyUnit)
+				PGA_1 = MyPrimaryGeneratorAction(e, energyUnit)
 				gRunManager.SetUserAction(PGA_1)
 
 				myEA = MyEventAction()
