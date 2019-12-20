@@ -283,14 +283,14 @@ class ClusterClass(object):
 			# angle += 0.75
 			# print "coors = (", phi, ",", theta, ")"
 			for e in energy_LIST:
-				WIPE.wipeComps()
+				# WIPE.wipeComps()
 
 				if energyUnit == MeV:
 					constant = 4.644e-9
 				if energyUnit == eV:
 					constant = 4.644e-15
 
-				b = np.sqrt(e*2*constant) # multiplying constant by 2 seems to work for 150 mm clusters
+				b = np.sqrt(e*3*constant) # multiplying constant by 2 seems to work for 150 mm clusters
 
 				magVec, magVecScaled = FD.cartesianfieldParam(e, b, x, y ,z)
 				# magVec, magVecScaled = FD.spherefieldParam(e, be, phi, theta)
@@ -461,7 +461,7 @@ class ClusterClass(object):
 		# cluster_count = 2*len(cluster_coor_LIST)
 		# # cluster_count = 2 * (len(uniqueClusters)-1)
 		# print "There are ", cluster_count, " clusters"
-		# plt.show()
+		plt.show()
 
 CC = ClusterClass()
 if __name__ == '__main__':

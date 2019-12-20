@@ -265,9 +265,10 @@ class Plotter(object):
 				frame += 1
 			#combines the pos/neg ranges to get the real range
 			true_range = np.sum(range_LIST)
+			# print true_range
 			if true_range < 200:
 				cluster_sizes_LIST.append(true_range)
-				# print "\n", "Range = ", true_range, "\n"
+				print "\n", "Range = ", true_range, "\n"
 
 		# plt.show()
 
