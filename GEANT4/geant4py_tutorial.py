@@ -73,7 +73,7 @@ class Constructor(object):
 		# GC.ConstructTube("Tube", au, [-1., -1., -1.], cm, 10., 30., 30., 0, 300.)
 		scale_factor = 5
 		# GC.ConstructSphere("Sphere", material1 , [0., 0., 0.], cm, 0, 1., 0., 360., 0., 180)
-		# GC.ConstructSphere("Sphere", material1 , [0., 0., 0.], cm, 9.5*scale_factor, 10.*scale_factor, 0., 360., 0., 180)
+		# GC.ConstructSphere("Sphere", material1 , [0., 0., 0.], cm, (10-.0000001)*scale_factor, 10.*scale_factor, 0., 360., 0., 180)
 
 	# GC.ConstructCone("Cone", nai, [-20., -20., -20.], cm, 0., 20., 0., 0., 25., 0., 180) # dphi = 359.9999 is basically 360, but we can still see it
 		# gRunManager.Initialize()
