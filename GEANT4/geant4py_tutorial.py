@@ -56,7 +56,7 @@ for x in np.arange(-500, 500, cluster_width):
 # energy_LIST = list(np.arange(2., 9., 1.)) # MeV
 
 # energy_LIST = list(np.logspace(0., 9., num=10, endpoint=True, base=10)) # eV
-energy_LIST = [0.0005] # eV
+energy_LIST = [.0001] # MeV
 global energyUnit
 energyUnit = MeV
 # energy_LIST = [1e-6] # eV
@@ -167,15 +167,13 @@ CF = CurveFitter()
 uniqueClusters = [[None, None, None]]
 class FieldDesign(object):
 
-	def cartesianfieldParam(self, energy, be, x, y, z):
+	def cartesianfieldParam(self, energy, b, x, y, z):
 		
-		vectorList = [list(np.multiply([energy, energy, energy], be))]
-		B_mag = energy*be
 		radius = np.sqrt(np.square(x) + np.square(y) + np.square(z))
 
-		mag0 = x*B_mag/radius
-		mag1 = y*B_mag/radius
-		mag2 = z*B_mag/radius
+		mag0 = x*b/radius
+		mag1 = y*b/radius
+		mag2 = z*b/radius
 
 		magVec = [mag0, mag1, mag2] 
 		# print magVec
@@ -211,14 +209,13 @@ class FieldDesign(object):
 
 		return magVec, magVecScaled
 
-	def spherefieldParam(self, energy, be, phi, theta):
+	def spherefieldParam(self, energy, b, phi, theta):
 
-		vectorList = [list(np.multiply([energy, energy, energy], be))]
-		radius = np.sqrt(np.square(vectorList[0][0]) + np.square(vectorList[0][1]) + np.square(vectorList[0][2]))
+		radius = np.sqrt(np.square(x) + np.square(y) + np.square(z))
 
-		mag0 = vectorList[0][0]*(np.sin(phi)*np.cos(theta))
-		mag1 = vectorList[0][1]*(np.sin(phi)*np.sin(theta))
-		mag2 = vectorList[0][2]*np.cos(phi)
+		mag0 = x*b/radius
+		mag1 = y*b/radius
+		mag2 = z*b/radius
 
 		magVec = [mag0, mag1, mag2] 
 		
@@ -290,64 +287,51 @@ class ClusterClass(object):
 			# print "coors = (", phi, ",", theta, ")"
 			for e in energy_LIST:
 				WIPE.wipeComps()
-				energy = e
-				# energy = 2.5
-				energyExponent = np.log(energy)
 
-				be_step = 1*10**(energyExponent-11)
+				if energyUnit == MeV:
+					constant = 5.16e-10
+				if energyUnit == eV:
+					constant = 5.16e-16
 
-				# tickMarks = np.arange(1e-7, 2.5e-4, be_step*5.)
-				# be_ratio = [1e-7]
-				be_ratio = [5e-3]
-				# be_ratio = np.arange(1e-20, 2.5*10**(energyExponent-10), be_step) # ratio between magnetic field (varied) and particle energy (fixed @ 2.5 MeV)
-				# be_ratio = [1.e-4, 2.e-4, be_step] # 2.5 MeV after all tests, used to verify best be_ratio, should display 3D position plot
-				# be_ratio = [6e-5] # 0.5 MeV after all tests, used to verify best be_ratio, should display 3D position plot
-				# print energy, "\n"
+				b = np.sqrt(e*constant)
 
-				# print("be len: ", len(be_ratio))
-				# time.sleep(1)
-
-				for be in be_ratio:
-					# angle += 10
-					# angle += 0.075 # +0.075 is a recommended delta theta
-					# print energy, " MeV", "\n", be, "T/MeV", "\n\n"
-					magVec, magVecScaled = FD.cartesianfieldParam(energy, be, x, y ,z)
-					# magVec, magVecScaled = FD.spherefieldParam(energy, be, phi, theta)
+				magVec, magVecScaled = FD.cartesianfieldParam(energy, b, x, y ,z)
+				# magVec, magVecScaled = FD.spherefieldParam(energy, be, phi, theta)
 
 
-					# set user actions ...
-					PGA_1 = MyPrimaryGeneratorAction(energy, energyUnit)
-					gRunManager.SetUserAction(PGA_1)
+				# set user actions ...
+				PGA_1 = MyPrimaryGeneratorAction(energy, energyUnit)
+				gRunManager.SetUserAction(PGA_1)
 
-					myEA = MyEventAction()
-					gRunManager.SetUserAction(myEA)
+				myEA = MyEventAction()
+				gRunManager.SetUserAction(myEA)
 
-					mySA = MySteppingAction()
-					gRunManager.SetUserAction(mySA)
+				mySA = MySteppingAction()
+				gRunManager.SetUserAction(mySA)
 
 
-					fieldMgr = gTransportationManager.GetFieldManager()
-					myField = G4UniformMagField(G4ThreeVector(magVec[0], magVec[1], magVec[2]))
+				fieldMgr = gTransportationManager.GetFieldManager()
+				myField = G4UniformMagField(G4ThreeVector(magVec[0], magVec[1], magVec[2]))
 
-					# myField = MyField(1)
-					fieldMgr.SetDetectorField(myField)
-					fieldMgr.CreateChordFinder(myField)
-					# print "|B-field| = ", vectorList[0][0]
-					# CI = ClusterIsolation(magVecScaled)
-					# CI
-					# CI.getClusterWidth()
+				# myField = MyField(1)
+				fieldMgr.SetDetectorField(myField)
+				fieldMgr.CreateChordFinder(myField)
+				# print "|B-field| = ", vectorList[0][0]
+				# CI = ClusterIsolation(magVecScaled)
+				# CI
+				# CI.getClusterWidth()
 
-					myRA = MyRunAction()
-					gRunManager.SetUserAction(myRA)
+				myRA = MyRunAction()
+				gRunManager.SetUserAction(myRA)
 
-					gRunManager.Initialize()
+				gRunManager.Initialize()
 
-					gRunManager.BeamOn(1)
+				gRunManager.BeamOn(1)
 
-					VIS.visualizer(viz_theta, viz_phi)
+				VIS.visualizer(viz_theta, viz_phi)
 
-					# std_devs_LIST, means_LIST, n_LIST, n_sd_LIST = PLT.dataReturner()
-					std_devs_LIST, n_LIST, n_sd_LIST, cluster_time_LIST, cluster_size_LIST = PLT.dataReturner() # for 3D positions
+				# std_devs_LIST, means_LIST, n_LIST, n_sd_LIST = PLT.dataReturner()
+				std_devs_LIST, n_LIST, n_sd_LIST, cluster_time_LIST, cluster_size_LIST = PLT.dataReturner() # for 3D positions
 
 					# WIPE.wipeCluster()
 					# PLT.wipeData() #clean lists before starting another run
