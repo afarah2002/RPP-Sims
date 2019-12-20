@@ -28,15 +28,17 @@ WIPE = WipeData()
 
 # energy_LIST = list(np.arange(2., 9., 1.)) # MeV
 # energy_LIST = list(np.arange(1., 50., 1.)) # MeV
-energy_LIST = list(np.logspace(-6., 3., num=500, endpoint=True, base=10)) # eV
+# energy_LIST = list(np.logspace(-6., 3., num=500, endpoint=True, base=10)) # eV
+energy_LIST = list(np.arange(1.901e-3, 1e3, 1e-5))
+# energy_LIST = [1000.]
 
 
 # energy_LIST = []
 
 global opt_b_right_LIST
 global opt_b_left_LIST
-opt_be_right_LIST = []
-opt_be_left_LIST = []
+opt_b_right_LIST = []
+opt_b_left_LIST = []
 
 class Constructor(object):
 	def __init__(self):
@@ -97,7 +99,7 @@ class Visualizer(object):
 		gApplyUICommand("/vis/scene/endOfRunAction accumulate")
 
 		gApplyUICommand("/vis/viewer/set/viewpointThetaPhi 0" + str(angle))
-		gApplyUICommand("/vis/viewer/zoom 1.00001")
+		# gApplyUICommand("/vis/viewer/zoom 1.00001")
 		
 		gApplyUICommand("/vis/viewer/update")
 
@@ -154,110 +156,113 @@ if __name__ == '__main__':
 	# time.sleep(1)
 	data_right = open("data_right.txt", "a")
 	data_left = open("data_left.txt", "a")
+	while True:
+		for e in energy_LIST:
+			WIPE.wipeComps()
+			energy = e
+			# energy = 2.5
+			print energy, "\n"
 
-	for e in energy_LIST:
-		WIPE.wipeComps()
-		energy = e
-		# energy = 2.5
-		be_step = 1.e-5
+			# time.sleep(1)
+			b_step = 1.e-9
+			B = np.arange(0, 5.e-2, b_step)
+			# B = [0.05]
+			# print("B len: ", len(B))
+			B = [np.sqrt(e*5.16e-16)]
 
-		tickMarks = np.arange(1e-7, 2.5e-3, be_step*5.)
-		be_ratio = np.arange(1e-10, 2.5e-3, be_step) # ratio between magnetic field (varied) and particle energy (fixed @ 2.5 MeV)
-		# be_ratio = [1.e-4, 2.e-4, be_step] # 2.5 MeV after all tests, used to verify best be_ratio, should display 3D position plot
-		# be_ratio = [6e-5] # 0.5 MeV after all tests, used to verify best be_ratio, should display 3D position plot
-		# be_ratio = [np.exp(1)**(-(np.log10(e)))] 
-		# be_ratio = [-1/(np.log10(e**-1/(e**e)-6)-np.log10(e)+6)] # <---- best so far
-		# be_ratio = [1/(-np.log(1/e))] # <---- best so far
-		# be_ratio = [-1/math.log(e, 1.2)]
-		# be_ratio = [10**(-.19*np.log10(e)-4)]
+			for b in B:
+				# angle += 10
+				# angle += 0.075 # +0.075 is a recommended delta theta
+				# set user actions ...
+				PGA_1 = MyPrimaryGeneratorAction(energy)
+				gRunManager.SetUserAction(PGA_1)
 
-		# be_ratio = [10**(1/np.log10(e))]
-		be_ratio = [1/(e)]
-		print energy, "\n"
+				myEA = MyEventAction()
+				gRunManager.SetUserAction(myEA)
 
-		# time.sleep(1)
-		b_step = 1.e-9
-		B = np.arange(1e-10, 2.5e-3, b_step)
-		# print("B len: ", len(B))
+				mySA = MySteppingAction()
+				gRunManager.SetUserAction(mySA)
 
-		for be in be_ratio:
-			# angle += 10
-			# angle += 0.075 # +0.075 is a recommended delta theta
-			print "energy: ", e*10e6, "eV", "\n", "B/E: ", be,"T/MeV"
-			# set user actions ...
-			PGA_1 = MyPrimaryGeneratorAction(energy)
-			gRunManager.SetUserAction(PGA_1)
+				# b = np.sqrt(3*(energy/100)**2)
+				# b = e/(np.log(2*e))
 
-			myEA = MyEventAction()
-			gRunManager.SetUserAction(myEA)
+				# b = abs(10**np.log(e)*e)
+				print "energy: ", e*10e6, "eV", "\n", "B: ", b,"T"
 
-			mySA = MySteppingAction()
-			gRunManager.SetUserAction(mySA)
+				# b = e*np.e**(np.sqrt(e))/np.log(e)
+				# b = (np.log(e)-1)/(np.log(e)**2)
+				# vectorList = [list(np.multiply([energy, energy, energy], be))]
+				# vectorList = [[b, b, b]]
+				# for v in vectorList: 
+				fieldMgr = gTransportationManager.GetFieldManager()
+				myField = G4UniformMagField(G4ThreeVector(np.sqrt(3*b**2),np.sqrt(3*b**2),np.sqrt(3*b**2)))
+				# myField = MyField(1)
+				fieldMgr.SetDetectorField(myField)
+				fieldMgr.CreateChordFinder(myField)
+				# print "|B-field| = ", vectorList[0][0]
 
-			# b = np.sqrt(3*(energy/100)**2)
-			b = e/(np.log(e))
-			# b = (np.log(e)-1)/(np.log(e)**2)
-			# vectorList = [list(np.multiply([energy, energy, energy], be))]
-			# vectorList = [[b, b, b]]
-			# for v in vectorList: 
-			fieldMgr = gTransportationManager.GetFieldManager()
-			myField = G4UniformMagField(G4ThreeVector(b,b,b))
-			# myField = MyField(1)
-			fieldMgr.SetDetectorField(myField)
-			fieldMgr.CreateChordFinder(myField)
-			# print "|B-field| = ", vectorList[0][0]
+				myRA = MyRunAction()
+				gRunManager.SetUserAction(myRA)
 
-			myRA = MyRunAction()
-			gRunManager.SetUserAction(myRA)
+				gRunManager.Initialize()
 
-			gRunManager.Initialize()
+				gRunManager.BeamOn(1)
 
-			gRunManager.BeamOn(1)
+				VIS.visualizer(angle)
 
-			VIS.visualizer(angle)
+				# std_devs_LIST, means_LIST, n_LIST, n_sd_LIST = PLT.dataReturner()
+				std_devs_LIST, n_LIST, n_sd_LIST, cluster_size_LIST = PLT.dataReturner() # for 3D positions
+				# print "CLUSTER SIZES", "\n", cluster_size_LIST
+				# # print len(n_sd_LIST[0])
+				gradient_length = 100
+				if e > 1e-3:
+					gradient_length = 100
+				if e > 1:
+					gradient_length = 400
+				if e > 1e2:
+					gradient_length = 500
 
-			# std_devs_LIST, means_LIST, n_LIST, n_sd_LIST = PLT.dataReturner()
-			std_devs_LIST, n_LIST, n_sd_LIST, cluster_size_LIST = PLT.dataReturner() # for 3D positions
-			# print "CLUSTER SIZES", "\n", cluster_size_LIST
-			# # print len(n_sd_LIST[0])
-			# if len(n_sd_LIST[0]) > 101:
-			# 	# print "HIIIIII"
-			# 	avg_change = np.mean(np.gradient(n_sd_LIST[0][-100:-1]))
-			# 	print "avg change: ", avg_change
-			# 	if avg_change < -0.05:
-			# 		break
-			# 		break
-				
+				if len(n_sd_LIST[0]) > gradient_length:
+					# print "HIIIIII"
+					avg_change = np.mean(np.gradient(n_sd_LIST[0][-(gradient_length + 1):-1]))
+					print "avg change: ", avg_change, 
+					if avg_change < -0.035:
+						print "should stop now"
+						time.sleep(.5)
+						break 
+						
+						
+					
 
-			# PLT.wipeData() #clean lists before starting another run
+				# PLT.wipeData() #clean lists before starting another run
 
-		for num, n_sd in enumerate(n_sd_LIST):
-			if num == 0: # right cluster
-				print "NSD RIGHT"
-				# time.sleep(1)
-				max_n_sd = max(n_sd) # gets the peak n/sd that shows the greatest clustering efficiency
-				opt_be = n_sd.index(max_n_sd) * be_step # find the be_ratio that produces that max n/sd 
+			for num, n_sd in enumerate(n_sd_LIST):
+				if num == 0: # right cluster
+					print "NSD RIGHT"
+					# time.sleep(1)
+					max_n_sd = max(n_sd) # gets the peak n/sd that shows the greatest clustering efficiency
+					opt_b = n_sd.index(max_n_sd) * b_step # find the be_ratio that produces that max n/sd 
 
-				opt_be_right_LIST.append(opt_be)
-				data_right.write(str(opt_be)+"\n")
+					opt_b_right_LIST.append(opt_b)
+					data_right.write(str(opt_b)+"\n")
 
-			else: # left cluster
-				print "NSD LEFT"
-				# time.sleep(1)
-				max_n_sd = max(n_sd) # gets the peak n/sd that shows the greatest clustering efficiency
-				opt_be = n_sd.index(max_n_sd) * be_step # find the be_ratio that produces that max n/sd 
+				else: # left cluster
+					print "NSD LEFT"
+					# time.sleep(1)
+					max_n_sd = max(n_sd) # gets the peak n/sd that shows the greatest clustering efficiency
+					opt_b = n_sd.index(max_n_sd) * b_step # find the be_ratio that produces that max n/sd 
 
-				opt_be_left_LIST.append(opt_be)
-				data_left.write(str(opt_be)+"\n")
+					opt_b_left_LIST.append(opt_b)
+					data_left.write(str(opt_b)+"\n")
 
-		function = rational3_3
+			function = rational3_3
 
-		data  = {
-				"SD" : std_devs_LIST, \
-				# "means" : means_LIST, \
-				"n/sd" : n_sd_LIST, \
-				"cluster_size" : n_LIST \
-				}
+			data  = {
+					"SD" : std_devs_LIST, \
+					# "means" : means_LIST, \
+					"n/sd" : n_sd_LIST, \
+					"cluster_size" : n_LIST \
+					}
 
 		# fig, (sd, n_sd, n) = plt.subplots(3, sharex=True, sharey=False)
 		# # plt.tight_layout()
