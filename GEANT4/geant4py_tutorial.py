@@ -210,9 +210,9 @@ class FieldDesign(object):
 
 		radius = np.sqrt(np.square(x) + np.square(y) + np.square(z))
 
-		mag0 = x*np.sqrt(3*b**2)/radius
-		mag1 = y*np.sqrt(3*b**2)/radius
-		mag2 = z*np.sqrt(3*b**2)/radius
+		mag0 = x*b/radius
+		mag1 = y*b/radius
+		mag2 = z*b/radius
 
 		magVec = [mag0, mag1, mag2] 
 		
@@ -286,11 +286,11 @@ class ClusterClass(object):
 				WIPE.wipeComps()
 
 				if energyUnit == MeV:
-					constant = 5.16e-10
+					constant = 4.644e-9
 				if energyUnit == eV:
-					constant = 5.16e-16
+					constant = 4.644e-15
 
-				b = np.sqrt(e*constant)
+				b = np.sqrt(e*2*constant) # multiplying constant by 2 seems to work for 150 mm clusters
 
 				magVec, magVecScaled = FD.cartesianfieldParam(e, b, x, y ,z)
 				# magVec, magVecScaled = FD.spherefieldParam(e, be, phi, theta)
