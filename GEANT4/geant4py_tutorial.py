@@ -168,7 +168,7 @@ if __name__ == '__main__':
 			B = np.arange(0, 5.e-2, b_step)
 			# B = [0.05]
 			# print("B len: ", len(B))
-			B = [np.sqrt(e*4.644e-15)]
+			B = [np.sqrt(e*3*4.644e-15)]
 
 			for b in B:
 				# angle += 10
