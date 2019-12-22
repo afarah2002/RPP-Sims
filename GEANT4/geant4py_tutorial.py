@@ -21,7 +21,7 @@ import collections
 from geom_constructor import GeomConstructor 
 # from beam import BeamInitializer
 from beam2 import MyPrimaryGeneratorAction, MyRunAction, MyEventAction,MySteppingAction, MyField, \
-				  Plotter, WipeData, ClusterIsolation
+				  Plotter, WipeData
 
 
 PLT = Plotter()
@@ -31,29 +31,62 @@ GC = GeomConstructor()
 spherical_coor_LIST = []
 # spherical_coor_LIST = [[0,0]]
 pi = np.pi
-step = 10
-factor1 = 1
-factor2 = 1
-for phi in np.arange(0, pi, factor1*pi/step): # smaller steps means more clusters, range goes to pi since clusters are double sided
-	for theta in np.arange(0, pi, factor2*pi/step):
+step = 20
+for phi in np.arange(0, pi, pi/step): # smaller steps means more clusters, range goes to pi since clusters are double sided
+	for theta in np.arange(0, pi, pi/step):
 		sph_coor = [theta, phi] # phi, theta
 		spherical_coor_LIST.append(sph_coor)
 
 cluster_coor_LIST = []
-cluster_width = 150
-for x in np.arange(-500, 500, cluster_width):
-	for y in np.arange(-500, 500, cluster_width):
-		for z in np.arange(-500, 500, cluster_width):
+global cluster_width
+cluster_width = 160
+spacing = 40./7
+interval = cluster_width + spacing
+for x in np.arange(-(500-cluster_width/2 - spacing), 500 - (cluster_width/2 + spacing) + interval, interval):
+	for y in np.arange(-(500-cluster_width/2 - spacing), 500 - (cluster_width/2 + spacing) + interval, interval):
+		for z in np.arange(-(500-cluster_width/2 - spacing), 500 - (cluster_width/2 + spacing) + interval, interval):
 			cluster_coor = [x,y,z]
+			# cluster_coor_LIST.append(cluster_coor)
+			# print cluster_coor
+			# time.sleep(1)
+			opposite = np.multiply(cluster_coor, -1)
 			for i in cluster_coor:
-				if np.abs(i) == 500:
+				if np.abs(i) == 500-cluster_width/2 - spacing and cluster_coor not in cluster_coor_LIST:
 					cluster_coor_LIST.append(cluster_coor)
 					break
 
 
+# print cluster_coor_LIST
+'''
+# USE TO DOUBLE CHECK CLUSTER COOR LIST #
+
+fig = plt.figure()
+# Axes3D.scatter(self.px, self.py, self.pz)
+
+# first subplot: a 3D scatter plot of positions
+ax = fig.add_subplot(111, projection='3d')
+axmin = -(500-cluster_width/2 - spacing)
+axmax = 500 - (cluster_width/2 + spacing)	
+axes = plt.gca()
+axes.set_xlim([axmin,axmax])
+axes.set_ylim([axmin,axmax])
+axes.set_zlim([axmin,axmax])
+
+ax.set_xlabel('mm')
+ax.set_ylabel('mm')
+ax.set_zlabel('mm')
+
+for cluster_coor in cluster_coor_LIST:
+	print cluster_coor
+	ax.scatter(cluster_coor[0], cluster_coor[1], cluster_coor[2])
+
+# plt.draw() 
+
+plt.show()
+'''
 
 
-energy_LIST = [1] # MeV
+energy_LIST = [.25] # MeV
 global energyUnit
 energyUnit = MeV
 
@@ -90,7 +123,7 @@ class Constructor(object):
 		# cal= G4EzVolume("Calorimeter") #initialize volume
 		NaI= gNistManager.FindOrBuildMaterial("G4_SODIUM_IODIDE")
 		C = gNistManager.FindOrBuildMaterial("G4_C")
-		# GC.ConstructBox("Detector Box", C, [0., 0., 0.], cm, [100., 100., 100.])
+		# GC.ConstructBox("Detector Box", C, [0., 0., 0.], cm, [95., 95., 95.])
 
 		# GC.ConstructOrb("Orb", NaI, [10., 10., 10.], cm, 10.)
 
@@ -160,7 +193,7 @@ CF = CurveFitter()
 uniqueClusters = [[None, None, None]]
 class FieldDesign(object):
 
-	def cartesianfieldParam(self, energy, b, x, y, z):
+	def cartesianfieldParam(self, energy, b, x, y, z, cluster_width):
 		
 		radius = np.sqrt(x**2 + y**2 + z**2)
 
@@ -182,14 +215,14 @@ class FieldDesign(object):
 		scale = 500 / np.abs(magVec[maxIndex])
 		magVecScaled = np.multiply(magVec, scale)
 
-		receiverDimScaled = [150, 150, 150]
+		receiverDimScaled = [cluster_width, cluster_width, cluster_width]
 		receiverDimScaled[maxIndex] = 1
 
 		# print "Receiver DIMENSIONS  ", receiverDimScaled
 
 		material1 = G4Material.GetMaterial("G4_W")
-		GC.ConstructBox("Receiver", material1, magVecScaled, mm, receiverDimScaled)
-		GC.ConstructBox("Receiver", material1, np.multiply(magVecScaled, -1), mm, receiverDimScaled) # receiver for opposite cluster
+		GC.ConstructBox("Receiver", material1, [x,y,z], mm, receiverDimScaled)
+		GC.ConstructBox("Receiver", material1, np.multiply([x,y,z], -1), mm, receiverDimScaled) # receiver for opposite cluster
 
 		# if the magVecScaled is not in the uniqueClusters list, append to it
 		flag = 0
@@ -208,11 +241,12 @@ class FieldDesign(object):
 
 	def spherefieldParam(self, energy, b, phi, theta):
 
-		radius = np.sqrt(np.square(x) + np.square(y) + np.square(z))
+		# vectorList = [list(np.multiply([energy, energy, energy], be))]
+		# radius = np.sqrt(np.square(vectorList[0][0]) + np.square(vectorList[0][1]) + np.square(vectorList[0][2]))
 
-		mag0 = x*b/radius
-		mag1 = y*b/radius
-		mag2 = z*b/radius
+		mag0 = b*(np.sin(phi)*np.cos(theta))
+		mag1 = b*(np.sin(phi)*np.sin(theta))
+		mag2 = b*np.cos(phi)
 
 		magVec = [mag0, mag1, mag2] 
 		
@@ -223,7 +257,7 @@ class FieldDesign(object):
 		scale = 500 / np.abs(magVec[maxIndex])
 		magVecScaled = np.multiply(magVec, scale)
 
-		receiverDimScaled = [150, 150, 150]
+		receiverDimScaled = [cluster_width, cluster_width, cluster_width]
 		receiverDimScaled[maxIndex] = 1
 
 		# print "Receiver DIMENSIONS  ", receiverDimScaled
@@ -256,8 +290,8 @@ VIS = Visualizer()
 initialMomenta = []
 finalMomenta = []
 
-viz_theta = 35
-viz_phi = 35
+viz_theta = 90
+viz_phi = 0
 zoom = 1.5
 
 
@@ -265,13 +299,18 @@ class ClusterClass(object):
 
 	def run(self):
 		# print(energy_LIST)
-		print(cluster_coor_LIST)
+		# print(cluster_coor_LIST)
 		# time.sleep(1)
 		data_right = open("data_right.txt", "a")
 		data_left = open("data_left.txt", "a")
+
+		# print spherical_coor_LIST
+
+		# time.sleep(1)
+
 		# for sph_coor in spherical_coor_LIST:
 		for cart_coor in cluster_coor_LIST:
-
+			# time.sleep(.25)
 			# print cart_coor
 
 			x = cart_coor[0]
@@ -290,14 +329,14 @@ class ClusterClass(object):
 				if energyUnit == eV:
 					constant = 4.644e-15
 
-				b = np.sqrt(e*3*constant) # multiplying constant by 2 seems to work for 150 mm clusters
+				b = np.sqrt(e*3*constant) 
 
-				magVec, magVecScaled = FD.cartesianfieldParam(e, b, x, y ,z)
-				# magVec, magVecScaled = FD.spherefieldParam(e, be, phi, theta)
+				magVec, magVecScaled = FD.cartesianfieldParam(e, b, x, y ,z, cluster_width)
+				# magVec, magVecScaled = FD.spherefieldParam(e, b, phi, theta)
 
 
 				# set user actions ...
-				PGA_1 = MyPrimaryGeneratorAction(e, energyUnit)
+				PGA_1 = MyPrimaryGeneratorAction(e, energyUnit,cart_coor)
 				gRunManager.SetUserAction(PGA_1)
 
 				myEA = MyEventAction()
@@ -449,18 +488,21 @@ class ClusterClass(object):
 
 		# PLT.grapher()
 
-		# fig, ax = plt.subplots(1, sharey=True, sharex=False, tight_layout=False)
-		# n_bins = 10
-		# ax.hist(cluster_size_LIST, n_bins)
-		# plt.title("Cluster sizes (mm)")
-		# # plt.figure()
-		# # plt.ylabel("Median cluster time (ns)", fontsize=18)
-		# # plt.xlabel("Run number", fontsize=18)
-		# # plt.plot(x,y)
-		# # plt.plot(np.arange(-60, 60, 1), function(np.arange(-60, 60, 1), *popt))
-		# cluster_count = 2*len(cluster_coor_LIST)
-		# # cluster_count = 2 * (len(uniqueClusters)-1)
+		fig, ax = plt.subplots(1, sharey=True, sharex=False, tight_layout=False)
+		n_bins = 10
+		ax.hist(cluster_size_LIST, n_bins)
+		plt.title("Cluster sizes (mm)")
+		# plt.figure()
+		# plt.ylabel("Median cluster time (ns)", fontsize=18)
+		# plt.xlabel("Run number", fontsize=18)
+		# plt.plot(x,y)
+		# plt.plot(np.arange(-60, 60, 1), function(np.arange(-60, 60, 1), *popt))
+		cluster_count = 2*len(cluster_coor_LIST)
+		true_cluster_count = (1000/cluster_width)**3
+		avg_cluster_size = np.mean(cluster_size_LIST)
+		# cluster_count = 2 * (len(uniqueClusters)-1)
 		# print "There are ", cluster_count, " clusters"
+		# print "Avg cluster size: ", avg_cluster_size, " mm"
 		plt.show()
 
 CC = ClusterClass()

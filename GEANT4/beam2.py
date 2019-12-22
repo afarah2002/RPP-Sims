@@ -53,10 +53,12 @@ n_sd_pos_3D_left_LIST = []
 global cluster_time_LIST
 cluster_time_LIST = []
 
+global p3D
 global px
 global py
 global pz
 
+p3D = []
 px = []
 py = []
 pz = []
@@ -69,10 +71,12 @@ px2 = []
 py2 = []
 pz2 = []
 
+global m3D
 global mx
 global my
 global mz
 
+m3D = []
 mx = []
 my = []
 mz = []
@@ -82,12 +86,15 @@ cluster_sizes_LIST = []
 
 global SEE_count
 SEE_count = 0
+
 #----------code starts here!----------#
 class WipeData(object):
 	# wipe lists for next data collection
 	def wipe(self):
 		pos_3D_right[:] = []
 		pos_3D_left[:] = []
+		p3D[:] = []
+		m3D[:] = []
 		px[:] = []
 		py[:] = []
 		pz[:] = []
@@ -133,6 +140,12 @@ class Plotter(object):
 		radius = np.sqrt(np.square(posf[0]) + np.square(posf[1]) + np.square(posf[2]))
 		# if tcluster > 25: # weird set of outlier <---- INTERESTING PHENOMENON
 		# if tcluster > 3 and tcluster < 4:
+
+		# print momf
+
+		p3D.append(posf)
+		m3D.append(momf)
+
 		px.append(posf[0])
 		py.append(posf[1])
 		pz.append(posf[2])
@@ -212,9 +225,9 @@ class Plotter(object):
 		axes.set_ylim([axmin,axmax])
 		axes.set_zlim([axmin,axmax])
 
-		ax.set_xlabel('X position units')
-		ax.set_ylabel('Y position units')
-		ax.set_zlabel('Z position units')
+		ax.set_xlabel('mm')
+		ax.set_ylabel('mm')
+		ax.set_zlabel('mm')
 
 		ax.scatter(px, py, pz)
 		# for i in np.arange(0, len(px)):
@@ -231,6 +244,63 @@ class Plotter(object):
 		# second subplot: a histogram of positions
 		# fig, axs = plt.subplots(3, sharey=True, sharex=False, tight_layout=False)
 
+	def graphMomemtum(self):
+
+		# print clusterCenter
+
+		clusterx = []
+		clustery = []
+		clusterz = []
+
+		momx = []		
+		momy = []
+		momz = []
+
+		for pos in p3D:
+			difference = np.sqrt((clusterCenter[0] - pos[0])**2+ \
+								 (clusterCenter[1] - pos[1])**2+ \
+								 (clusterCenter[2] - pos[2])**2)
+
+			pos_index = p3D.index(pos)
+
+			if difference < 160:
+				clusterx.append(clusterCenter[0] - pos[0])
+				clustery.append(clusterCenter[1] - pos[1])
+				clusterz.append(clusterCenter[2] - pos[2])
+
+				momx.append(m3D[pos_index][0]*200)
+				momy.append(m3D[pos_index][1]*200)
+				momz.append(m3D[pos_index][2]*200)
+
+		fig = plt.figure()
+		# Axes3D.scatter(self.px, self.py, self.pz)
+
+		# first subplot: a 3D scatter plot of positions
+		ax = fig.add_subplot(111, projection='3d')
+		axmin = -160 
+		axmax = 160
+		axes = plt.gca()
+		axes.set_xlim([axmin,axmax])
+		axes.set_ylim([axmin,axmax])
+		axes.set_zlim([axmin,axmax])
+
+		ax.set_xlabel('mm')
+		ax.set_ylabel('mm')
+		ax.set_zlabel('mm')
+
+		ax.scatter(clusterx, clustery, clusterz)
+		for i in np.arange(0, len(clusterx)):
+			a = Arrow3D([clusterx[i], clusterx[i] + momx[i]], [clustery[i], clustery[i] + momy[i]], [clusterz[i], clusterz[i] + momz[i]], mutation_scale=20, lw=1, arrowstyle="-|>", color="r")
+			ax.add_artist(a)
+
+
+		plt.title("3D Positions of Randomly Scattered e+")
+
+		# plt.draw() 
+		
+		plt.show()
+
+
 	def computeClusterSize(self):
 		n_bins = 25
 		position_LIST = [px, py, pz]
@@ -243,7 +313,8 @@ class Plotter(object):
 			# print counts, "\n\n", bins
 
 			# separate x, y, z into positive and negative
-			for pos in i:
+			for pos in i: 
+				# print pos
 				if pos > 0:
 					positive.append(pos)
 				if pos < 0:
@@ -251,7 +322,8 @@ class Plotter(object):
 			frame = 0
 			for i in [positive, negative]:
 				# print "sign change" , i, "\n"
-				counts, bins = np.histogram(positive, bins=n_bins)
+				# plt.hist(i, bins=n_bins)
+				counts, bins = np.histogram(i, bins=n_bins)
 				counts = list(counts)
 				# print counts, "\n\n", "bins", "\n", bins
 				for freq in counts:
@@ -262,45 +334,30 @@ class Plotter(object):
 				# takes the range of each pos/neg without outliers
 				rng = np.max(bins) - np.min(bins)
 				range_LIST.append(rng)
+				# print range_LIST
 				frame += 1
 			#combines the pos/neg ranges to get the real range
 			true_range = np.sum(range_LIST)
 			# print true_range
 			if true_range < 200:
 				cluster_sizes_LIST.append(true_range)
-				print "\n", "Range = ", true_range, "\n"
+				# print "\n", "Range = ", true_range, "\n"
 
-		# plt.show()
+		plt.show()
 
 PLT = Plotter()
-
-class ClusterIsolation(object):
-	# uses p_2 to keep lists throughout runs
-
-	# def __init__(self):
-	# 	self.clusterCenter = clusterCenter
-
-	def getClusterWidth(self):
-		# isolate cluster
-		max_x = max(px)
-		min_x = min(px)
-		max_y = max(py)
-		min_y = min(py)
-		max_z = max(pz)
-		min_z = min(pz)
-
-
-CI = ClusterIsolation()
 
 class MyPrimaryGeneratorAction(G4VUserPrimaryGeneratorAction):
 	"My Primary Generator Action"
 
-	def __init__(self, energy, energyUnit):
+	def __init__(self, energy, energyUnit, center):
 		G4VUserPrimaryGeneratorAction.__init__(self)
 		self.particleGun = G4ParticleGun(1)
 		# print("\n Particle gun defined \n")
 		self.energy = energy
 		self.energyUnit = energyUnit
+		global clusterCenter
+		clusterCenter = center
 	def GeneratePrimaries(self, event):
 
 
@@ -333,16 +390,16 @@ class MyRunAction(G4UserRunAction):
 
 	def EndOfRunAction(self, run):
 		# PLT.grapher()
+		PLT.graphMomemtum()
 		PLT.computeClusterSize()
-		# print(cluster_sizes_LIST)
+		print(cluster_sizes_LIST)
 		PLT.dataAnalysis()
-		# CI.getClusterWidth()
-		WIPE.wipeElectronCounter()
+		# WIPE.wipeElectronCounter()
 		global SEE_count
-		print SEE_count/2
+		# print SEE_count/2
 		# time.sleep(1)
 		SEE_count = 0
-		# WIPE.wipe()
+		WIPE.wipe()
 		# print "*** End of Run"
 		# print "- Run sammary : (id= %d, #events= %d)" \
 		# % (run.GetRunID(), run.GetNumberOfEventToBeProcessed())
@@ -394,6 +451,7 @@ class MySteppingAction(G4UserSteppingAction):
 			# print KE, "\n", p, "\n", initialMomentum, "\n", finalMomentum, "\n\n" 
 			# energy = step.GetTotalEnergyDeposit()
 			# print p 
+
 			PLT.dataCollection(p, m, t) # calls data collection and analysis on final positions and momenta
 			# return initialMomentum, finalMomentum 
 		if particleName == 'e-':
