@@ -87,6 +87,13 @@ cluster_sizes_LIST = []
 global SEE_count
 SEE_count = 0
 
+#--- for a specific cluster ---#
+global C_positions_LIST
+global C_momenta_LIST
+
+C_positions_LIST = []
+C_momenta_LIST = []
+
 #----------code starts here!----------#
 class WipeData(object):
 	# wipe lists for next data collection
@@ -144,9 +151,11 @@ class Plotter(object):
 		# print momf
 
 		p3D.append(posf)
+		# print len(p3D)
 		m3D.append(momf)
 
 		px.append(posf[0])
+		# print "py = ", len(py)
 		py.append(posf[1])
 		pz.append(posf[2])
 
@@ -230,8 +239,9 @@ class Plotter(object):
 		ax.set_zlabel('mm')
 
 		ax.scatter(px, py, pz)
+		scale_fac = 50
 		# for i in np.arange(0, len(px)):
-		# 	a = Arrow3D([px[i], px[i] + mx[i]], [py[i], py[i] + my[i]], [pz[i], pz[i] + mz[i]], mutation_scale=20, lw=1, arrowstyle="-|>", color="r")
+		# 	a = Arrow3D([px[i], px[i] + mx[i]*scale_fac], [py[i], py[i] + my[i]*scale_fac], [pz[i], pz[i] + mz[i]*scale_fac], mutation_scale=20, lw=1, arrowstyle="-|>", color="r")
 		# 	ax.add_artist(a)
 
 
@@ -244,9 +254,12 @@ class Plotter(object):
 		# second subplot: a histogram of positions
 		# fig, axs = plt.subplots(3, sharey=True, sharex=False, tight_layout=False)
 
-	def graphMomemtum(self):
-
+	def computeClusterMomentum(self):
+		# pass
 		# print clusterCenter
+
+		# positions = open("positions.txt", "a")
+		# momenta = open("momenta.txt", "a")
 
 		clusterx = []
 		clustery = []
@@ -256,6 +269,8 @@ class Plotter(object):
 		momy = []
 		momz = []
 
+		print "length of p3D = ", len(p3D)
+
 		for pos in p3D:
 			difference = np.sqrt((clusterCenter[0] - pos[0])**2+ \
 								 (clusterCenter[1] - pos[1])**2+ \
@@ -264,42 +279,66 @@ class Plotter(object):
 			pos_index = p3D.index(pos)
 
 			if difference < 160:
-				clusterx.append(clusterCenter[0] - pos[0])
-				clustery.append(clusterCenter[1] - pos[1])
-				clusterz.append(clusterCenter[2] - pos[2])
+				clusterx.append(pos[0] - clusterCenter[0])
+				clustery.append(pos[1] - clusterCenter[1])
+				clusterz.append(pos[2] - clusterCenter[2])
 
-				momx.append(m3D[pos_index][0]*200)
-				momy.append(m3D[pos_index][1]*200)
-				momz.append(m3D[pos_index][2]*200)
+				momx.append(m3D[pos_index][0])
+				momy.append(m3D[pos_index][1])
+				momz.append(m3D[pos_index][2])
 
-		fig = plt.figure()
-		# Axes3D.scatter(self.px, self.py, self.pz)
+		print "number of clustered positrons = ", len(clusterx)
 
-		# first subplot: a 3D scatter plot of positions
-		ax = fig.add_subplot(111, projection='3d')
-		axmin = -160 
-		axmax = 160
-		axes = plt.gca()
-		axes.set_xlim([axmin,axmax])
-		axes.set_ylim([axmin,axmax])
-		axes.set_zlim([axmin,axmax])
+		# saving data
 
-		ax.set_xlabel('mm')
-		ax.set_ylabel('mm')
-		ax.set_zlabel('mm')
+		C_positions_LIST[:] = []
+		C_momenta_LIST[:] = []
 
-		ax.scatter(clusterx, clustery, clusterz)
-		for i in np.arange(0, len(clusterx)):
-			a = Arrow3D([clusterx[i], clusterx[i] + momx[i]], [clustery[i], clustery[i] + momy[i]], [clusterz[i], clusterz[i] + momz[i]], mutation_scale=20, lw=1, arrowstyle="-|>", color="r")
-			ax.add_artist(a)
+		for index in range(len(clusterx)):
+			position = [clusterx[index], clustery[index], clusterz[index]]
+			momentum = [momx[index], momy[index], momz[index]]
+			
+			# positions.write("["+ str(position[0])+ ", "+ str(position[1])+ ", "+ str(position[2])+ "]"+"\n")
+			# momenta.write("["+ str(momentum[0])+ ", "+ str(momentum[1])+ ", "+ str(momentum[2])+ "]"+"\n")
+
+			C_positions_LIST.append(position)
+			C_momenta_LIST.append(momentum)
 
 
-		plt.title("3D Positions of Randomly Scattered e+")
+		# fig = plt.figure()
+		# # Axes3D.scatter(self.px, self.py, self.pz)
 
-		# plt.draw() 
+		# # first subplot: a 3D scatter plot of positions
+		# ax = fig.add_subplot(111, projection='3d')
+		# axmin = -160 
+		# axmax = 160
+		# axes = plt.gca()
+		# axes.set_xlim([axmin,axmax])
+		# axes.set_ylim([axmin,axmax])
+		# axes.set_zlim([axmin,axmax])
+
+		# ax.set_xlabel('mm')
+		# ax.set_ylabel('mm')
+		# ax.set_zlabel('mm')
+
+		# ax.scatter(clusterx, clustery, clusterz)
+		# for i in np.arange(0, len(clusterx)):
+		# 	a = Arrow3D([clusterx[i], clusterx[i] + momx[i]], [clustery[i], clustery[i] + momy[i]], [clusterz[i], clusterz[i] + momz[i]], mutation_scale=20, lw=1, arrowstyle="-|>", color="r")
+		# 	ax.add_artist(a)
+
+
+		# plt.title("A single cluster")
+
+		# # plt.draw() 
 		
-		plt.show()
+		# plt.show()
 
+	def clusterDataReturner(self):
+
+		positions = C_positions_LIST
+		momenta = C_momenta_LIST
+
+		return positions, momenta
 
 	def computeClusterSize(self):
 		n_bins = 25
@@ -390,15 +429,15 @@ class MyRunAction(G4UserRunAction):
 
 	def EndOfRunAction(self, run):
 		# PLT.grapher()
-		PLT.graphMomemtum()
+		PLT.computeClusterMomentum()
 		PLT.computeClusterSize()
-		print(cluster_sizes_LIST)
+		# print(cluster_sizes_LIST)
 		PLT.dataAnalysis()
 		# WIPE.wipeElectronCounter()
 		global SEE_count
 		# print SEE_count/2
 		# time.sleep(1)
-		SEE_count = 0
+		# SEE_count = 0
 		WIPE.wipe()
 		# print "*** End of Run"
 		# print "- Run sammary : (id= %d, #events= %d)" \

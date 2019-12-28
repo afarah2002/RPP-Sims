@@ -22,6 +22,8 @@ from geom_constructor import GeomConstructor
 # from beam import BeamInitializer
 from beam2 import MyPrimaryGeneratorAction, MyRunAction, MyEventAction,MySteppingAction, MyField, \
 				  Plotter, WipeData
+from electron_emission import SecondaryElectronEmissionProcess
+from visualizer import Visualizer
 
 
 PLT = Plotter()
@@ -31,7 +33,7 @@ GC = GeomConstructor()
 spherical_coor_LIST = []
 # spherical_coor_LIST = [[0,0]]
 pi = np.pi
-step = 20
+step = 6
 for phi in np.arange(0, pi, pi/step): # smaller steps means more clusters, range goes to pi since clusters are double sided
 	for theta in np.arange(0, pi, pi/step):
 		sph_coor = [theta, phi] # phi, theta
@@ -42,16 +44,19 @@ global cluster_width
 cluster_width = 160
 spacing = 40./7
 interval = cluster_width + spacing
-for x in np.arange(-(500-cluster_width/2 - spacing), 500 - (cluster_width/2 + spacing) + interval, interval):
-	for y in np.arange(-(500-cluster_width/2 - spacing), 500 - (cluster_width/2 + spacing) + interval, interval):
-		for z in np.arange(-(500-cluster_width/2 - spacing), 500 - (cluster_width/2 + spacing) + interval, interval):
+interval *= 3
+global edge
+edge = 500
+for x in np.arange(-(edge-cluster_width/2 - spacing), edge - (cluster_width/2 + spacing) + interval, interval):
+	for y in np.arange(-(edge-cluster_width/2 - spacing), edge - (cluster_width/2 + spacing) + interval, interval):
+		for z in np.arange(-(edge-cluster_width/2 - spacing), edge - (cluster_width/2 + spacing) + interval, interval):
 			cluster_coor = [x,y,z]
 			# cluster_coor_LIST.append(cluster_coor)
 			# print cluster_coor
 			# time.sleep(1)
 			opposite = np.multiply(cluster_coor, -1)
 			for i in cluster_coor:
-				if np.abs(i) == 500-cluster_width/2 - spacing and cluster_coor not in cluster_coor_LIST:
+				if np.abs(i) == edge-cluster_width/2 - spacing and cluster_coor not in cluster_coor_LIST:
 					cluster_coor_LIST.append(cluster_coor)
 					break
 
@@ -85,10 +90,15 @@ for cluster_coor in cluster_coor_LIST:
 plt.show()
 '''
 
+global ALL_clusters_positions
+global ALL_clusters_momenta
 
-energy_LIST = [.25] # MeV
+ALL_clusters_positions = []
+ALL_clusters_momenta = []
+
+energy_LIST = [2000] 
 global energyUnit
-energyUnit = MeV
+energyUnit = eV
 
 cluster_time_median_LIST = []
 
@@ -122,44 +132,21 @@ class Constructor(object):
 		# calorimeter placed inside the box
 		# cal= G4EzVolume("Calorimeter") #initialize volume
 		NaI= gNistManager.FindOrBuildMaterial("G4_SODIUM_IODIDE")
-		C = gNistManager.FindOrBuildMaterial("G4_C")
-		# GC.ConstructBox("Detector Box", C, [0., 0., 0.], cm, [95., 95., 95.])
+		# GRAPHITE = gNistManager.FindOrBuildMaterial("G4_GRAPHITE")
+		# GC.ConstructBox("Detector Box", GRAPHITE, [0., 0., 0.], cm, [95., 95., 95.])
 
 		# GC.ConstructOrb("Orb", NaI, [10., 10., 10.], cm, 10.)
 
 		# GC.ConstructTube("Tube", NaI, [-1., -1., -1.], cm, 10., 30., 30., 0, 300.)
 		scale_factor = 5
 		# GC.ConstructSphere("Sphere", material1 , [0., 0., 0.], cm, 0, 1., 0., 360., 0., 180)
-		# GC.ConstructSphere("Sphere", C , [0., 0., 0.], cm, 9.5*scale_factor, 10.*scale_factor, 0., 360., 0., 180)
+		# GC.ConstructSphere("Sphere", GRAPHITE , [0., 0., 0.], m, (.10-30e-9)*scale_factor, .10*scale_factor, 0., 360., 0., 90)
 
 
 		# GC.ConstructCone("Cone", NaI, [-20., -20., -20.], cm, 0., 20., 0., 0., 25., 0., 180) # dphi = 359.9999 is basically 360, but we can still see it
 		# gRunManager.Initialize()
  
 
-class Visualizer(object):
-
-	def visualizer(self, viz_theta, viz_phi):
-		# time.sleep(.1)
-
-		gApplyUICommand("/vis/sceneHandler/create OGLSX OGLSX")
-		gApplyUICommand("/vis/viewer/create OGLSX oglsxviewer")
-		gApplyUICommand("/vis/drawVolume")
-		# gApplyUICommand("/globalField/verbose level")
-		# gApplyUICommand("/MagneticFieldModels/UniformField/SetBVec 3. 1. 1. Tesla")
-
-		gApplyUICommand("/vis/viewer/select oglsxviewer")
-		gApplyUICommand("/vis/ogl/set/displayListLimit 100000")
-		gApplyUICommand("/vis/scene/add/trajectories")
-
-		gApplyUICommand("/tracking/storeTrajectory 1")
-		gApplyUICommand("/vis/scene/endOfEventAction accumulate")
-		gApplyUICommand("/vis/scene/endOfRunAction accumulate")
-
-		gApplyUICommand("/vis/viewer/set/viewpointThetaPhi " + str(viz_theta) + " " + str(viz_phi))
-		gApplyUICommand("/vis/viewer/zoom 1.00001")
-		
-		gApplyUICommand("/vis/viewer/update")
 
 ###############################################################################################################################################
 # Functions for curve fitting by scipy.optimize.curve_fit()
@@ -212,7 +199,7 @@ class FieldDesign(object):
 		maxIndex = list(np.abs(magVec)).index(max(np.abs(magVec))) 
 
 		#get scaling factor
-		scale = 500 / np.abs(magVec[maxIndex])
+		scale = edge / np.abs(magVec[maxIndex])
 		magVecScaled = np.multiply(magVec, scale)
 
 		receiverDimScaled = [cluster_width, cluster_width, cluster_width]
@@ -284,20 +271,22 @@ FD = FieldDesign()
 
 
 Constructor = Constructor()
-Constructor.construct()
+
 VIS = Visualizer()
+
+SEEP = SecondaryElectronEmissionProcess()
 
 initialMomenta = []
 finalMomenta = []
 
-viz_theta = 90
-viz_phi = 0
+viz_theta = 35
+viz_phi = 35
 zoom = 1.5
 
 
 class ClusterClass(object):
 
-	def run(self):
+	def run(self, energy_range, location_range):
 		# print(energy_LIST)
 		# print(cluster_coor_LIST)
 		# time.sleep(1)
@@ -308,35 +297,35 @@ class ClusterClass(object):
 
 		# time.sleep(1)
 
-		# for sph_coor in spherical_coor_LIST:
-		for cart_coor in cluster_coor_LIST:
-			# time.sleep(.25)
-			# print cart_coor
+		for e in energy_LIST:
+			# WIPE.wipeComps()
 
-			x = cart_coor[0]
-			y = cart_coor[1]
-			z = cart_coor[2]
+			if energyUnit == MeV:
+				constant = 4.644e-9
+			if energyUnit == eV:
+				constant = 4.644e-15
 
-			# phi = sph_coor[0]
-			# theta = sph_coor[1]
-			# angle += 0.75
-			# print "coors = (", phi, ",", theta, ")"
-			for e in energy_LIST:
-				# WIPE.wipeComps()
+			b = np.sqrt(e*3*constant) 
 
-				if energyUnit == MeV:
-					constant = 4.644e-9
-				if energyUnit == eV:
-					constant = 4.644e-15
+			for location in location_range:
+				Constructor.construct()
 
-				b = np.sqrt(e*3*constant) 
 
-				magVec, magVecScaled = FD.cartesianfieldParam(e, b, x, y ,z, cluster_width)
-				# magVec, magVecScaled = FD.spherefieldParam(e, b, phi, theta)
+
+				if len(location) == 3: # this is cartesian
+					x = location[0]
+					y = location[1]
+					z = location[2]
+					magVec, magVecScaled = FD.cartesianfieldParam(e, b, x, y ,z, cluster_width)
+				if len(location) == 2: # this is spherical
+					phi = location[0]
+					theta = location[1]
+					magVec, magVecScaled = FD.spherefieldParam(e, b, phi, theta)
 
 
 				# set user actions ...
-				PGA_1 = MyPrimaryGeneratorAction(e, energyUnit,cart_coor)
+				# PGA_1 = MyPrimaryGeneratorAction(e, energyUnit,cart_coor)
+				PGA_1 = MyPrimaryGeneratorAction(e, energyUnit, magVecScaled)
 				gRunManager.SetUserAction(PGA_1)
 
 				myEA = MyEventAction()
@@ -345,6 +334,7 @@ class ClusterClass(object):
 				mySA = MySteppingAction()
 				gRunManager.SetUserAction(mySA)
 
+				# VIS.visualizer(viz_theta, viz_phi)
 
 				fieldMgr = gTransportationManager.GetFieldManager()
 				myField = G4UniformMagField(G4ThreeVector(magVec[0], magVec[1], magVec[2]))
@@ -358,13 +348,25 @@ class ClusterClass(object):
 				# CI.getClusterWidth()
 
 				myRA = MyRunAction()
+
+
 				gRunManager.SetUserAction(myRA)
 
 				gRunManager.Initialize()
 
 				gRunManager.BeamOn(1)
 
-				VIS.visualizer(viz_theta, viz_phi)
+				cluster_positions, cluster_momenta = PLT.clusterDataReturner()
+				print len(cluster_positions), "\n", len(cluster_momenta)
+
+				SEEP.runSEE(e, cluster_positions, cluster_momenta)
+				# while True:
+					# SEEP
+					# if raw_input() == "":
+					# 	break
+
+
+
 
 				# std_devs_LIST, means_LIST, n_LIST, n_sd_LIST = PLT.dataReturner()
 				std_devs_LIST, n_LIST, n_sd_LIST, cluster_time_LIST, cluster_size_LIST = PLT.dataReturner() # for 3D positions
@@ -486,7 +488,8 @@ class ClusterClass(object):
 		# function = rational3_3
 		# popt = CF.fit(function, x, y)
 
-		# PLT.grapher()
+		'''
+		PLT.grapher()
 
 		fig, ax = plt.subplots(1, sharey=True, sharex=False, tight_layout=False)
 		n_bins = 10
@@ -504,10 +507,11 @@ class ClusterClass(object):
 		# print "There are ", cluster_count, " clusters"
 		# print "Avg cluster size: ", avg_cluster_size, " mm"
 		plt.show()
+		'''
+		# return energy_range, ALL_clustes_positions, ALL_clusters_momenta
 
 CC = ClusterClass()
-if __name__ == '__main__':
-	CC.run()
+CC.run(energy_LIST, spherical_coor_LIST)
 
 
 

@@ -18,10 +18,12 @@ from matplotlib import colors
 from matplotlib.ticker import PercentFormatter
 import time
 
-
-
 global vectorCount
 vectorCount = 500 # number of scattered e+ per run
+
+global SEE_count
+SEE_count = 0
+
 
 #----------code starts here!----------#
 class WipeData(object):
@@ -76,13 +78,14 @@ PLT = Plotter()
 class MyPrimaryGeneratorAction(G4VUserPrimaryGeneratorAction):
 	"My Primary Generator Action"
 
-	def __init__(self, energy, locationArray, momentumArray):
+	def __init__(self, energy, p_LIST, m_LIST):
 		G4VUserPrimaryGeneratorAction.__init__(self)
 		self.particleGun = G4ParticleGun(1)
 		# print("\n Particle gun defined \n")
 		self.energy = energy
-		self.momentumArray = momentumArray
-		self.locationArray = locationArray
+		self.positions_LIST = p_LIST
+		self.momenta_LIST = m_LIST
+
 	def GeneratePrimaries(self, event):
 
 
@@ -97,13 +100,11 @@ class MyPrimaryGeneratorAction(G4VUserPrimaryGeneratorAction):
 		self.particleGun.SetParticleByName(particle) # define particle
 		self.particleGun.SetParticleEnergy(energy*energyUnit) # define particle energy 
 
-		for i in range(0, vectorCount): # creates random momentum vectors originating from [0, 0, 0]
-			mx = random.uniform(-1,1)
-			my = random.uniform(-1,1)
-			mz = random.uniform(-1,1)
-			momentumArray = [mx, my, mz]
-			self.particleGun.SetParticlePosition(G4ThreeVector(self.locationArray[0], self.locationArray[1], self.locationArray[2])*dimensionUnit) # define first particle generator location
-			self.particleGun.SetParticleMomentumDirection(G4ThreeVector(self.momentumArray[0], self.momentumArray[1], self.momentumArray[2])*dimensionUnit) # define first particle generator momentum
+		
+		for position in self.positions_LIST: # creates random momentum vectors originating from [0, 0, 0]
+			momentumArray = self.momenta_LIST[self.positions_LIST.index(position)]
+			self.particleGun.SetParticlePosition(G4ThreeVector(position[0], position[1], position[2])*dimensionUnit) # define first particle generator location
+			self.particleGun.SetParticleMomentumDirection(G4ThreeVector(momentumArray[0]/1000, momentumArray[1]/1000, momentumArray[2]/1000)*dimensionUnit) # define first particle generator momentum
 			self.particleGun.GeneratePrimaryVertex(event)
 		#################################################
 
@@ -112,8 +113,10 @@ class MyRunAction(G4UserRunAction):
 	"My Run Action"
 
 	def EndOfRunAction(self, run):
-		
-		pass
+		global SEE_count
+		SEE_count = 0
+		# time.sleep(1)
+		# pass
 
 # ------------------------------------------------------------------
 class MyEventAction(G4UserEventAction):
@@ -134,6 +137,8 @@ class MySteppingAction(G4UserSteppingAction):
 		track = step.GetTrack()
 		touchable = track.GetTouchable()
 		KE = track.GetKineticEnergy()
+		parentId = track.GetParentID()
+		particleName = track.GetDefinition().GetParticleName() 
 
 		# kinetic energy in MeV - PRE
 		# initialKE = preStepPoint.GetKineticEnergy() 
@@ -161,3 +166,7 @@ class MySteppingAction(G4UserSteppingAction):
 		# return initialMomentum, finalMomentum 
 
 
+		if particleName == 'e-' and parentId != 0:
+			global SEE_count
+			SEE_count += 1
+			print SEE_count
