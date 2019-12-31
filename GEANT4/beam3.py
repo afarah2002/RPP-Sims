@@ -75,7 +75,7 @@ class Plotter(object):
 PLT = Plotter()
 
 
-class MyPrimaryGeneratorAction(G4VUserPrimaryGeneratorAction):
+class ClusteredPositronGenerator(G4VUserPrimaryGeneratorAction):
 	"My Primary Generator Action"
 
 	def __init__(self, energy, p_LIST, m_LIST):
@@ -93,7 +93,7 @@ class MyPrimaryGeneratorAction(G4VUserPrimaryGeneratorAction):
 		#################################################
 		particle = "e+"
 		# energy_2 = 2.5
-		energyUnit = MeV 
+		energyUnit = keV 
 		dimensionUnit = cm
 
 		energy = self.energy
@@ -104,7 +104,7 @@ class MyPrimaryGeneratorAction(G4VUserPrimaryGeneratorAction):
 		for position in self.positions_LIST: # creates random momentum vectors originating from [0, 0, 0]
 			momentumArray = self.momenta_LIST[self.positions_LIST.index(position)]
 			self.particleGun.SetParticlePosition(G4ThreeVector(position[0], position[1], position[2])*dimensionUnit) # define first particle generator location
-			self.particleGun.SetParticleMomentumDirection(G4ThreeVector(momentumArray[0]/1000, momentumArray[1]/1000, momentumArray[2]/1000)*dimensionUnit) # define first particle generator momentum
+			self.particleGun.SetParticleMomentumDirection(G4ThreeVector(momentumArray[0], momentumArray[1], momentumArray[2])*dimensionUnit) # define first particle generator momentum
 			self.particleGun.GeneratePrimaryVertex(event)
 		#################################################
 

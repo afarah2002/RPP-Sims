@@ -305,33 +305,33 @@ class Plotter(object):
 			C_momenta_LIST.append(momentum)
 
 
-		# fig = plt.figure()
-		# # Axes3D.scatter(self.px, self.py, self.pz)
+		fig = plt.figure()
+		# Axes3D.scatter(self.px, self.py, self.pz)
 
-		# # first subplot: a 3D scatter plot of positions
-		# ax = fig.add_subplot(111, projection='3d')
-		# axmin = -160 
-		# axmax = 160
-		# axes = plt.gca()
-		# axes.set_xlim([axmin,axmax])
-		# axes.set_ylim([axmin,axmax])
-		# axes.set_zlim([axmin,axmax])
+		# first subplot: a 3D scatter plot of positions
+		ax = fig.add_subplot(111, projection='3d')
+		axmin = -160 
+		axmax = 160
+		axes = plt.gca()
+		axes.set_xlim([axmin,axmax])
+		axes.set_ylim([axmin,axmax])
+		axes.set_zlim([axmin,axmax])
 
-		# ax.set_xlabel('mm')
-		# ax.set_ylabel('mm')
-		# ax.set_zlabel('mm')
+		ax.set_xlabel('mm')
+		ax.set_ylabel('mm')
+		ax.set_zlabel('mm')
 
-		# ax.scatter(clusterx, clustery, clusterz)
-		# for i in np.arange(0, len(clusterx)):
-		# 	a = Arrow3D([clusterx[i], clusterx[i] + momx[i]], [clustery[i], clustery[i] + momy[i]], [clusterz[i], clusterz[i] + momz[i]], mutation_scale=20, lw=1, arrowstyle="-|>", color="r")
-		# 	ax.add_artist(a)
+		ax.scatter(clusterx, clustery, clusterz)
+		for i in np.arange(0, len(clusterx)):
+			a = Arrow3D([clusterx[i], clusterx[i] + 1000*momx[i]], [clustery[i], clustery[i] + 1000*momy[i]], [clusterz[i], clusterz[i] + 1000*momz[i]], mutation_scale=20, lw=1, arrowstyle="-|>", color="r")
+			ax.add_artist(a)
 
 
-		# plt.title("A single cluster")
+		plt.title("A single cluster")
 
-		# # plt.draw() 
+		# plt.draw() 
 		
-		# plt.show()
+		plt.show()
 
 	def clusterDataReturner(self):
 
