@@ -31,6 +31,8 @@ WIPE = WipeData()
 # energy_LIST = list(np.logspace(-6., 3., num=500, endpoint=True, base=10)) # eV
 energy_LIST = list(np.arange(1.901e-3, 1e3, 1e-5))
 # energy_LIST = [1000.]
+global energyUnit
+energyUnit = MeV
 
 
 # energy_LIST = []
@@ -174,7 +176,7 @@ if __name__ == '__main__':
 				# angle += 10
 				# angle += 0.075 # +0.075 is a recommended delta theta
 				# set user actions ...
-				PGA_1 = MyPrimaryGeneratorAction(energy)
+				PGA_1 = MyPrimaryGeneratorAction(energy, energyUnit, magVecScaled)
 				gRunManager.SetUserAction(PGA_1)
 
 				myEA = MyEventAction()
