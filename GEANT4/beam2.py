@@ -84,7 +84,10 @@ class WipeData(object):
 		pos_3D_left[:] = []
 		px[:] = []
 		py[:] = []
-		pz[:] = []
+		pz[:] = []		
+		mx[:] = []
+		my[:] = []
+		mz[:] = []
 
 	def wipeComps(self):
 
@@ -119,6 +122,10 @@ class Plotter(object):
 		px.append(posf[0])
 		py.append(posf[1])
 		pz.append(posf[2])
+
+		mx.append(momf[0])
+		my.append(momf[1])
+		mz.append(momf[2])
 
 		position = np.sqrt(np.square(posf[0]) + np.square(posf[1]) + np.square(posf[2]))
 
@@ -187,88 +194,88 @@ class Plotter(object):
 		ax.set_ylabel('Y position units')
 		ax.set_zlabel('Z position units')
 
-		ax.scatter(px, py, pz)
+		ax.scatter(mx, my, mz)
 		plt.title("3D Positions of Randomly Scattered e+")
 		plt.show()
 
-	def computeClusterMomentum(self):
-		# pass
-		# print clusterCenter
+	# def computeClusterMomentum(self):
+	# 	# pass
+	# 	# print clusterCenter
 
-		# positions = open("positions.txt", "a")
-		# momenta = open("momenta.txt", "a")
+	# 	# positions = open("positions.txt", "a")
+	# 	# momenta = open("momenta.txt", "a")
 
-		clusterx = []
-		clustery = []
-		clusterz = []
+	# 	clusterx = []
+	# 	clustery = []
+	# 	clusterz = []
 
-		momx = []		
-		momy = []
-		momz = []
+	# 	momx = []		
+	# 	momy = []
+	# 	momz = []
 
-		print "length of p3D = ", len(p3D)
+	# 	print "length of p3D = ", len(p3D)
 
-		for pos in p3D:
-			difference = np.sqrt((clusterCenter[0] - pos[0])**2+ \
-								 (clusterCenter[1] - pos[1])**2+ \
-								 (clusterCenter[2] - pos[2])**2)
+	# 	for pos in p3D:
+	# 		difference = np.sqrt((clusterCenter[0] - pos[0])**2+ \
+	# 							 (clusterCenter[1] - pos[1])**2+ \
+	# 							 (clusterCenter[2] - pos[2])**2)
 
-			pos_index = p3D.index(pos)
+	# 		pos_index = p3D.index(pos)
 
-			if difference < 160:
-				clusterx.append(pos[0] - clusterCenter[0])
-				clustery.append(pos[1] - clusterCenter[1])
-				clusterz.append(pos[2] - clusterCenter[2])
+	# 		if difference < 160:
+	# 			clusterx.append(pos[0] - clusterCenter[0])
+	# 			clustery.append(pos[1] - clusterCenter[1])
+	# 			clusterz.append(pos[2] - clusterCenter[2])
 
-				momx.append(m3D[pos_index][0])
-				momy.append(m3D[pos_index][1])
-				momz.append(m3D[pos_index][2])
+	# 			momx.append(m3D[pos_index][0])
+	# 			momy.append(m3D[pos_index][1])
+	# 			momz.append(m3D[pos_index][2])
 
-		print "number of clustered positrons = ", len(clusterx)
+	# 	print "number of clustered positrons = ", len(clusterx)
 
-		# saving data
+	# 	# saving data
 
-		C_positions_LIST[:] = []
-		C_momenta_LIST[:] = []
+	# 	C_positions_LIST[:] = []
+	# 	C_momenta_LIST[:] = []
 
-		for index in range(len(clusterx)):
-			position = [clusterx[index], clustery[index], clusterz[index]]
-			momentum = [momx[index], momy[index], momz[index]]
+	# 	for index in range(len(clusterx)):
+	# 		position = [clusterx[index], clustery[index], clusterz[index]]
+	# 		momentum = [momx[index], momy[index], momz[index]]
 			
-			# positions.write("["+ str(position[0])+ ", "+ str(position[1])+ ", "+ str(position[2])+ "]"+"\n")
-			# momenta.write("["+ str(momentum[0])+ ", "+ str(momentum[1])+ ", "+ str(momentum[2])+ "]"+"\n")
+	# 		# positions.write("["+ str(position[0])+ ", "+ str(position[1])+ ", "+ str(position[2])+ "]"+"\n")
+	# 		# momenta.write("["+ str(momentum[0])+ ", "+ str(momentum[1])+ ", "+ str(momentum[2])+ "]"+"\n")
 
-			C_positions_LIST.append(position)
-			C_momenta_LIST.append(momentum)
-
-
-		fig = plt.figure()
-		# Axes3D.scatter(self.px, self.py, self.pz)
-
-		# first subplot: a 3D scatter plot of positions
-		ax = fig.add_subplot(111, projection='3d')
-		axmin = -160 
-		axmax = 160
-		axes = plt.gca()
-		axes.set_xlim([axmin,axmax])
-		axes.set_ylim([axmin,axmax])
-		axes.set_zlim([axmin,axmax])
-
-		ax.set_xlabel('mm')
-		ax.set_ylabel('mm')
-		ax.set_zlabel('mm')
-
-		ax.scatter(clusterx, clustery, clusterz)
-		for i in np.arange(0, len(clusterx)):
-			a = Arrow3D([clusterx[i], clusterx[i] + 1000*momx[i]], [clustery[i], clustery[i] + 1000*momy[i]], [clusterz[i], clusterz[i] + 1000*momz[i]], mutation_scale=20, lw=1, arrowstyle="-|>", color="r")
-			ax.add_artist(a)
+	# 		C_positions_LIST.append(position)
+	# 		C_momenta_LIST.append(momentum)
 
 
-		plt.title("A single cluster")
+	# 	fig = plt.figure()
+	# 	# Axes3D.scatter(self.px, self.py, self.pz)
 
-		# plt.draw() 
+	# 	# first subplot: a 3D scatter plot of positions
+	# 	ax = fig.add_subplot(111, projection='3d')
+	# 	axmin = -160 
+	# 	axmax = 160
+	# 	axes = plt.gca()
+	# 	axes.set_xlim([axmin,axmax])
+	# 	axes.set_ylim([axmin,axmax])
+	# 	axes.set_zlim([axmin,axmax])
+
+	# 	ax.set_xlabel('mm')
+	# 	ax.set_ylabel('mm')
+	# 	ax.set_zlabel('mm')
+
+	# 	ax.scatter(clusterx, clustery, clusterz)
+	# 	for i in np.arange(0, len(clusterx)):
+	# 		a = Arrow3D([clusterx[i], clusterx[i] + 1000*momx[i]], [clustery[i], clustery[i] + 1000*momy[i]], [clusterz[i], clusterz[i] + 1000*momz[i]], mutation_scale=20, lw=1, arrowstyle="-|>", color="r")
+	# 		ax.add_artist(a)
+
+
+	# 	plt.title("A single cluster")
+
+	# 	# plt.draw() 
 		
-		plt.show()
+	# 	plt.show()
 
 	def computeClusterSize(self):
 		n_bins = 25
@@ -321,14 +328,15 @@ PLT = Plotter()
 class MyPrimaryGeneratorAction(G4VUserPrimaryGeneratorAction):
 	"My Primary Generator Action"
 
-	def __init__(self,energy, energyUnit, center):
+	def __init__(self, energy, energyUnit):
 		G4VUserPrimaryGeneratorAction.__init__(self)
 		self.particleGun = G4ParticleGun(1)
 		# print("\n Particle gun defined \n")
 		self.energy = energy
+		global KE
+		KE = energy
 		self.energyUnit = energyUnit
-		global clusterCenter
-		clusterCenter = center
+
 	def GeneratePrimaries(self, event):
 
 
@@ -336,14 +344,12 @@ class MyPrimaryGeneratorAction(G4VUserPrimaryGeneratorAction):
 		#################################################
 		locationArray = [0, 0, 0]
 
-		particle = "e+"
+		particle = "p"
 		# energy_2 = 2.5
-		energyUnit = self.energyUnit
 		dimensionUnit = cm
 
-		energy = self.energy
 		self.particleGun.SetParticleByName(particle) # define particle
-		self.particleGun.SetParticleEnergy(energy*energyUnit) # define particle energy 
+		self.particleGun.SetParticleEnergy(self.energy*self.energyUnit) # define particle energy 
 
 		for i in range(0, vectorCount): # creates random momentum vectors originating from [0, 0, 0]
 			mx = random.uniform(-1,1)
@@ -360,8 +366,8 @@ class MyRunAction(G4UserRunAction):
 	"My Run Action"
 
 	def EndOfRunAction(self, run):
-		# PLT.grapher()\
-		PLT.computeClusterMomentum()
+		PLT.grapher()
+		# PLT.computeClusterMomentum()
 		# PLT.computeClusterSize()
 		PLT.dataAnalysis()
 		WIPE.wipe()
@@ -386,7 +392,7 @@ class MySteppingAction(G4UserSteppingAction):
 
 		track = step.GetTrack()
 		touchable = track.GetTouchable()
-		KE = track.GetKineticEnergy()
+		KE = preStepPoint.GetKineticEnergy()
 
 		# kinetic energy in MeV - PRE
 		# initialKE = preStepPoint.GetKineticEnergy() 
@@ -395,42 +401,19 @@ class MySteppingAction(G4UserSteppingAction):
 
 		m = [track.GetMomentum().x, track.GetMomentum().y, track.GetMomentum().z] # equal to the postStepPoint momentum
 		p = [postStepPoint.GetPosition().x, postStepPoint.GetPosition().y, postStepPoint.GetPosition().z]
+		delta_m = [step.GetDeltaMomentum().x, step.GetDeltaMomentum().y, step.GetDeltaMomentum().z]
 		mm = np.sqrt((m[0])**2 + (m[1])**2 + (m[2])**2)
 
 		# momenta - PRE
 		initialMomentum = [preStepPoint.GetMomentum().x, preStepPoint.GetMomentum().y, preStepPoint.GetMomentum().z]
 		# momenta - POST
 		finalMomentum = [postStepPoint.GetMomentum().x, postStepPoint.GetMomentum().y, postStepPoint.GetMomentum().z]
-
+		# m = np.add(initialMomentum, delta_m)
 		# print KE, "\n", p, "\n", initialMomentum, "\n", finalMomentum, "\n\n" 
 		# energy = step.GetTotalEnergyDeposit()
-
-
+		print KE
 		PLT.dataCollection(p, m) # calls data collection and analysis on final positions and momenta
 		# return initialMomentum, finalMomentum 
 
-class MyField(G4MagneticField): ### used when mag field NOT parameterized in main filed
-	"My Magnetic Field"
-
-	def __init__(self, eb_ratio):
-		self.eb_ratio = eb_ratio
-
-	def GetFieldValue(self, pos, time):
-		self.eb_ratio = 1
-		vectorList = [
-						# [1., 1., 1.], 
-					 	# [10., 10., 10.]
-					 	list(np.multiply([0.1, 0.1, 0.1], self.eb_ratio))
-					 	# [0., 0., 1]
-					 	# [0,0,0]
-					 ]
-		for v in vectorList:
-
-			bfield = G4ThreeVector()
-			bfield.x = v[0]*tesla
-			bfield.y = v[1]*tesla
-			bfield.z = v[2]*tesla
-			# print "\n", "B-field activated", "\n" ### gets rid of other prints for some reason
-			return bfield
 
 
