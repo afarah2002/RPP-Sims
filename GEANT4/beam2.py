@@ -290,6 +290,8 @@ class Plotter(object):
 		print "number of clustered positrons = ", len(clusterx)
 
 		# saving data
+		global C_positions_LIST
+		global C_momenta_LIST
 
 		C_positions_LIST[:] = []
 		C_momenta_LIST[:] = []
@@ -490,7 +492,7 @@ class MySteppingAction(G4UserSteppingAction):
 			# print KE, "\n", p, "\n", initialMomentum, "\n", finalMomentum, "\n\n" 
 			# energy = step.GetTotalEnergyDeposit()
 			# print p 
-
+			print "momentum = ", m
 			PLT.dataCollection(p, m, t) # calls data collection and analysis on final positions and momenta
 			# return initialMomentum, finalMomentum 
 		if particleName == 'e-':

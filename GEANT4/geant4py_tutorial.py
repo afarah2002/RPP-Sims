@@ -92,10 +92,11 @@ for cluster_coor in cluster_coor_LIST:
 plt.show()
 '''
 
-energy_LIST = [0.002]
-energy_LIST = list(np.arange(0.002, 0.003, 0.0002))
+# energy_LIST = [0.002]
+# energy_LIST = list(np.arange(0.002, 0.003, 0.0002))
+energy_LIST = list(np.arange(1000, 2000, 200))
 global energyUnit
-energyUnit = MeV
+energyUnit = keV
 
 cluster_time_median_LIST = []
 
@@ -344,12 +345,13 @@ class ClusterClass(object):
 
 			cluster_positions, cluster_momenta = PLT.clusterDataReturner()
 			print len(cluster_positions), "\n", len(cluster_momenta)
-			# saving ALL clusters for this energy to be SEEPed
-			ALL_clusters_positions.append(cluster_positions) 
-			# time.sleep(1.5)
-			ALL_clusters_momenta.append(cluster_momenta) 
 
-			# std_devs_LIST, means_LIST, n_LIST, n_sd_LIST = PLT.dataReturner()
+			# saving ALL clusters for this energy to be SEEPed
+			# ALL_clusters_positions.append(cluster_positions) 
+			# # time.sleep(1.5)
+			# ALL_clusters_momenta.append(cluster_momenta) 
+
+			# # std_devs_LIST, means_LIST, n_LIST, n_sd_LIST = PLT.dataReturner()
 			std_devs_LIST, n_LIST, n_sd_LIST, cluster_time_LIST, cluster_size_LIST = PLT.dataReturner() # for 3D positions
 
 				# WIPE.wipeCluster()
@@ -491,10 +493,11 @@ if __name__ == '__main__':
 		positions, momenta = CC.run(e, spherical_coor_LIST)
 		# print "# of clusters = ", len(positions)
 		# time.sleep(3)
-		print len(positions)
-		# time.sleep(1)
-		for pos in positions:
-			mom = momenta[positions.index(pos)]
-			# print mom
-			SEEP.runSEE(e, pos, mom)
-			time.sleep(3)
+
+		# print len(positions)
+		# # time.sleep(1)
+		# for pos in positions:
+		# 	mom = momenta[positions.index(pos)]
+		# 	# print mom
+		# 	SEEP.runSEE(e, pos, mom)
+		# 	time.sleep(3)
