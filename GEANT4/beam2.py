@@ -307,33 +307,33 @@ class Plotter(object):
 			C_momenta_LIST.append(momentum)
 
 
-		fig = plt.figure()
-		# Axes3D.scatter(self.px, self.py, self.pz)
+		# fig = plt.figure()
+		# # Axes3D.scatter(self.px, self.py, self.pz)
 
-		# first subplot: a 3D scatter plot of positions
-		ax = fig.add_subplot(111, projection='3d')
-		axmin = -160 
-		axmax = 160
-		axes = plt.gca()
-		axes.set_xlim([axmin,axmax])
-		axes.set_ylim([axmin,axmax])
-		axes.set_zlim([axmin,axmax])
+		# # first subplot: a 3D scatter plot of positions
+		# ax = fig.add_subplot(111, projection='3d')
+		# axmin = -160 
+		# axmax = 160
+		# axes = plt.gca()
+		# axes.set_xlim([axmin,axmax])
+		# axes.set_ylim([axmin,axmax])
+		# axes.set_zlim([axmin,axmax])
 
-		ax.set_xlabel('mm')
-		ax.set_ylabel('mm')
-		ax.set_zlabel('mm')
+		# ax.set_xlabel('mm')
+		# ax.set_ylabel('mm')
+		# ax.set_zlabel('mm')
 
-		ax.scatter(clusterx, clustery, clusterz)
-		for i in np.arange(0, len(clusterx)):
-			a = Arrow3D([clusterx[i], clusterx[i] + 1000*momx[i]], [clustery[i], clustery[i] + 1000*momy[i]], [clusterz[i], clusterz[i] + 1000*momz[i]], mutation_scale=20, lw=1, arrowstyle="-|>", color="r")
-			ax.add_artist(a)
+		# ax.scatter(clusterx, clustery, clusterz)
+		# for i in np.arange(0, len(clusterx)):
+		# 	a = Arrow3D([clusterx[i], clusterx[i] + 1000*momx[i]], [clustery[i], clustery[i] + 1000*momy[i]], [clusterz[i], clusterz[i] + 1000*momz[i]], mutation_scale=20, lw=1, arrowstyle="-|>", color="r")
+		# 	ax.add_artist(a)
 
 
-		plt.title("A single cluster")
+		# plt.title("A single cluster")
 
-		# plt.draw() 
+		# # plt.draw() 
 		
-		plt.show()
+		# plt.show()
 
 	def clusterDataReturner(self):
 
@@ -432,7 +432,7 @@ class MyRunAction(G4UserRunAction):
 	def EndOfRunAction(self, run):
 		# PLT.grapher()
 		PLT.computeClusterMomentum()
-		PLT.computeClusterSize()
+		# PLT.computeClusterSize()
 		# print(cluster_sizes_LIST)
 		PLT.dataAnalysis()
 		# WIPE.wipeElectronCounter()
@@ -492,7 +492,6 @@ class MySteppingAction(G4UserSteppingAction):
 			# print KE, "\n", p, "\n", initialMomentum, "\n", finalMomentum, "\n\n" 
 			# energy = step.GetTotalEnergyDeposit()
 			# print p 
-			print "momentum = ", m
 			PLT.dataCollection(p, m, t) # calls data collection and analysis on final positions and momenta
 			# return initialMomentum, finalMomentum 
 		if particleName == 'e-':
@@ -500,31 +499,4 @@ class MySteppingAction(G4UserSteppingAction):
 			# print "electron"
 			SEE_count += 1
 			# print SEE_count
-
-
-
-class MyField(G4MagneticField): ### used when mag field NOT parameterized in main filed
-	"My Magnetic Field"
-
-	def __init__(self, eb_ratio):
-		self.eb_ratio = eb_ratio
-
-	def GetFieldValue(self, pos, time):
-		self.eb_ratio = 1
-		vectorList = [
-						# [1., 1., 1.], 
-					 	# [10., 10., 10.]
-					 	list(np.multiply([0.1, 0.1, 0.1], self.eb_ratio))
-					 	# [0., 0., 1]
-					 	# [0,0,0]
-					 ]
-		for v in vectorList:
-
-			bfield = G4ThreeVector()
-			bfield.x = v[0]*tesla
-			bfield.y = v[1]*tesla
-			bfield.z = v[2]*tesla
-			# print "\n", "B-field activated", "\n" ### gets rid of other prints for some reason
-			return bfield
-
 

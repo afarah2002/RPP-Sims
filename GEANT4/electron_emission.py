@@ -19,7 +19,7 @@ from scipy import optimize, stats
 #----file imports--------#
 from geom_constructor import GeomConstructor 
 # from beam import BeamInitializer
-from beam3 import ClusteredPositronGenerator, MyRunAction, MyEventAction, MySteppingAction, Plotter, WipeData
+from beam3 import ClusteredPositronGenerator, MyRunAction, MyEventAction, MySteppingAction, WipeData
 from visualizer import Visualizer
 
 #----------code starts here!----------#
@@ -87,8 +87,8 @@ SEEConstructor = SEEConstructor()
 VIS = Visualizer()
 # # CC = ClusterClass()
 
-viz_theta = 90
-viz_phi = 0
+viz_theta = 45
+viz_phi = 45
 
 
 class SecondaryElectronEmissionProcess(object):
@@ -97,7 +97,8 @@ class SecondaryElectronEmissionProcess(object):
 
 	def runSEE(self, energy, positions, momenta):
 		# while True:
-		print energy
+		print momenta
+		time.sleep(1)
 		SEEConstructor
 		SEEConstructor.construct()
 		# # viz_theta += .1

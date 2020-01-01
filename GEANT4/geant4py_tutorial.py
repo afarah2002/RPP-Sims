@@ -21,7 +21,7 @@ from scipy import optimize, stats
 import sys
 
 #-----------FILE imports------------#
-from beam2 import MyPrimaryGeneratorAction, MyRunAction, MyEventAction,MySteppingAction, MyField, \
+from beam2 import MyPrimaryGeneratorAction, MyRunAction, MyEventAction,MySteppingAction, \
 				  Plotter, WipeData
 from electron_emission import SecondaryElectronEmissionProcess
 from geom_constructor import GeomConstructor 
@@ -94,9 +94,9 @@ plt.show()
 
 # energy_LIST = [0.002]
 # energy_LIST = list(np.arange(0.002, 0.003, 0.0002))
-energy_LIST = list(np.arange(1000, 2000, 200))
+energy_LIST = list(np.arange(1001, 2000, 200))
 global energyUnit
-energyUnit = keV
+energyUnit = eV
 
 cluster_time_median_LIST = []
 
@@ -263,14 +263,12 @@ class FieldDesign(object):
 
 		return magVec, magVecScaled
 
+# -----------CLASS ASSIGNMENTS----------- #
 FD = FieldDesign()
-
-
 Constructor = Constructor()
-
 VIS = Visualizer()
-
 SEEP = SecondaryElectronEmissionProcess()
+# --------------------------------------- #
 
 initialMomenta = []
 finalMomenta = []
@@ -279,6 +277,11 @@ viz_theta = 35
 viz_phi = 35
 zoom = 1.5
 
+
+global ALL_clusters_positions 
+global ALL_clusters_momenta 
+ALL_clusters_positions = []
+ALL_clusters_momenta = []
 
 class ClusterClass(object):
 
@@ -295,8 +298,8 @@ class ClusterClass(object):
 
 		e = energy
 
-		ALL_clusters_positions = []
-		ALL_clusters_momenta = []
+		ALL_clusters_positions[:] = []
+		ALL_clusters_momenta[:] = []
 
 		if energyUnit == MeV:
 			constant = 4.644e-9
@@ -328,7 +331,7 @@ class ClusterClass(object):
 			gRunManager.SetUserAction(myEA)
 			mySA = MySteppingAction()
 			gRunManager.SetUserAction(mySA)
-			VIS.visualizer(viz_theta, viz_phi)
+			# VIS.visualizer(viz_theta, viz_phi)
 			fieldMgr = gTransportationManager.GetFieldManager()
 			myField = G4UniformMagField(G4ThreeVector(magVec[0], magVec[1], magVec[2]))
 			# myField = MyField(1)
@@ -347,10 +350,11 @@ class ClusterClass(object):
 			print len(cluster_positions), "\n", len(cluster_momenta)
 
 			# saving ALL clusters for this energy to be SEEPed
-			# ALL_clusters_positions.append(cluster_positions) 
-			# # time.sleep(1.5)
-			# ALL_clusters_momenta.append(cluster_momenta) 
-
+			ALL_clusters_positions.append(cluster_positions) 
+			print "appended", ALL_clusters_positions
+			# time.sleep(12)
+			ALL_clusters_momenta.append(cluster_momenta) 
+			SEEP.runSEE(e, cluster_positions, cluster_momenta)
 			# # std_devs_LIST, means_LIST, n_LIST, n_sd_LIST = PLT.dataReturner()
 			std_devs_LIST, n_LIST, n_sd_LIST, cluster_time_LIST, cluster_size_LIST = PLT.dataReturner() # for 3D positions
 
@@ -403,6 +407,7 @@ class ClusterClass(object):
 			# plt.show()
 			
 			# WIPE.wipeTime()
+		time.sleep(1)
 		for i in ALL_clusters_positions:
 			print i[-1] # <------------------- WHAT?!?!?!? HOW, THESE SHOULD BE DIFFERENT!!!! APPENDING RIGHT????
 		time.sleep(1.5)
@@ -495,9 +500,10 @@ if __name__ == '__main__':
 		# time.sleep(3)
 
 		# print len(positions)
-		# # time.sleep(1)
+		# time.sleep(1)
+		# counter = 0
 		# for pos in positions:
 		# 	mom = momenta[positions.index(pos)]
 		# 	# print mom
 		# 	SEEP.runSEE(e, pos, mom)
-		# 	time.sleep(3)
+		# 	# time.sleep(3)

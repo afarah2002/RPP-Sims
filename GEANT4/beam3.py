@@ -25,6 +25,8 @@ global SEE_count
 SEE_count = 0
 
 
+
+
 #----------code starts here!----------#
 class WipeData(object):
 	# wipe lists for next data collection
@@ -44,37 +46,6 @@ class Arrow3D(FancyArrowPatch):
         self.set_positions((xs[0],ys[0]),(xs[1],ys[1]))
         FancyArrowPatch.draw(self, renderer)
 
-class Plotter(object):
-	"graphs 3D positions"
-
-	def __init__(self):
-		pass
-
-	def dataCollection(self, posf, momf, tcluster):
-
-		pass
-
-
-	def dataAnalysis(self):
-
-		pass
-
-
-
-	def dataReturner(self):
-
-		pass
-
-	def grapher(self):
-
-		pass
-
-
-		# plt.show()
-
-PLT = Plotter()
-
-
 class ClusteredPositronGenerator(G4VUserPrimaryGeneratorAction):
 	"My Primary Generator Action"
 
@@ -93,7 +64,7 @@ class ClusteredPositronGenerator(G4VUserPrimaryGeneratorAction):
 		#################################################
 		particle = "e+"
 		# energy_2 = 2.5
-		energyUnit = keV 
+		energyUnit = eV 
 		dimensionUnit = cm
 
 		energy = self.energy
@@ -103,9 +74,15 @@ class ClusteredPositronGenerator(G4VUserPrimaryGeneratorAction):
 		
 		for position in self.positions_LIST: # creates random momentum vectors originating from [0, 0, 0]
 			momentumArray = self.momenta_LIST[self.positions_LIST.index(position)]
-			self.particleGun.SetParticlePosition(G4ThreeVector(position[0], position[1], position[2])*dimensionUnit) # define first particle generator location
-			self.particleGun.SetParticleMomentumDirection(G4ThreeVector(momentumArray[0], momentumArray[1], momentumArray[2])*dimensionUnit) # define first particle generator momentum
-			self.particleGun.GeneratePrimaryVertex(event)
+			print momentumArray
+			if momentumArray[0] != 0 or momentumArray[1] != 0 or momentumArray[2] != 0:
+				self.particleGun.SetParticlePosition(G4ThreeVector(position[0], position[1], position[2])*dimensionUnit) # define first particle generator location
+				self.particleGun.SetParticleMomentumDirection(G4ThreeVector(momentumArray[0], momentumArray[1], momentumArray[2])*dimensionUnit) # define first particle generator momentum
+				self.particleGun.GeneratePrimaryVertex(event)
+			else:
+				print KE 
+				# time.sleep(1)
+
 		#################################################
 
 #-------------------------------------------------------------------
@@ -136,6 +113,7 @@ class MySteppingAction(G4UserSteppingAction):
 		# change = step.particleChange()
 		track = step.GetTrack()
 		touchable = track.GetTouchable()
+		global KE
 		KE = track.GetKineticEnergy()
 		parentId = track.GetParentID()
 		particleName = track.GetDefinition().GetParticleName() 
