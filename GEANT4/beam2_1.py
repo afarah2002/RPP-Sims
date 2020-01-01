@@ -1,23 +1,23 @@
-#----------imports----------#
+#----------GEANT4 IMPORTS----------#
 from Geant4 import * 
-import random
-import numpy as np
-import scipy.stats as ss
-from scipy.signal import find_peaks
-import pandas as pd
-import seaborn as sns  # for nicer graphics
 
-## matplotlib stuff
+# --------PYTHON IMPORTS ----------#
+from matplotlib import colors
 import matplotlib.pyplot as plt
-import matplotlib.pyplot as plt
+from matplotlib.ticker import PercentFormatter
 from mpl_toolkits.mplot3d import Axes3D
 from matplotlib.patches import FancyArrowPatch
 from mpl_toolkits.mplot3d import proj3d
+import numpy as np
+import pandas as pd
+import random
+from scipy.signal import find_peaks
+import scipy.stats as ss
+import seaborn as sns  # for nicer graphics
 from time import sleep
-from matplotlib import colors
-from matplotlib.ticker import PercentFormatter
-import time
 
+# -------- FILE IMPORTS ------- #
+from arrow_generator import Arrow3D
 
 global bound_lower
 global bound_upper
@@ -29,39 +29,12 @@ bound_upper = bound_lower + 400
 global vectorCount
 vectorCount = 500 # number of scattered e+ per run
 
-# global energy
-# energy = SP.sendEnergy()
-
-global pos_3D_right
-pos_3D_right = []
-global n_sd_pos_3D_right_LIST
-sd_pos_3D_right_LIST = []
-global n_pos_3D_right_LIST
-n_pos_3D_right_LIST = []
-global n_sd_pos_3D_right_LIST
-n_sd_pos_3D_right_LIST = []
-
-global pos_3D_left
-pos_3D_left = []
-global n_sd_pos_3D_left_LIST
-sd_pos_3D_left_LIST = []
-global n_pos_3D_left_LIST
-n_pos_3D_left_LIST = []
-global n_sd_pos_3D_left_LIST
-n_sd_pos_3D_left_LIST = []
 
 global cluster_time_LIST
 cluster_time_LIST = []
 
 global p3D
-global px
-global py
-global pz
-
 p3D = []
-px = []
-py = []
-pz = []
 
 
 global m3D
@@ -88,80 +61,50 @@ C_positions_LIST = []
 C_momenta_LIST = []
 
 #----------code starts here!----------#
-class WipeData(object):
-	# wipe lists for next data collection
-	def wipe(self):
-		pos_3D_right[:] = []
-		pos_3D_left[:] = []
-		p3D[:] = []
-		m3D[:] = []
-		px[:] = []
-		py[:] = []
-		pz[:] = []
-
-	def wipeElectronCounter(self):
-		SEE_count = 0
-		pass
-
-	def wipeTime(self):
-		cluster_time_LIST[:] = []
-
-	def wipeComps(self):
-		sd_pos_3D_right_LIST[:] = []
-		n_pos_3D_right_LIST[:] = []
-		n_sd_pos_3D_right_LIST[:] = []
-		sd_pos_3D_left_LIST[:] = []
-		n_pos_3D_left_LIST[:] = []
-		n_sd_pos_3D_left_LIST[:] = []
-
-WIPE = WipeData()
-
-class Arrow3D(FancyArrowPatch):
-    def __init__(self, xs, ys, zs, *args, **kwargs):
-        FancyArrowPatch.__init__(self, (0,0), (0,0), *args, **kwargs)
-        self._verts3d = xs, ys, zs
-
-    def draw(self, renderer):
-        xs3d, ys3d, zs3d = self._verts3d
-        xs, ys, zs = proj3d.proj_transform(xs3d, ys3d, zs3d, renderer.M)
-        self.set_positions((xs[0],ys[0]),(xs[1],ys[1]))
-        FancyArrowPatch.draw(self, renderer)
-
-# class RecordMomenta
-
-class Plotter(object):
+class DataAnalysis(object):
 	"graphs 3D positions"
 
 	def __init__(self):
-		pass
+
+		self.p3D = []
+		self.px = []
+		self.py = []
+		self.pz = []
+
+		self.m3D = []
+		self.mx = []
+		self.my = []
+		self.mz = []
+
+	def wipeData(self):
+
+		self.p3D[:] = []
+		self.px[:] = []
+		self.py[:] = []
+		self.pz[:] = []
+
+		self.m3D[:] = []
+		self.mx[:] = []
+		self.my[:] = []
+		self.mz[:] = []
 
 	def dataCollection(self, posf, momf, tcluster):
 
 		radius = np.sqrt(np.square(posf[0]) + np.square(posf[1]) + np.square(posf[2]))
-		# if tcluster > 25: # weird set of outlier <---- INTERESTING PHENOMENON
-		# if tcluster > 3 and tcluster < 4:
-
-		# print momf
 
 		p3D.append(posf)
+		self.p3D.append(posf)
+		print "p3D = ", len(self.p3D)
 		# print len(p3D)
-		m3D.append(momf)
+		self.m3D.append(momf)
 
-		px.append(posf[0])
-		# print "py = ", len(py)
-		py.append(posf[1])
-		pz.append(posf[2])
+		self.px.append(posf[0])
+		self.py.append(posf[1])
+		self.pz.append(posf[2])
 
-		mx.append(momf[0])
-		my.append(momf[1])
-		mz.append(momf[2])
-
-		if posf[0] < 0 and posf[1] < 0 and posf[2] < 0 and -radius < -bound_lower and -radius > -bound_upper:
-			pos_3D_left.append(radius)
-			cluster_time_LIST.append(tcluster)
-		if posf[0] > 0 and posf[1] > 0 and posf[2] > 0 and radius > bound_lower and radius < bound_upper:
-			pos_3D_right.append(radius)
-			cluster_time_LIST.append(tcluster)
+		self.mx.append(momf[0])
+		self.my.append(momf[1])
+		self.mz.append(momf[2])
 
 		radius_lower = np.sqrt(3 * np.square(bound_lower))
 		radius_upper = np.sqrt(3 * np.square(bound_upper))
@@ -170,49 +113,14 @@ class Plotter(object):
 		if radius > bound_lower and radius < bound_upper:
 			cluster_time_LIST.append(tcluster)
 
-
-	def dataAnalysis(self):
-		# results = open("RESULTS/results_10212019_1.txt", "a")
-
-		n_pos_3D_right = len(pos_3D_right)
-		mean_pos_3D_right = np.mean(pos_3D_right)
-		self.std_dev_pos_3D_right = np.std(pos_3D_right)
-		if self.std_dev_pos_3D_right == 0:
-			self.std_dev_pos_3D_right = 0.0001
-		median_pos_3D_right = np.median(pos_3D_right)
-		n_sd_pos_3D_right = float(n_pos_3D_right / self.std_dev_pos_3D_right)
-
-		n_pos_3D_left = len(pos_3D_left)
-		mean_pos_3D_left = np.mean(pos_3D_left)
-		self.std_dev_pos_3D_left = np.std(pos_3D_left)
-		if self.std_dev_pos_3D_left == 0:
-			self.std_dev_pos_3D_left = 0.0001
-		median_pos_3D_left = np.median(pos_3D_left)
-		n_sd_pos_3D_left = float(n_pos_3D_left / self.std_dev_pos_3D_left)
-
-		sd_pos_3D_right_LIST.append(self.std_dev_pos_3D_right)
-		n_sd_pos_3D_right_LIST.append(n_sd_pos_3D_right)
-		n_pos_3D_right_LIST.append(n_pos_3D_right)
-
-		sd_pos_3D_left_LIST.append(self.std_dev_pos_3D_left)
-		n_sd_pos_3D_left_LIST.append(n_sd_pos_3D_left)
-		n_pos_3D_left_LIST.append(n_pos_3D_left)
-
-
-
 	def dataReturner(self):
 
-		return [sd_pos_3D_right_LIST, sd_pos_3D_left_LIST], \
-			   [n_pos_3D_right_LIST, n_pos_3D_left_LIST], \
-			   [n_sd_pos_3D_right_LIST, n_sd_pos_3D_left_LIST], \
-			   cluster_time_LIST, \
-			   cluster_sizes_LIST
-		pass
+		return cluster_time_LIST, cluster_sizes_LIST
 
 	def grapher(self):
 
 		fig = plt.figure()
-		# Axes3D.scatter(self.px, self.py, self.pz)
+		# Axes3D.scatter(self.self.px, self.self.py, self.self.pz)
 
 		# first subplot: a 3D scatter plot of positions
 		ax = fig.add_subplot(111, projection='3d')
@@ -227,10 +135,10 @@ class Plotter(object):
 		ax.set_ylabel('mm')
 		ax.set_zlabel('mm')
 
-		ax.scatter(px, py, pz)
+		ax.scatter(self.px, self.py, self.pz)
 		scale_fac = 50
-		# for i in np.arange(0, len(px)):
-		# 	a = Arrow3D([px[i], px[i] + mx[i]*scale_fac], [py[i], py[i] + my[i]*scale_fac], [pz[i], pz[i] + mz[i]*scale_fac], mutation_scale=20, lw=1, arrowstyle="-|>", color="r")
+		# for i in np.arange(0, len(self.px)):
+		# 	a = Arrow3D([self.px[i], self.px[i] + mx[i]*scale_fac], [self.py[i], self.py[i] + my[i]*scale_fac], [self.pz[i], self.pz[i] + mz[i]*scale_fac], mutation_scale=20, lw=1, arrowstyle="-|>", color="r")
 		# 	ax.add_artist(a)
 
 
@@ -260,21 +168,21 @@ class Plotter(object):
 
 		# print "length of p3D = ", len(p3D)
 
-		for pos in p3D:
+		for pos in self.p3D:
 			difference = np.sqrt((clusterCenter[0] - pos[0])**2+ \
 								 (clusterCenter[1] - pos[1])**2+ \
 								 (clusterCenter[2] - pos[2])**2)
 
-			pos_index = p3D.index(pos)
+			pos_index = self.p3D.index(pos)
 
 			if difference < 160:
 				clusterx.append(pos[0] - clusterCenter[0])
 				clustery.append(pos[1] - clusterCenter[1])
 				clusterz.append(pos[2] - clusterCenter[2])
 
-				momx.append(m3D[pos_index][0])
-				momy.append(m3D[pos_index][1])
-				momz.append(m3D[pos_index][2])
+				momx.append(self.m3D[pos_index][0])
+				momy.append(self.m3D[pos_index][1])
+				momz.append(self.m3D[pos_index][2])
 
 		# print "number of clustered positrons = ", len(clusterx)
 
@@ -295,7 +203,7 @@ class Plotter(object):
 
 		print len(C_positions_LIST), "\n", len(C_momenta_LIST)
 		fig = plt.figure()
-		# Axes3D.scatter(self.px, self.py, self.pz)
+		# Axes3D.scatter(self.self.px, self.self.py, self.self.pz)
 
 		# first subplot: a 3D scatter plot of positions
 		ax = fig.add_subplot(111, projection='3d')
@@ -331,7 +239,7 @@ class Plotter(object):
 
 	def computeClusterSize(self):
 		n_bins = 25
-		position_LIST = [px, py, pz]
+		position_LIST = [self.px, self.py, self.pz]
 		for i in position_LIST:
 			# fig2, ax2 = plt.subplots(2, sharey=True, sharex=False, tight_layout=False)
 			range_LIST = []
@@ -374,7 +282,7 @@ class Plotter(object):
 
 		# plt.show()
 
-PLT = Plotter()
+DA = DataAnalysis()
 
 class MyPrimaryGeneratorAction(G4VUserPrimaryGeneratorAction):
 	"My Primary Generator Action"
@@ -417,17 +325,12 @@ class MyRunAction(G4UserRunAction):
 	"My Run Action"
 
 	def EndOfRunAction(self, run):
-		# PLT.grapher()
-		PLT.computeClusterMomentum()
-		PLT.computeClusterSize()
-		# print(cluster_sizes_LIST)
-		PLT.dataAnalysis()
-		# WIPE.wipeElectronCounter()
-		global SEE_count
-		# print SEE_count/2
-		# time.sleep(1)
-		# SEE_count = 0
-		WIPE.wipe()
+		DA
+		DA.grapher()
+		DA.computeClusterMomentum()
+		DA.computeClusterSize()
+		DA.wipeData()
+		# WIPE.wipe()
 		# print "*** End of Run"
 		# print "- Run sammary : (id= %d, #events= %d)" \
 		# % (run.GetRunID(), run.GetNumberOfEventToBeProcessed())
@@ -438,6 +341,7 @@ class MyEventAction(G4UserEventAction):
 
 	def EndOfEventAction(self, event):
 		# print "See count", SEE_count
+
 		pass
 
 # ------------------------------------------------------------------
@@ -479,7 +383,7 @@ class MySteppingAction(G4UserSteppingAction):
 			# print KE, "\n", p, "\n", initialMomentum, "\n", finalMomentum, "\n\n" 
 			# energy = step.GetTotalEnergyDeposit()
 			# print p 
-			PLT.dataCollection(p, m, t) # calls data collection and analysis on final positions and momenta
+			DA.dataCollection(p, m, t) # calls data collection and analysis on final positions and momenta
 			# return initialMomentum, finalMomentum 
 		if particleName == 'e-':
 			global SEE_count
