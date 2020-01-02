@@ -19,51 +19,9 @@ from time import sleep
 # -------- FILE IMPORTS ------- #
 from arrow_generator import Arrow3D
 
-global bound_lower
-global bound_upper
-
-bound_lower = 490 # only consider the cluster within these bounds, range of 100
-bound_upper = bound_lower + 400
-# bound_upper = 550
-
-global vectorCount
-vectorCount = 500 # number of scattered e+ per run
-
-
-global cluster_time_LIST
-cluster_time_LIST = []
-
-global p3D
-p3D = []
-
-
-global m3D
-global mx
-global my
-global mz
-
-m3D = []
-mx = []
-my = []
-mz = []
-
-global cluster_sizes_LIST
-cluster_sizes_LIST = []
-
-global SEE_count
-SEE_count = 0
-
-#--- for a specific cluster ---#
-global C_positions_LIST
-global C_momenta_LIST
-
-C_positions_LIST = []
-C_momenta_LIST = []
-
 #----------code starts here!----------#
 class DataAnalysis(object):
-	"graphs 3D positions"
-
+	"Performs data collection, analysis and visualization for the pre-SEE analysis"
 	def __init__(self):
 
 		self.p3D = []
@@ -75,6 +33,14 @@ class DataAnalysis(object):
 		self.mx = []
 		self.my = []
 		self.mz = []
+
+		self.cluster_time_LIST = []
+		self.cluster_sizes_LIST = []
+
+
+		# for a specific cluster
+		self.C_positions_LIST = []
+		self.C_momenta_LIST = []
 
 	def wipeData(self):
 
@@ -92,10 +58,8 @@ class DataAnalysis(object):
 
 		radius = np.sqrt(np.square(posf[0]) + np.square(posf[1]) + np.square(posf[2]))
 
-		p3D.append(posf)
+		# p3D.append(posf)
 		self.p3D.append(posf)
-		print "p3D = ", len(self.p3D)
-		# print len(p3D)
 		self.m3D.append(momf)
 
 		self.px.append(posf[0])
@@ -106,16 +70,18 @@ class DataAnalysis(object):
 		self.my.append(momf[1])
 		self.mz.append(momf[2])
 
+		bound_lower = 490 # only consider the cluster within these bounds, range of 100
+		bound_upper = bound_lower + 400
+
 		radius_lower = np.sqrt(3 * np.square(bound_lower))
 		radius_upper = np.sqrt(3 * np.square(bound_upper))
 
-
 		if radius > bound_lower and radius < bound_upper:
-			cluster_time_LIST.append(tcluster)
+			self.cluster_time_LIST.append(tcluster)
 
 	def dataReturner(self):
 
-		return cluster_time_LIST, cluster_sizes_LIST
+		return self.cluster_time_LIST, self.cluster_sizes_LIST
 
 	def grapher(self):
 
@@ -187,8 +153,8 @@ class DataAnalysis(object):
 		# print "number of clustered positrons = ", len(clusterx)
 
 		# saving data
-		C_positions_LIST[:] = []
-		C_momenta_LIST[:] = []
+		self.C_positions_LIST = []
+		self.C_momenta_LIST = []
 
 		for index in range(len(clusterx)):
 			position = [clusterx[index], clustery[index], clusterz[index]]
@@ -197,43 +163,43 @@ class DataAnalysis(object):
 			# positions.write("["+ str(position[0])+ ", "+ str(position[1])+ ", "+ str(position[2])+ "]"+"\n")
 			# momenta.write("["+ str(momentum[0])+ ", "+ str(momentum[1])+ ", "+ str(momentum[2])+ "]"+"\n")
 
-			C_positions_LIST.append(position)
-			C_momenta_LIST.append(momentum)
+			self.C_positions_LIST.append(position)
+			self.C_momenta_LIST.append(momentum)
 
 
-		print len(C_positions_LIST), "\n", len(C_momenta_LIST)
-		fig = plt.figure()
-		# Axes3D.scatter(self.self.px, self.self.py, self.self.pz)
+		print len(self.C_positions_LIST), "\n", len(self.C_momenta_LIST)
+		# fig = plt.figure()
+		# # Axes3D.scatter(self.self.px, self.self.py, self.self.pz)
 
-		# first subplot: a 3D scatter plot of positions
-		ax = fig.add_subplot(111, projection='3d')
-		axmin = -160 
-		axmax = 160
-		axes = plt.gca()
-		axes.set_xlim([axmin,axmax])
-		axes.set_ylim([axmin,axmax])
-		axes.set_zlim([axmin,axmax])
+		# # first subplot: a 3D scatter plot of positions
+		# ax = fig.add_subplot(111, projection='3d')
+		# axmin = -160 
+		# axmax = 160
+		# axes = plt.gca()
+		# axes.set_xlim([axmin,axmax])
+		# axes.set_ylim([axmin,axmax])
+		# axes.set_zlim([axmin,axmax])
 
-		ax.set_xlabel('mm')
-		ax.set_ylabel('mm')
-		ax.set_zlabel('mm')
+		# ax.set_xlabel('mm')
+		# ax.set_ylabel('mm')
+		# ax.set_zlabel('mm')
 
-		ax.scatter(clusterx, clustery, clusterz)
-		for i in np.arange(0, len(clusterx)):
-			a = Arrow3D([clusterx[i], clusterx[i] + 1000*momx[i]], [clustery[i], clustery[i] + 1000*momy[i]], [clusterz[i], clusterz[i] + 1000*momz[i]], mutation_scale=20, lw=1, arrowstyle="-|>", color="r")
-			ax.add_artist(a)
+		# ax.scatter(clusterx, clustery, clusterz)
+		# for i in np.arange(0, len(clusterx)):
+		# 	a = Arrow3D([clusterx[i], clusterx[i] + 1000*momx[i]], [clustery[i], clustery[i] + 1000*momy[i]], [clusterz[i], clusterz[i] + 1000*momz[i]], mutation_scale=20, lw=1, arrowstyle="-|>", color="r")
+		# 	ax.add_artist(a)
 
 
-		plt.title("A single cluster")
+		# plt.title("A single cluster")
 
-		# plt.draw() 
+		# # plt.draw() 
 		
-		plt.show()
+		# plt.show()
 
 	def clusterDataReturner(self):
 
-		positions = C_positions_LIST
-		momenta = C_momenta_LIST
+		positions = self.C_positions_LIST
+		momenta = self.C_momenta_LIST
 
 		return positions, momenta
 
@@ -276,8 +242,8 @@ class DataAnalysis(object):
 			true_range = np.sum(range_LIST)
 			# print true_range
 			if true_range < 200:
-				cluster_sizes_LIST.append(true_range)
-		print "avg cluster size = ", np.mean(cluster_sizes_LIST)
+				self.cluster_sizes_LIST.append(true_range)
+		print "avg cluster size = ", np.mean(self.cluster_sizes_LIST)
 				# print "\n", "Range = ", true_range, "\n"
 
 		# plt.show()
@@ -287,12 +253,13 @@ DA = DataAnalysis()
 class MyPrimaryGeneratorAction(G4VUserPrimaryGeneratorAction):
 	"My Primary Generator Action"
 
-	def __init__(self, energy, energyUnit, center):
+	def __init__(self, energy, energyUnit, center, particleCount):
 		G4VUserPrimaryGeneratorAction.__init__(self)
 		self.particleGun = G4ParticleGun(1)
 		# print("\n Particle gun defined \n")
 		self.energy = energy
 		self.energyUnit = energyUnit
+		self.particleCount = particleCount
 		global clusterCenter
 		clusterCenter = center
 
@@ -310,7 +277,7 @@ class MyPrimaryGeneratorAction(G4VUserPrimaryGeneratorAction):
 		self.particleGun.SetParticleByName(particle) # define particle
 		self.particleGun.SetParticleEnergy(energy*energyUnit) # define particle energy 
 
-		for i in range(0, vectorCount): # creates random momentum vectors originating from [0, 0, 0]
+		for i in range(0, self.particleCount): # creates random momentum vectors originating from [0, 0, 0]
 			mx = random.uniform(-1,1)
 			my = random.uniform(-1,1)
 			mz = random.uniform(-1,1)
@@ -326,7 +293,7 @@ class MyRunAction(G4UserRunAction):
 
 	def EndOfRunAction(self, run):
 		DA
-		DA.grapher()
+		# DA.grapher()
 		DA.computeClusterMomentum()
 		DA.computeClusterSize()
 		DA.wipeData()

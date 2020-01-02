@@ -46,10 +46,6 @@ energyUnit = eV
 
 cluster_time_median_LIST = []
 
-global opt_be_right_LIST
-global opt_be_left_LIST
-opt_be_right_LIST = []
-opt_be_left_LIST = []
 
 class SpaceConstructor(object):
 	def __init__(self):
@@ -70,18 +66,9 @@ GC = GeomConstructor()
 ClusGen = ClusterGenerator()
 # --------------------------------------- #
 
-initialMomenta = []
-finalMomenta = []
-
 viz_theta = 35
 viz_phi = 35
 zoom = 1.5
-
-
-global ALL_clusters_positions 
-global ALL_clusters_momenta 
-ALL_clusters_positions = []
-ALL_clusters_momenta = []
 
 class ClusterClass(object):
 
@@ -91,21 +78,7 @@ class ClusterClass(object):
 		self.ALL_clusters_momenta = []
 
 
-	def run(self, energy, location_range):
-		# print(energy_LIST)
-		# print(cluster_coor_LIST)
-		# time.sleep(1)
-		data_right = open("data_right.txt", "a")
-		data_left = open("data_left.txt", "a")
-
-		# print spherical_coor_LIST
-
-		# time.sleep(1)
-
-		e = energy
-
-		ALL_clusters_positions[:] = []
-		ALL_clusters_momenta[:] = []
+	def run(self, energy, location_range, particleCount):
 
 		if energyUnit == MeV:
 			constant = 4.644e-9
@@ -114,22 +87,25 @@ class ClusterClass(object):
 		if energyUnit == eV:
 			constant = 4.644e-15
 
-		b = np.sqrt(e*constant) 
+		b = np.sqrt(energy*constant) 
 
 		for location in location_range:
 
+			print len(self.ALL_clusters_positions) # <------------------- WHAT?!?!?!? HOW, THESE SHOULD BE DIFFERENT!!!! APPENDING RIGHT????
+			time.sleep(1)
+			SpaceConst
 			if len(location) == 3: # this is cartesian
 				x = location[0]
 				y = location[1]
 				z = location[2]
-				magVec, magVecScaled = FD.cartesianfieldParam(e, b, x, y ,z, cluster_width)
+				magVec, magVecScaled = FD.cartesianfieldParam(energy, b, x, y ,z, cluster_width)
 			if len(location) == 2: # this is spherical
 				phi = location[0]
 				theta = location[1]
-				magVec, magVecScaled = FD.spherefieldParam(e, b, phi, theta, cluster_width)
+				magVec, magVecScaled = FD.spherefieldParam(energy, b, phi, theta, cluster_width)
 
 			# set user actions ...
-			PGA_1 = MyPrimaryGeneratorAction(e, energyUnit, magVecScaled)
+			PGA_1 = MyPrimaryGeneratorAction(e, energyUnit, magVecScaled, particleCount)
 			gRunManager.SetUserAction(PGA_1)
 			myEA = MyEventAction()
 			gRunManager.SetUserAction(myEA)
@@ -154,23 +130,23 @@ class ClusterClass(object):
 			# print "appended", ALL_clusters_positions
 			# time.sleep(12)
 			self.ALL_clusters_momenta.append(cluster_momenta) 
-			cluster_time_LIST, cluster_size_LIST = DA.dataReturner() # for 3D positions
+			# cluster_time_LIST, cluster_size_LIST = DA.dataReturner() # for 3D positions
 
-			median = np.median(cluster_time_LIST)
-			cluster_time_median_LIST.append(median)
+			# median = np.median(cluster_time_LIST)
+			# cluster_time_median_LIST.append(median)
 							
 		time.sleep(2)
-		# for i in ALL_clusters_positions:
-		# 	print i[-1] # <------------------- WHAT?!?!?!? HOW, THESE SHOULD BE DIFFERENT!!!! APPENDING RIGHT????
-		# time.sleep(1.5)
+		time.sleep(1.5)
 		return self.ALL_clusters_positions, self.ALL_clusters_momenta
 
 CC = ClusterClass()
 if __name__ == '__main__':
 	step = 6
+	particleCount = 1000
 	location_range = ClusGen.sphericalClusters(step)
 	for e in energy_LIST:
-		positions, momenta = CC.run(e, location_range)
+		CC
+		positions, momenta = CC.run(e, location_range, particleCount)
 		# print "# of clusters = ", len(positions)
 		# time.sleep(3)
 
