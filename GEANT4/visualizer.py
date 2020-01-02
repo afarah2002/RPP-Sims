@@ -1,16 +1,16 @@
 from Geant4 import *
 class Visualizer(object):
 
-	def visualizer(self, viz_theta, viz_phi):
+	def visualizer(self, viz_theta, viz_phi, viewer_name):
 		# time.sleep(.1)
 
 		gApplyUICommand("/vis/sceneHandler/create OGLSX OGLSX")
-		gApplyUICommand("/vis/viewer/create OGLSX oglsxviewer")
+		gApplyUICommand("/vis/viewer/create OGLSX " + viewer_name)
 		gApplyUICommand("/vis/drawVolume")
 		# gApplyUICommand("/globalField/verbose level")
 		# gApplyUICommand("/MagneticFieldModels/UniformField/SetBVec 3. 1. 1. Tesla")
 
-		gApplyUICommand("/vis/viewer/select oglsxviewer")
+		gApplyUICommand("/vis/viewer/select " + viewer_name)
 		gApplyUICommand("/vis/ogl/set/displayListLimit 100000")
 		gApplyUICommand("/vis/scene/add/trajectories")
 

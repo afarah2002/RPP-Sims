@@ -78,7 +78,7 @@ class ClusterClass(object):
 		self.ALL_clusters_momenta = []
 
 
-	def run(self, energy, location_range, particleCount):
+	def run(self, energy, location_range, particleCount, cluster_width, edge):
 
 		if energyUnit == MeV:
 			constant = 4.644e-9
@@ -95,7 +95,7 @@ class ClusterClass(object):
 				x = location[0]
 				y = location[1]
 				z = location[2]
-				magVec, magVecScaled = FD.cartesianfieldParam(energy, b, x, y ,z, cluster_width)
+				magVec, magVecScaled = FD.cartesianfieldParam(energy, b, x, y ,z, cluster_width, edge)
 			if len(location) == 2: # this is spherical
 				phi = location[0]
 				theta = location[1]
@@ -108,7 +108,7 @@ class ClusterClass(object):
 			gRunManager.SetUserAction(myEA)
 			mySA = MySteppingAction()
 			gRunManager.SetUserAction(mySA)
-			VIS.visualizer(viz_theta, viz_phi)
+			VIS.visualizer(viz_theta, viz_phi, "cluster_gen")
 			fieldMgr = gTransportationManager.GetFieldManager()
 			myField = G4UniformMagField(G4ThreeVector(magVec[0], magVec[1], magVec[2]))
 			fieldMgr.SetDetectorField(myField)
@@ -118,23 +118,17 @@ class ClusterClass(object):
 			gRunManager.Initialize()
 			gRunManager.BeamOn(1)
 
-			# print len(cluster_positions), "\n", len(cluster_momenta)
-			# SEEP.runSEE(e, cluster_positions, cluster_momenta)
 			# saving ALL clusters for this energy to be SEEPed
 			cluster_positions, cluster_momenta = DA.clusterDataReturner()
 			self.ALL_clusters_positions.append(cluster_positions) 
-			# print cluster_positions
-			# print "appended", ALL_clusters_positions
-			# time.sleep(12)
 			self.ALL_clusters_momenta.append(cluster_momenta) 
 			# cluster_time_LIST, cluster_size_LIST = DA.dataReturner() # for 3D positions
-
 			# median = np.median(cluster_time_LIST)
 			# cluster_time_median_LIST.append(median)
 							
 		for i in self.ALL_clusters_positions:
 			print i[-1]
-			time.sleep(2)
+		# time.sleep(2)
 
 		return self.ALL_clusters_positions, self.ALL_clusters_momenta
 
@@ -142,18 +136,17 @@ CC = ClusterClass()
 if __name__ == '__main__':
 	step = 6
 	particleCount = 500
-	location_range = ClusGen.sphericalClusters(step)
+	edge = 500
+	cluster_width = 190
+	# location_range = ClusGen.sphericalClusters(step)
+	location_range = ClusGen.cartesianClusters(cluster_width, edge)
 	for e in energy_LIST:
 		CC
-		positions, momenta = CC.run(e, location_range, particleCount)
-		# print "# of clusters = ", len(positions)
-		# time.sleep(3)
-
-		# print len(positions)
-		# time.sleep(1)
-		# counter = 0
-		# for pos in positions:
-		# 	mom = momenta[positions.index(pos)]
-		# 	# print mom
-		# 	SEEP.runSEE(e, pos, mom)
-		# 	# time.sleep(3)
+		positions, momenta = CC.run(e, location_range, particleCount, cluster_width, edge)
+		counter = 0
+		for pos in positions:
+			mom = momenta[positions.index(pos)]
+			# print mom
+			SEEP.runSEE(e, pos, mom)
+			# time.sleep(3)
+		gApplyUICommand("/vis/viewer/close")

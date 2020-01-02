@@ -114,9 +114,6 @@ class DataAnalysis(object):
 		
 		plt.show()
 
-		# second subplot: a histogram of positions
-		# fig, axs = plt.subplots(3, sharey=True, sharex=False, tight_layout=False)
-
 	def computeClusterMomentum(self):
 
 		clusterx = []
@@ -198,9 +195,7 @@ class DataAnalysis(object):
 
 		positions = C_positions_LIST
 		momenta = C_momenta_LIST
-		print positions
 		return positions, momenta
-		# plt.show()
 
 	def computeClusterSize(self):
 		n_bins = 25
@@ -350,9 +345,5 @@ class MySteppingAction(G4UserSteppingAction):
 			# print p 
 			DA.dataCollection(p, m, t) # calls data collection and analysis on final positions and momenta
 			# return initialMomentum, finalMomentum 
-		if particleName == 'e-':
-			global SEE_count
-			# print "electron"
-			SEE_count += 1
-			# print SEE_count
+
 

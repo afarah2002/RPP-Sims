@@ -73,7 +73,7 @@ class SEEConstructor(object):
 
 	def construct(self):
 
-		NaI= gNistManager.FindOrBuildMaterial("G4_SODIUM_IODIDE")
+		NaI = gNistManager.FindOrBuildMaterial("G4_SODIUM_IODIDE")
 		GRAPHITE = gNistManager.FindOrBuildMaterial("G4_GRAPHITE")
 		Al = gNistManager.FindOrBuildMaterial("G4_Al")
 		scale_factor = 5
@@ -96,8 +96,8 @@ GC = GeomConstructor()
 SEEConstructor = SEEConstructor()
 VIS = Visualizer()
 # # CC = ClusterClass()
-viz_theta = 045
-viz_phi = 45
+viz_theta = 0
+viz_phi = 0
 
 
 class SecondaryElectronEmissionProcess(object):
@@ -107,7 +107,7 @@ class SecondaryElectronEmissionProcess(object):
 	def runSEE(self, energy, positions, momenta):
 		# while True:
 		# print positions
-		time.sleep(1)
+		# time.sleep(1)
 		SEEConstructor
 		SEEConstructor.construct()
 		PGA_1 = ClusteredPositronGenerator(energy, positions, momenta)
@@ -137,7 +137,9 @@ class SecondaryElectronEmissionProcess(object):
 		# # if n == "":
 		# # 	break
 		# # else:
-		VIS.visualizer(viz_theta, viz_phi)
+		gApplyUICommand("/vis/viewer/select " + "SEE")
+
+		VIS.visualizer(viz_theta, viz_phi, "SEE")
 		
 		# gApplyUICommand("/vis/viewer/update")
 

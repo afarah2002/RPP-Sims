@@ -29,7 +29,7 @@ uniqueClusters = [[None, None, None]]
 
 class FieldDesign(object):
 
-	def cartesianfieldParam(self, energy, b, x, y, z, cluster_width):
+	def cartesianfieldParam(self, energy, b, x, y, z, cluster_width, edge):
 		
 		radius = np.sqrt(x**2 + y**2 + z**2)
 
@@ -90,7 +90,7 @@ class FieldDesign(object):
 		maxIndex = list(np.abs(magVec)).index(max(np.abs(magVec))) 
 
 		#get scaling factor
-		scale = 500 / np.abs(magVec[maxIndex])
+		scale = edge / np.abs(magVec[maxIndex])
 		magVecScaled = np.multiply(magVec, scale)
 
 		receiverDimScaled = [cluster_width, cluster_width, cluster_width]
