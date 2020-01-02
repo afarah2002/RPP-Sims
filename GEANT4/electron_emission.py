@@ -65,7 +65,7 @@ class SEEConstructor(object):
 		exN03PL = g4py.EMSTDpl.PhysicsListEMstd()
 		gRunManager.SetUserInitialization(exN03PL)
 		# reset world material
-		air= gNistManager.FindOrBuildMaterial("G4_AIR")
+		air = gNistManager.FindOrBuildMaterial("G4_AIR")
 		# g4py.ezgeom.SetWorldMaterial(air)
 
 
@@ -75,19 +75,28 @@ class SEEConstructor(object):
 
 		NaI= gNistManager.FindOrBuildMaterial("G4_SODIUM_IODIDE")
 		GRAPHITE = gNistManager.FindOrBuildMaterial("G4_GRAPHITE")
+		Al = gNistManager.FindOrBuildMaterial("G4_Al")
 		scale_factor = 5
 
+		thickness = 30e-8
+		width = 1900
+
 		# GC.ConstructSphere("Sphere", GRAPHITE , [0., 0., 0.], m, (.10-30e-9)*scale_factor, .10*scale_factor, 0., 360., 0., 90)
-		GC.ConstructBox("Box", GRAPHITE, [0., 0., (.095)*scale_factor], m, [160,160,30e-9])
-		GC.ConstructBox("Box", GRAPHITE, [0., 0., -(.095)*scale_factor], m, [160,160,30e-9])
+		GC.ConstructBox("Box", Al, [(95)*scale_factor, 0., 0.], mm, [ thickness,width,width]) # ON X-AXIS
+		GC.ConstructBox("Box", Al, [-(95)*scale_factor, 0., 0.], mm, [ thickness,width,width]) # ON X-AXIS
+
+		GC.ConstructBox("Box", Al, [0., (95)*scale_factor, 0.], mm, [width, thickness, width]) # ON Y-AXIS
+		GC.ConstructBox("Box", Al, [0., -(95)*scale_factor, 0.], mm, [width, thickness, width]) # ON Y-AXIS
+
+		GC.ConstructBox("Box", Al, [0., 0., (95)*scale_factor], mm, [width,width, thickness]) # ON Z-AXIS
+		GC.ConstructBox("Box", Al, [0., 0., -(95)*scale_factor], mm, [width,width, thickness]) # ON Z-AXIS
 
 
 GC = GeomConstructor()
 SEEConstructor = SEEConstructor()
 VIS = Visualizer()
 # # CC = ClusterClass()
-
-viz_theta = 45
+viz_theta = 045
 viz_phi = 45
 
 
@@ -97,11 +106,10 @@ class SecondaryElectronEmissionProcess(object):
 
 	def runSEE(self, energy, positions, momenta):
 		# while True:
-		print momenta
+		# print positions
 		time.sleep(1)
 		SEEConstructor
 		SEEConstructor.construct()
-		# # viz_theta += .1
 		PGA_1 = ClusteredPositronGenerator(energy, positions, momenta)
 		gRunManager.SetUserAction(PGA_1)
 
@@ -131,6 +139,6 @@ class SecondaryElectronEmissionProcess(object):
 		# # else:
 		VIS.visualizer(viz_theta, viz_phi)
 		
-		gApplyUICommand("/vis/viewer/update")
+		# gApplyUICommand("/vis/viewer/update")
 
 

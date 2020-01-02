@@ -18,15 +18,6 @@ from matplotlib import colors
 from matplotlib.ticker import PercentFormatter
 import time
 
-global vectorCount
-vectorCount = 500 # number of scattered e+ per run
-
-global SEE_count
-SEE_count = 0
-
-
-
-
 #----------code starts here!----------#
 class WipeData(object):
 	# wipe lists for next data collection
@@ -65,22 +56,22 @@ class ClusteredPositronGenerator(G4VUserPrimaryGeneratorAction):
 		particle = "e+"
 		# energy_2 = 2.5
 		energyUnit = eV 
-		dimensionUnit = cm
+		dimensionUnit = mm
 
-		energy = self.energy
+		energy = self.energy/1000
 		self.particleGun.SetParticleByName(particle) # define particle
 		self.particleGun.SetParticleEnergy(energy*energyUnit) # define particle energy 
 
 		
 		for position in self.positions_LIST: # creates random momentum vectors originating from [0, 0, 0]
 			momentumArray = self.momenta_LIST[self.positions_LIST.index(position)]
-			print momentumArray
+			# print momentumArray
 			if momentumArray[0] != 0 or momentumArray[1] != 0 or momentumArray[2] != 0:
 				self.particleGun.SetParticlePosition(G4ThreeVector(position[0], position[1], position[2])*dimensionUnit) # define first particle generator location
-				self.particleGun.SetParticleMomentumDirection(G4ThreeVector(momentumArray[0], momentumArray[1], momentumArray[2])*dimensionUnit) # define first particle generator momentum
+				self.particleGun.SetParticleMomentumDirection(G4ThreeVector(momentumArray[0]/np.sqrt(1000), momentumArray[1]/np.sqrt(1000), momentumArray[2]/np.sqrt(1000))*dimensionUnit) # define first particle generator momentum
 				self.particleGun.GeneratePrimaryVertex(event)
-			else:
-				print KE 
+			# else:
+			# 	print KE 
 				# time.sleep(1)
 
 		#################################################
@@ -115,6 +106,7 @@ class MySteppingAction(G4UserSteppingAction):
 		touchable = track.GetTouchable()
 		global KE
 		KE = track.GetKineticEnergy()
+		# print KE
 		parentId = track.GetParentID()
 		particleName = track.GetDefinition().GetParticleName() 
 
