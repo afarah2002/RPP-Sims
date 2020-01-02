@@ -21,7 +21,7 @@ from scipy import optimize, stats
 import sys
 
 #-----------FILE imports------------#
-from beam2 import MyPrimaryGeneratorAction, MyRunAction, MyEventAction,MySteppingAction, \
+from beam2_1 import MyPrimaryGeneratorAction, MyRunAction, MyEventAction,MySteppingAction, \
 				  Plotter, WipeData
 from electron_emission import SecondaryElectronEmissionProcess
 from geom_constructor import GeomConstructor 
@@ -93,7 +93,7 @@ plt.show()
 '''
 
 # energy_LIST = [0.002]
-# energy_LIST = list(np.arange(0.002, 0.003, 0.0002))
+# energy_LIST = list(np.arange(1, 4, 0.5))
 energy_LIST = list(np.arange(1001, 2000, 200))
 global energyUnit
 energyUnit = eV
@@ -308,7 +308,7 @@ class ClusterClass(object):
 		if energyUnit == eV:
 			constant = 4.644e-15
 
-		b = np.sqrt(e*3*constant) 
+		b = np.sqrt(e*constant) 
 
 		for location in location_range:
 			# Constructor
@@ -347,16 +347,16 @@ class ClusterClass(object):
 			gRunManager.BeamOn(1)
 
 			cluster_positions, cluster_momenta = PLT.clusterDataReturner()
-			print len(cluster_positions), "\n", len(cluster_momenta)
+			# print len(cluster_positions), "\n", len(cluster_momenta)
+			SEEP.runSEE(e, cluster_positions, cluster_momenta)
 
 			# saving ALL clusters for this energy to be SEEPed
 			ALL_clusters_positions.append(cluster_positions) 
-			print "appended", ALL_clusters_positions
+			# print "appended", ALL_clusters_positions
 			# time.sleep(12)
 			ALL_clusters_momenta.append(cluster_momenta) 
-			SEEP.runSEE(e, cluster_positions, cluster_momenta)
 			# # std_devs_LIST, means_LIST, n_LIST, n_sd_LIST = PLT.dataReturner()
-			std_devs_LIST, n_LIST, n_sd_LIST, cluster_time_LIST, cluster_size_LIST = PLT.dataReturner() # for 3D positions
+			cluster_time_LIST, cluster_size_LIST = PLT.dataReturner() # for 3D positions
 
 				# WIPE.wipeCluster()
 				# PLT.wipeData() #clean lists before starting another run
@@ -379,12 +379,7 @@ class ClusterClass(object):
 					opt_be_left_LIST.append(opt_be)
 					data_left.write(str(opt_be)+"\n")
 			'''
-			data  = {
-					"SD" : std_devs_LIST, \
-					# "means" : means_LIST, \
-					"n/sd" : n_sd_LIST, \
-					"cluster_size" : n_LIST \
-					}
+
 			median = np.median(cluster_time_LIST)
 			cluster_time_median_LIST.append(median)
 							
@@ -407,10 +402,10 @@ class ClusterClass(object):
 			# plt.show()
 			
 			# WIPE.wipeTime()
-		time.sleep(1)
-		for i in ALL_clusters_positions:
-			print i[-1] # <------------------- WHAT?!?!?!? HOW, THESE SHOULD BE DIFFERENT!!!! APPENDING RIGHT????
-		time.sleep(1.5)
+		time.sleep(2)
+		# for i in ALL_clusters_positions:
+		# 	print i[-1] # <------------------- WHAT?!?!?!? HOW, THESE SHOULD BE DIFFERENT!!!! APPENDING RIGHT????
+		# time.sleep(1.5)
 		return ALL_clusters_positions, ALL_clusters_momenta
 
 	# 		'''

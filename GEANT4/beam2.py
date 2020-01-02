@@ -63,13 +63,6 @@ px = []
 py = []
 pz = []
 
-global px2
-global py2
-global pz2
-
-px2 = []
-py2 = []
-pz2 = []
 
 global m3D
 global mx
@@ -159,13 +152,9 @@ class Plotter(object):
 		py.append(posf[1])
 		pz.append(posf[2])
 
-		px2.append(posf[0])
-		py2.append(posf[1])
-		pz2.append(posf[2])
-
-		mx.append(momf[0]*100)
-		my.append(momf[1]*100)
-		mz.append(momf[2]*100)
+		mx.append(momf[0])
+		my.append(momf[1])
+		mz.append(momf[2])
 
 		if posf[0] < 0 and posf[1] < 0 and posf[2] < 0 and -radius < -bound_lower and -radius > -bound_upper:
 			pos_3D_left.append(radius)
@@ -269,7 +258,7 @@ class Plotter(object):
 		momy = []
 		momz = []
 
-		print "length of p3D = ", len(p3D)
+		# print "length of p3D = ", len(p3D)
 
 		for pos in p3D:
 			difference = np.sqrt((clusterCenter[0] - pos[0])**2+ \
@@ -287,12 +276,9 @@ class Plotter(object):
 				momy.append(m3D[pos_index][1])
 				momz.append(m3D[pos_index][2])
 
-		print "number of clustered positrons = ", len(clusterx)
+		# print "number of clustered positrons = ", len(clusterx)
 
 		# saving data
-		global C_positions_LIST
-		global C_momenta_LIST
-
 		C_positions_LIST[:] = []
 		C_momenta_LIST[:] = []
 
@@ -307,33 +293,34 @@ class Plotter(object):
 			C_momenta_LIST.append(momentum)
 
 
-		# fig = plt.figure()
-		# # Axes3D.scatter(self.px, self.py, self.pz)
+		print len(C_positions_LIST), "\n", len(C_momenta_LIST)
+		fig = plt.figure()
+		# Axes3D.scatter(self.px, self.py, self.pz)
 
-		# # first subplot: a 3D scatter plot of positions
-		# ax = fig.add_subplot(111, projection='3d')
-		# axmin = -160 
-		# axmax = 160
-		# axes = plt.gca()
-		# axes.set_xlim([axmin,axmax])
-		# axes.set_ylim([axmin,axmax])
-		# axes.set_zlim([axmin,axmax])
+		# first subplot: a 3D scatter plot of positions
+		ax = fig.add_subplot(111, projection='3d')
+		axmin = -160 
+		axmax = 160
+		axes = plt.gca()
+		axes.set_xlim([axmin,axmax])
+		axes.set_ylim([axmin,axmax])
+		axes.set_zlim([axmin,axmax])
 
-		# ax.set_xlabel('mm')
-		# ax.set_ylabel('mm')
-		# ax.set_zlabel('mm')
+		ax.set_xlabel('mm')
+		ax.set_ylabel('mm')
+		ax.set_zlabel('mm')
 
-		# ax.scatter(clusterx, clustery, clusterz)
-		# for i in np.arange(0, len(clusterx)):
-		# 	a = Arrow3D([clusterx[i], clusterx[i] + 1000*momx[i]], [clustery[i], clustery[i] + 1000*momy[i]], [clusterz[i], clusterz[i] + 1000*momz[i]], mutation_scale=20, lw=1, arrowstyle="-|>", color="r")
-		# 	ax.add_artist(a)
+		ax.scatter(clusterx, clustery, clusterz)
+		for i in np.arange(0, len(clusterx)):
+			a = Arrow3D([clusterx[i], clusterx[i] + 1000*momx[i]], [clustery[i], clustery[i] + 1000*momy[i]], [clusterz[i], clusterz[i] + 1000*momz[i]], mutation_scale=20, lw=1, arrowstyle="-|>", color="r")
+			ax.add_artist(a)
 
 
-		# plt.title("A single cluster")
+		plt.title("A single cluster")
 
-		# # plt.draw() 
+		# plt.draw() 
 		
-		# plt.show()
+		plt.show()
 
 	def clusterDataReturner(self):
 
@@ -382,9 +369,10 @@ class Plotter(object):
 			# print true_range
 			if true_range < 200:
 				cluster_sizes_LIST.append(true_range)
+		print "avg cluster size = ", np.mean(cluster_sizes_LIST)
 				# print "\n", "Range = ", true_range, "\n"
 
-		plt.show()
+		# plt.show()
 
 PLT = Plotter()
 
@@ -399,9 +387,8 @@ class MyPrimaryGeneratorAction(G4VUserPrimaryGeneratorAction):
 		self.energyUnit = energyUnit
 		global clusterCenter
 		clusterCenter = center
+
 	def GeneratePrimaries(self, event):
-
-
 		# Particle param
 		#################################################
 		locationArray = [0, 0, 0]
@@ -432,7 +419,7 @@ class MyRunAction(G4UserRunAction):
 	def EndOfRunAction(self, run):
 		# PLT.grapher()
 		PLT.computeClusterMomentum()
-		# PLT.computeClusterSize()
+		PLT.computeClusterSize()
 		# print(cluster_sizes_LIST)
 		PLT.dataAnalysis()
 		# WIPE.wipeElectronCounter()
