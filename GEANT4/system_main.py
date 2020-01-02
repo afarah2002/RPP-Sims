@@ -90,9 +90,6 @@ class ClusterClass(object):
 		b = np.sqrt(energy*constant) 
 
 		for location in location_range:
-
-			print len(self.ALL_clusters_positions) # <------------------- WHAT?!?!?!? HOW, THESE SHOULD BE DIFFERENT!!!! APPENDING RIGHT????
-			time.sleep(1)
 			SpaceConst
 			if len(location) == 3: # this is cartesian
 				x = location[0]
@@ -111,7 +108,7 @@ class ClusterClass(object):
 			gRunManager.SetUserAction(myEA)
 			mySA = MySteppingAction()
 			gRunManager.SetUserAction(mySA)
-			# VIS.visualizer(viz_theta, viz_phi)
+			VIS.visualizer(viz_theta, viz_phi)
 			fieldMgr = gTransportationManager.GetFieldManager()
 			myField = G4UniformMagField(G4ThreeVector(magVec[0], magVec[1], magVec[2]))
 			fieldMgr.SetDetectorField(myField)
@@ -121,12 +118,12 @@ class ClusterClass(object):
 			gRunManager.Initialize()
 			gRunManager.BeamOn(1)
 
-			cluster_positions, cluster_momenta = DA.clusterDataReturner()
 			# print len(cluster_positions), "\n", len(cluster_momenta)
 			# SEEP.runSEE(e, cluster_positions, cluster_momenta)
-
 			# saving ALL clusters for this energy to be SEEPed
+			cluster_positions, cluster_momenta = DA.clusterDataReturner()
 			self.ALL_clusters_positions.append(cluster_positions) 
+			# print cluster_positions
 			# print "appended", ALL_clusters_positions
 			# time.sleep(12)
 			self.ALL_clusters_momenta.append(cluster_momenta) 
@@ -135,14 +132,16 @@ class ClusterClass(object):
 			# median = np.median(cluster_time_LIST)
 			# cluster_time_median_LIST.append(median)
 							
-		time.sleep(2)
-		time.sleep(1.5)
+		for i in self.ALL_clusters_positions:
+			print i[-1]
+			time.sleep(2)
+
 		return self.ALL_clusters_positions, self.ALL_clusters_momenta
 
 CC = ClusterClass()
 if __name__ == '__main__':
 	step = 6
-	particleCount = 1000
+	particleCount = 500
 	location_range = ClusGen.sphericalClusters(step)
 	for e in energy_LIST:
 		CC

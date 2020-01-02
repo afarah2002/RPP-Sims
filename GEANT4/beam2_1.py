@@ -22,6 +22,10 @@ from arrow_generator import Arrow3D
 #----------code starts here!----------#
 class DataAnalysis(object):
 	"Performs data collection, analysis and visualization for the pre-SEE analysis"
+
+	# for a specific cluster
+
+
 	def __init__(self):
 
 		self.p3D = []
@@ -37,10 +41,6 @@ class DataAnalysis(object):
 		self.cluster_time_LIST = []
 		self.cluster_sizes_LIST = []
 
-
-		# for a specific cluster
-		self.C_positions_LIST = []
-		self.C_momenta_LIST = []
 
 	def wipeData(self):
 
@@ -118,11 +118,6 @@ class DataAnalysis(object):
 		# fig, axs = plt.subplots(3, sharey=True, sharex=False, tight_layout=False)
 
 	def computeClusterMomentum(self):
-		# pass
-		# print clusterCenter
-
-		# positions = open("positions.txt", "a")
-		# momenta = open("momenta.txt", "a")
 
 		clusterx = []
 		clustery = []
@@ -153,8 +148,11 @@ class DataAnalysis(object):
 		# print "number of clustered positrons = ", len(clusterx)
 
 		# saving data
-		self.C_positions_LIST = []
-		self.C_momenta_LIST = []
+
+		global C_positions_LIST 
+		global C_momenta_LIST 
+		C_positions_LIST = []
+		C_momenta_LIST = []
 
 		for index in range(len(clusterx)):
 			position = [clusterx[index], clustery[index], clusterz[index]]
@@ -163,11 +161,11 @@ class DataAnalysis(object):
 			# positions.write("["+ str(position[0])+ ", "+ str(position[1])+ ", "+ str(position[2])+ "]"+"\n")
 			# momenta.write("["+ str(momentum[0])+ ", "+ str(momentum[1])+ ", "+ str(momentum[2])+ "]"+"\n")
 
-			self.C_positions_LIST.append(position)
-			self.C_momenta_LIST.append(momentum)
+			C_positions_LIST.append(position)
+			C_momenta_LIST.append(momentum)
 
 
-		print len(self.C_positions_LIST), "\n", len(self.C_momenta_LIST)
+		# print len(C_positions_LIST), "\n", len(C_momenta_LIST)
 		# fig = plt.figure()
 		# # Axes3D.scatter(self.self.px, self.self.py, self.self.pz)
 
@@ -198,10 +196,11 @@ class DataAnalysis(object):
 
 	def clusterDataReturner(self):
 
-		positions = self.C_positions_LIST
-		momenta = self.C_momenta_LIST
-
+		positions = C_positions_LIST
+		momenta = C_momenta_LIST
+		print positions
 		return positions, momenta
+		# plt.show()
 
 	def computeClusterSize(self):
 		n_bins = 25
@@ -246,7 +245,6 @@ class DataAnalysis(object):
 		print "avg cluster size = ", np.mean(self.cluster_sizes_LIST)
 				# print "\n", "Range = ", true_range, "\n"
 
-		# plt.show()
 
 DA = DataAnalysis()
 
@@ -292,7 +290,7 @@ class MyRunAction(G4UserRunAction):
 	"My Run Action"
 
 	def EndOfRunAction(self, run):
-		DA
+		# DA
 		# DA.grapher()
 		DA.computeClusterMomentum()
 		DA.computeClusterSize()
