@@ -78,18 +78,19 @@ class SEEConstructor(object):
 		Al = gNistManager.FindOrBuildMaterial("G4_Al")
 		scale_factor = 5
 
-		thickness = 30e-8
-		width = 1900
+		dist_cent = 60 # from 1 to 100
+		thickness = 30e-9
+		width = 1000
 
 		# GC.ConstructSphere("Sphere", GRAPHITE , [0., 0., 0.], m, (.10-30e-9)*scale_factor, .10*scale_factor, 0., 360., 0., 90)
-		GC.ConstructBox("Box", Al, [(95)*scale_factor, 0., 0.], mm, [ thickness,width,width]) # ON X-AXIS
-		GC.ConstructBox("Box", Al, [-(95)*scale_factor, 0., 0.], mm, [ thickness,width,width]) # ON X-AXIS
+		GC.ConstructBox("Box", GRAPHITE, [(dist_cent)*scale_factor, 0., 0.], mm, [ thickness,width,width]) # ON X-AXIS
+		GC.ConstructBox("Box", GRAPHITE, [-(dist_cent)*scale_factor, 0., 0.], mm, [ thickness,width,width]) # ON X-AXIS
 
-		GC.ConstructBox("Box", Al, [0., (95)*scale_factor, 0.], mm, [width, thickness, width]) # ON Y-AXIS
-		GC.ConstructBox("Box", Al, [0., -(95)*scale_factor, 0.], mm, [width, thickness, width]) # ON Y-AXIS
+		# GC.ConstructBox("Box", Al, [0., (dist_cent)*scale_factor, 0.], mm, [width, thickness, width]) # ON Y-AXIS
+		# GC.ConstructBox("Box", Al, [0., -(dist_cent)*scale_factor, 0.], mm, [width, thickness, width]) # ON Y-AXIS
 
-		GC.ConstructBox("Box", Al, [0., 0., (95)*scale_factor], mm, [width,width, thickness]) # ON Z-AXIS
-		GC.ConstructBox("Box", Al, [0., 0., -(95)*scale_factor], mm, [width,width, thickness]) # ON Z-AXIS
+		# GC.ConstructBox("Box", Al, [0., 0., (dist_cent)*scale_factor], mm, [width,width, thickness]) # ON Z-AXIS
+		# GC.ConstructBox("Box", Al, [0., 0., -(dist_cent)*scale_factor], mm, [width,width, thickness]) # ON Z-AXIS
 
 
 GC = GeomConstructor()
@@ -102,14 +103,13 @@ viz_phi = 0
 
 class SecondaryElectronEmissionProcess(object):
 
-	# def __init__(self):
 
 	def runSEE(self, energy, positions, momenta):
-		# while True:
-		# print positions
-		# time.sleep(1)
+
+		print "energy = ", energy, " eV"
 		SEEConstructor
 		SEEConstructor.construct()
+		gRunManager.GeometryHasBeenModified()
 		PGA_1 = ClusteredPositronGenerator(energy, positions, momenta)
 		gRunManager.SetUserAction(PGA_1)
 
@@ -133,14 +133,10 @@ class SecondaryElectronEmissionProcess(object):
 
 		gRunManager.BeamOn(1)
 
-		# # n = raw_input("hi")
-		# # if n == "":
-		# # 	break
-		# # else:
-		gApplyUICommand("/vis/viewer/select " + "SEE")
-
-		VIS.visualizer(viz_theta, viz_phi, "SEE")
+		VIS.visualizer(viz_theta, viz_phi, "cluster_gen")
 		
 		# gApplyUICommand("/vis/viewer/update")
+
+		time.sleep(2)
 
 

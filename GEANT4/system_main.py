@@ -29,23 +29,11 @@ from field_designer import FieldDesign
 from cluster_generator import ClusterGenerator
 #----------code starts here!----------#
 
-
-
-global cluster_width
-cluster_width = 160
-spacing = 40./7
-interval = cluster_width + spacing
-interval *= 3
-global edge
-edge = 500
-# energy_LIST = [0.002]
+# energy_LIST = [1001]
 # energy_LIST = list(np.arange(1, 4, 0.5))
-energy_LIST = list(np.arange(1001, 2000, 200))
+energy_LIST = list(np.arange(1001., 2000., 200.))
 global energyUnit
 energyUnit = eV
-
-cluster_time_median_LIST = []
-
 
 class SpaceConstructor(object):
 	def __init__(self):
@@ -65,11 +53,6 @@ DA = DataAnalysis()
 GC = GeomConstructor()
 ClusGen = ClusterGenerator()
 # --------------------------------------- #
-
-viz_theta = 35
-viz_phi = 35
-zoom = 1.5
-
 class ClusterClass(object):
 
 	def __init__(self):
@@ -77,7 +60,8 @@ class ClusterClass(object):
 		self.ALL_clusters_positions = []
 		self.ALL_clusters_momenta = []
 
-
+		self.viz_theta = 35
+		self.viz_phi = 35
 	def run(self, energy, location_range, particleCount, cluster_width, edge):
 
 		if energyUnit == MeV:
@@ -90,7 +74,10 @@ class ClusterClass(object):
 		b = np.sqrt(energy*constant) 
 
 		for location in location_range:
+
 			SpaceConst
+			# gRunManager.GetRunManager().GeometryHasBeenModified()
+
 			if len(location) == 3: # this is cartesian
 				x = location[0]
 				y = location[1]
@@ -101,6 +88,7 @@ class ClusterClass(object):
 				theta = location[1]
 				magVec, magVecScaled = FD.spherefieldParam(energy, b, phi, theta, cluster_width)
 
+			print "energy = ", energy, " eV"
 			# set user actions ...
 			PGA_1 = MyPrimaryGeneratorAction(e, energyUnit, magVecScaled, particleCount)
 			gRunManager.SetUserAction(PGA_1)
@@ -108,7 +96,7 @@ class ClusterClass(object):
 			gRunManager.SetUserAction(myEA)
 			mySA = MySteppingAction()
 			gRunManager.SetUserAction(mySA)
-			VIS.visualizer(viz_theta, viz_phi, "cluster_gen")
+			VIS.visualizer(self.viz_theta, self.viz_phi, "cluster_gen")
 			fieldMgr = gTransportationManager.GetFieldManager()
 			myField = G4UniformMagField(G4ThreeVector(magVec[0], magVec[1], magVec[2]))
 			fieldMgr.SetDetectorField(myField)
@@ -122,13 +110,6 @@ class ClusterClass(object):
 			cluster_positions, cluster_momenta = DA.clusterDataReturner()
 			self.ALL_clusters_positions.append(cluster_positions) 
 			self.ALL_clusters_momenta.append(cluster_momenta) 
-			# cluster_time_LIST, cluster_size_LIST = DA.dataReturner() # for 3D positions
-			# median = np.median(cluster_time_LIST)
-			# cluster_time_median_LIST.append(median)
-							
-		for i in self.ALL_clusters_positions:
-			print i[-1]
-		# time.sleep(2)
 
 		return self.ALL_clusters_positions, self.ALL_clusters_momenta
 
@@ -139,14 +120,20 @@ if __name__ == '__main__':
 	edge = 500
 	cluster_width = 190
 	# location_range = ClusGen.sphericalClusters(step)
+	cluster_results = {}
 	location_range = ClusGen.cartesianClusters(cluster_width, edge)
 	for e in energy_LIST:
 		CC
 		positions, momenta = CC.run(e, location_range, particleCount, cluster_width, edge)
-		counter = 0
+
+		cluster_results[e] = [positions, momenta]
+	gApplyUICommand("/vis/viewer/zoom 1.5")
+	for e, data in cluster_results.items():
+		positions, momenta = data[0], data[1]
 		for pos in positions:
 			mom = momenta[positions.index(pos)]
 			# print mom
 			SEEP.runSEE(e, pos, mom)
 			# time.sleep(3)
-		gApplyUICommand("/vis/viewer/close")
+		# gRunManager.GeometryHasBeenModified()
+

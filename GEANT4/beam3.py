@@ -54,21 +54,24 @@ class ClusteredPositronGenerator(G4VUserPrimaryGeneratorAction):
 		# Particle param
 		#################################################
 		particle = "e+"
-		# energy_2 = 2.5
 		energyUnit = eV 
 		dimensionUnit = mm
 
-		energy = self.energy/1000
+		energy = self.energy
+		# print "energy = ", energy
 		self.particleGun.SetParticleByName(particle) # define particle
 		self.particleGun.SetParticleEnergy(energy*energyUnit) # define particle energy 
 
 		
 		for position in self.positions_LIST: # creates random momentum vectors originating from [0, 0, 0]
 			momentumArray = self.momenta_LIST[self.positions_LIST.index(position)]
-			# print momentumArray
+			# print momentumArrayz
 			if momentumArray[0] != 0 or momentumArray[1] != 0 or momentumArray[2] != 0:
 				self.particleGun.SetParticlePosition(G4ThreeVector(position[0], position[1], position[2])*dimensionUnit) # define first particle generator location
-				self.particleGun.SetParticleMomentumDirection(G4ThreeVector(momentumArray[0]/np.sqrt(1000), momentumArray[1]/np.sqrt(1000), momentumArray[2]/np.sqrt(1000))*dimensionUnit) # define first particle generator momentum
+				self.particleGun.SetParticleMomentumDirection(G4ThreeVector(momentumArray[0], \
+																			momentumArray[1], \
+																			momentumArray[2])*dimensionUnit) 
+																			# this is just the direction of hte particle, mag is determined by energy
 				self.particleGun.GeneratePrimaryVertex(event)
 			# else:
 			# 	print KE 
@@ -81,10 +84,7 @@ class MyRunAction(G4UserRunAction):
 	"My Run Action"
 
 	def EndOfRunAction(self, run):
-		global SEE_count
-		SEE_count = 0
-		# time.sleep(1)
-		# pass
+		pass
 
 # ------------------------------------------------------------------
 class MyEventAction(G4UserEventAction):
@@ -106,10 +106,11 @@ class MySteppingAction(G4UserSteppingAction):
 		touchable = track.GetTouchable()
 		global KE
 		KE = track.GetKineticEnergy()
-		# print KE
 		parentId = track.GetParentID()
 		particleName = track.GetDefinition().GetParticleName() 
 
+		# if particleName == "e+":
+		# print "e+ energy = ", KE
 		# kinetic energy in MeV - PRE
 		# initialKE = preStepPoint.GetKineticEnergy() 
 		# kinetic energy in MeV - POST
@@ -137,6 +138,4 @@ class MySteppingAction(G4UserSteppingAction):
 
 
 		if particleName == 'e-' and parentId != 0:
-			global SEE_count
-			SEE_count += 1
-			print SEE_count
+			print "--------------------------ELECTRON-----------------------------"

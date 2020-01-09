@@ -60,6 +60,7 @@ class DataAnalysis(object):
 
 		# p3D.append(posf)
 		self.p3D.append(posf)
+		# print len(self.p3D)	
 		self.m3D.append(momf)
 
 		self.px.append(posf[0])
@@ -162,7 +163,7 @@ class DataAnalysis(object):
 			C_momenta_LIST.append(momentum)
 
 
-		# print len(C_positions_LIST), "\n", len(C_momenta_LIST)
+		print len(C_positions_LIST), "\n", len(C_momenta_LIST)
 		# fig = plt.figure()
 		# # Axes3D.scatter(self.self.px, self.self.py, self.self.pz)
 

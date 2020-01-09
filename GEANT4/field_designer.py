@@ -57,8 +57,8 @@ class FieldDesign(object):
 		# print "Receiver DIMENSIONS  ", receiverDimScaled
 
 		material1 = G4Material.GetMaterial("G4_W")
-		GC.ConstructBox("Receiver", material1, [x,y,z], mm, receiverDimScaled)
-		GC.ConstructBox("Receiver", material1, np.multiply([x,y,z], -1), mm, receiverDimScaled) # receiver for opposite cluster
+		# GC.ConstructBox("Receiver", material1, [x,y,z], mm, receiverDimScaled)
+		# GC.ConstructBox("Receiver", material1, np.multiply([x,y,z], -1), mm, receiverDimScaled) # receiver for opposite cluster
 
 		# if the magVecScaled is not in the uniqueClusters list, append to it
 		flag = 0
