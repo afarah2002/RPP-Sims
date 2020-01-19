@@ -72,10 +72,12 @@ class SEEConstructor(object):
 
 
 	def construct(self):
-
+		# materials
 		NaI = gNistManager.FindOrBuildMaterial("G4_SODIUM_IODIDE")
 		GRAPHITE = gNistManager.FindOrBuildMaterial("G4_GRAPHITE")
 		Al = gNistManager.FindOrBuildMaterial("G4_Al")
+		W = G4Material.GetMaterial("G4_W")
+
 		scale_factor = 5
 
 		dist_cent = 60 # from 1 to 100
@@ -83,8 +85,8 @@ class SEEConstructor(object):
 		width = 1000
 
 		# GC.ConstructSphere("Sphere", GRAPHITE , [0., 0., 0.], m, (.10-30e-9)*scale_factor, .10*scale_factor, 0., 360., 0., 90)
-		GC.ConstructBox("Box", GRAPHITE, [(dist_cent)*scale_factor, 0., 0.], mm, [ thickness,width,width]) # ON X-AXIS
-		GC.ConstructBox("Box", GRAPHITE, [-(dist_cent)*scale_factor, 0., 0.], mm, [ thickness,width,width]) # ON X-AXIS
+		GC.ConstructBox("Box", W, [(dist_cent)*scale_factor, 0., 0.], mm, [ thickness,width,width]) # ON X-AXIS
+		GC.ConstructBox("Box", W, [-(dist_cent)*scale_factor, 0., 0.], mm, [ thickness,width,width]) # ON X-AXIS
 
 		# GC.ConstructBox("Box", Al, [0., (dist_cent)*scale_factor, 0.], mm, [width, thickness, width]) # ON Y-AXIS
 		# GC.ConstructBox("Box", Al, [0., -(dist_cent)*scale_factor, 0.], mm, [width, thickness, width]) # ON Y-AXIS

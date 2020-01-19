@@ -29,9 +29,9 @@ from field_designer import FieldDesign
 from cluster_generator import ClusterGenerator
 #----------code starts here!----------#
 
-# energy_LIST = [1001]
+energy_LIST = [1001]
 # energy_LIST = list(np.arange(1, 4, 0.5))
-energy_LIST = list(np.arange(1001., 2000., 200.))
+# energy_LIST = list(np.arange(1001., 2000., 200.))
 global energyUnit
 energyUnit = eV
 
@@ -118,10 +118,11 @@ if __name__ == '__main__':
 	step = 6
 	particleCount = 500
 	edge = 500
-	cluster_width = 190
+	cluster_width = 188
 	# location_range = ClusGen.sphericalClusters(step)
-	cluster_results = {}
 	location_range = ClusGen.cartesianClusters(cluster_width, edge)
+	cluster_results = {}
+
 	for e in energy_LIST:
 		CC
 		positions, momenta = CC.run(e, location_range, particleCount, cluster_width, edge)
@@ -132,8 +133,5 @@ if __name__ == '__main__':
 		positions, momenta = data[0], data[1]
 		for pos in positions:
 			mom = momenta[positions.index(pos)]
-			# print mom
 			SEEP.runSEE(e, pos, mom)
-			# time.sleep(3)
-		# gRunManager.GeometryHasBeenModified()
 
