@@ -10,4 +10,4 @@
 	 - cluster_generator.py - cluster placment based on field_designer.py
 	 - beam2_1.py - particle generator, cluster analysis, cluster plotter, event/step moderation
 	 - beam3.py - generates individual clusters in space
-	 - system_main.py - main cluster simulator 
+	 - system_main.py - main cluster simulator
