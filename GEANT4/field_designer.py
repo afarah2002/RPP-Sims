@@ -75,7 +75,7 @@ class FieldDesign(object):
 
 		return magVec, magVecScaled
 
-	def spherefieldParam(self, energy, b, phi, theta, cluster_width):
+	def spherefieldParam(self, energy, b, phi, theta, cluster_width, edge):
 
 		# vectorList = [list(np.multiply([energy, energy, energy], be))]
 		# radius = np.sqrt(np.square(vectorList[0][0]) + np.square(vectorList[0][1]) + np.square(vectorList[0][2]))

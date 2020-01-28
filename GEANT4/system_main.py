@@ -65,13 +65,13 @@ class ClusterClass(object):
 	def run(self, energy, location_range, particleCount, cluster_width, edge):
 
 		if energyUnit == MeV:
-			constant = 4.644e-9
+			cluster_constant = 4.644e-9
 		if energyUnit == keV:
-			constant = 4.644e-12
+			cluster_constant = 4.644e-12
 		if energyUnit == eV:
-			constant = 4.644e-15
+			cluster_constant = 4.644e-15
 
-		b = np.sqrt(energy*constant) 
+		b = np.sqrt(energy*cluster_constant) 
 
 		for location in location_range:
 
@@ -86,7 +86,7 @@ class ClusterClass(object):
 			if len(location) == 2: # this is spherical
 				phi = location[0]
 				theta = location[1]
-				magVec, magVecScaled = FD.spherefieldParam(energy, b, phi, theta, cluster_width)
+				magVec, magVecScaled = FD.spherefieldParam(energy, b, phi, theta, cluster_width, edge)
 
 			print "energy = ", energy, " eV"
 			# set user actions ...
@@ -111,27 +111,27 @@ class ClusterClass(object):
 			self.ALL_clusters_positions.append(cluster_positions) 
 			self.ALL_clusters_momenta.append(cluster_momenta) 
 
-		return self.ALL_clusters_positions, self.ALL_clusters_momenta
+		return self.ALL_clusters_positions, self.ALL_clusters_momenta, location
 
 CC = ClusterClass()
 if __name__ == '__main__':
-	step = 6
+	step = 2
 	particleCount = 500
 	edge = 500
 	cluster_width = 188
-	# location_range = ClusGen.sphericalClusters(step)
-	location_range = ClusGen.cartesianClusters(cluster_width, edge)
+	location_range = ClusGen.sphericalClusters(step)
+	# location_range = ClusGen.cartesianClusters(cluster_width, edge)
 	cluster_results = {}
 
 	for e in energy_LIST:
 		CC
-		positions, momenta = CC.run(e, location_range, particleCount, cluster_width, edge)
+		positions, momenta, location = CC.run(e, location_range, particleCount, cluster_width, edge)
 
-		cluster_results[e] = [positions, momenta]
+		cluster_results[e] = [positions, momenta, location]
 	gApplyUICommand("/vis/viewer/zoom 1.5")
 	for e, data in cluster_results.items():
-		positions, momenta = data[0], data[1]
+		positions, momenta, location = data[0], data[1], data[2]
 		for pos in positions:
 			mom = momenta[positions.index(pos)]
-			SEEP.runSEE(e, pos, mom)
+			SEEP.runSEE(e, pos, mom, location)
 

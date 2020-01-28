@@ -85,8 +85,8 @@ class SEEConstructor(object):
 		width = 1000
 
 		# GC.ConstructSphere("Sphere", GRAPHITE , [0., 0., 0.], m, (.10-30e-9)*scale_factor, .10*scale_factor, 0., 360., 0., 90)
-		GC.ConstructBox("Box", W, [(dist_cent)*scale_factor, 0., 0.], mm, [ thickness,width,width]) # ON X-AXIS
-		GC.ConstructBox("Box", W, [-(dist_cent)*scale_factor, 0., 0.], mm, [ thickness,width,width]) # ON X-AXIS
+		# GC.ConstructBox("Box", W, [(dist_cent)*scale_factor, 0., 0.], mm, [ thickness,width,width]) # ON X-AXIS
+		# GC.ConstructBox("Box", W, [-(dist_cent)*scale_factor, 0., 0.], mm, [ thickness,width,width]) # ON X-AXIS
 
 		# GC.ConstructBox("Box", Al, [0., (dist_cent)*scale_factor, 0.], mm, [width, thickness, width]) # ON Y-AXIS
 		# GC.ConstructBox("Box", Al, [0., -(dist_cent)*scale_factor, 0.], mm, [width, thickness, width]) # ON Y-AXIS
@@ -106,7 +106,7 @@ viz_phi = 0
 class SecondaryElectronEmissionProcess(object):
 
 
-	def runSEE(self, energy, positions, momenta):
+	def runSEE(self, energy, positions, momenta, location):
 
 		print "energy = ", energy, " eV"
 		SEEConstructor
