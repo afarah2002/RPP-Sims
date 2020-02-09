@@ -14,17 +14,18 @@ import random
 from scipy.signal import find_peaks
 import scipy.stats as ss
 import seaborn as sns  # for nicer graphics
-from time import sleep
-
+import time
 # -------- FILE IMPORTS ------- #
 from arrow_generator import Arrow3D
 
 #----------code starts here!----------#
+global times
+times = []
 class DataAnalysis(object):
 	"Performs data collection, analysis and visualization for the pre-SEE analysis"
 
 	# for a specific cluster
-
+	avg_cluster_time = 0
 
 	def __init__(self):
 
@@ -77,11 +78,11 @@ class DataAnalysis(object):
 		radius_lower = np.sqrt(3 * np.square(bound_lower))
 		radius_upper = np.sqrt(3 * np.square(bound_upper))
 
-		if radius > bound_lower and radius < bound_upper:
-			self.cluster_time_LIST.append(tcluster)
+		# if radius > bound_lower and radius < bound_upper:
+		self.cluster_time_LIST.append(tcluster)
 
 	def dataReturner(self):
-
+		# print self.cluster_time_LIST
 		return self.cluster_time_LIST, self.cluster_sizes_LIST
 
 	def grapher(self):
@@ -164,39 +165,34 @@ class DataAnalysis(object):
 
 
 		print len(C_positions_LIST), "\n", len(C_momenta_LIST)
-		# fig = plt.figure()
-		# # Axes3D.scatter(self.self.px, self.self.py, self.self.pz)
+		fig = plt.figure()
+		# Axes3D.scatter(self.self.px, self.self.py, self.self.pz)
 
-		# # first subplot: a 3D scatter plot of positions
-		# ax = fig.add_subplot(111, projection='3d')
-		# axmin = -160 
-		# axmax = 160
-		# axes = plt.gca()
-		# axes.set_xlim([axmin,axmax])
-		# axes.set_ylim([axmin,axmax])
-		# axes.set_zlim([axmin,axmax])
+		# first subplot: a 3D scatter plot of positions
+		ax = fig.add_subplot(111, projection='3d')
+		axmin = -160 
+		axmax = 160
+		axes = plt.gca()
+		axes.set_xlim([axmin,axmax])
+		axes.set_ylim([axmin,axmax])
+		axes.set_zlim([axmin,axmax])
 
-		# ax.set_xlabel('mm')
-		# ax.set_ylabel('mm')
-		# ax.set_zlabel('mm')
+		ax.set_xlabel('mm')
+		ax.set_ylabel('mm')
+		ax.set_zlabel('mm')
 
-		# ax.scatter(clusterx, clustery, clusterz)
-		# for i in np.arange(0, len(clusterx)):
-		# 	a = Arrow3D([clusterx[i], clusterx[i] + 1000*momx[i]], [clustery[i], clustery[i] + 1000*momy[i]], [clusterz[i], clusterz[i] + 1000*momz[i]], mutation_scale=20, lw=1, arrowstyle="-|>", color="r")
-		# 	ax.add_artist(a)
+		ax.scatter(clusterx, clustery, clusterz)
+		for i in np.arange(0, len(clusterx)):
+			a = Arrow3D([clusterx[i], clusterx[i] + 5000*momx[i]], [clustery[i], clustery[i] + 1000*momy[i]], [clusterz[i], clusterz[i] + 1000*momz[i]], mutation_scale=20, lw=1, arrowstyle="-|>", color="r")
+			ax.add_artist(a)
 
 
-		# plt.title("A single cluster")
+		plt.title("A single cluster")
 
-		# # plt.draw() 
+		# plt.draw() 
 		
-		# plt.show()
+		plt.show()
 
-	def clusterDataReturner(self):
-
-		positions = C_positions_LIST
-		momenta = C_momenta_LIST
-		return positions, momenta
 
 	def computeClusterSize(self):
 		n_bins = 25
@@ -240,6 +236,24 @@ class DataAnalysis(object):
 				self.cluster_sizes_LIST.append(true_range)
 		print "avg cluster size = ", np.mean(self.cluster_sizes_LIST)
 				# print "\n", "Range = ", true_range, "\n"
+
+	def timeAnalysis(self):
+		times = self.cluster_time_LIST
+		print "HIIIIIIIIIIII", len(times)
+		global avg_cluster_time
+		avg_cluster_time = np.median(times)
+		self.avg_cluster_time = avg_cluster_time
+		n_bins = 50
+		# print "time to cluster = ", cluster_time 
+		plt.hist(times, n_bins)
+		times[:] = []
+		plt.show()
+
+	def clusterDataReturner(self):
+		positions = C_positions_LIST
+		momenta = C_momenta_LIST
+
+		return avg_cluster_time, positions, momenta
 
 
 DA = DataAnalysis()
@@ -288,6 +302,7 @@ class MyRunAction(G4UserRunAction):
 	def EndOfRunAction(self, run):
 		# DA
 		# DA.grapher()
+		DA.timeAnalysis()
 		DA.computeClusterMomentum()
 		DA.computeClusterSize()
 		DA.wipeData()
@@ -331,8 +346,8 @@ class MySteppingAction(G4UserSteppingAction):
 			p_test = [step.GetDeltaPosition().x,step.GetDeltaPosition().y,step.GetDeltaPosition().z]
 			p = [postStepPoint.GetPosition().x, postStepPoint.GetPosition().y, postStepPoint.GetPosition().z] # (mm)
 			# p and p_test are the SAME 
-			t_test = step.GetDeltaTime()
-			t = track.GetGlobalTime() # (ns)
+			t = step.GetDeltaTime()
+			# t = track.GetGlobalTime() # (ns)
 			# t and t_test are the SAME
 
 			m = [postStepPoint.GetMomentum().x, postStepPoint.GetMomentum().y, postStepPoint.GetMomentum().z]

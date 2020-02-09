@@ -11,7 +11,7 @@ import collections
 import matplotlib
 import matplotlib.pyplot as plt
 import matplotlib.mlab as mlab
-from matplotlib.backends.backend_pdf import PdfPages
+plt.rc('font',family='Times New Roman')
 import numpy as np
 import random
 import thread
@@ -29,12 +29,13 @@ from field_designer import FieldDesign
 from cluster_generator import ClusterGenerator
 #----------code starts here!----------#
 
-energy_LIST = [1001]
+energy_LIST = [1001,1500]
 # energy_LIST = list(np.arange(1, 4, 0.5))
 # energy_LIST = list(np.arange(1001., 2000., 200.))
 global energyUnit
 energyUnit = eV
 
+GC = GeomConstructor()
 class SpaceConstructor(object):
 	def __init__(self):
 		g4py.NISTmaterials.Construct()
@@ -50,7 +51,6 @@ SpaceConst = SpaceConstructor()
 VIS = Visualizer()
 SEEP = SecondaryElectronEmissionProcess()
 DA = DataAnalysis()
-GC = GeomConstructor()
 ClusGen = ClusterGenerator()
 # --------------------------------------- #
 class ClusterClass(object):
@@ -60,8 +60,8 @@ class ClusterClass(object):
 		self.ALL_clusters_positions = []
 		self.ALL_clusters_momenta = []
 
-		self.viz_theta = 35
-		self.viz_phi = 35
+		self.viz_theta = 90
+		self.viz_phi = 0
 	def run(self, energy, location_range, particleCount, cluster_width, edge):
 
 		if energyUnit == MeV:
@@ -106,8 +106,13 @@ class ClusterClass(object):
 			gRunManager.Initialize()
 			gRunManager.BeamOn(1)
 
+			# cluster_time_LIST, cluster_sizes_LIST = DA.dataReturner()
+
 			# saving ALL clusters for this energy to be SEEPed
-			cluster_positions, cluster_momenta = DA.clusterDataReturner()
+			cluster_time, cluster_positions, cluster_momenta = DA.clusterDataReturner()
+
+			print "time to cluster = ", cluster_time 
+
 			self.ALL_clusters_positions.append(cluster_positions) 
 			self.ALL_clusters_momenta.append(cluster_momenta) 
 

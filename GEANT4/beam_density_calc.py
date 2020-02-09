@@ -1,9 +1,6 @@
 #----------PYTHON imports----------#
 import collections
 import matplotlib
-import matplotlib.pyplot as plt
-import matplotlib.mlab as mlab
-from matplotlib.backends.backend_pdf import PdfPages
 import numpy as np
 import random
 # import thread
@@ -11,6 +8,29 @@ import time
 import scipy.stats as ss
 from scipy import optimize, stats
 import sys
+
+
+#--------- MATPLOTLIB SETUP ----------#
+# import matplotlib.pyplot as plt
+# import matplotlib.mlab as mlab
+# from adjustText import adjust_text
+# plt.rc('font',family='Times New Roman')
+# plt.tick_params(axis={'both'}, direction='out', fontsize=50, length=6, width=2, grid_alpha=0.5)
+
+import itertools
+import matplotlib
+import seaborn as sns
+import matplotlib.pyplot as plt
+# plt.style.use('classic')
+plt.rc('text', usetex=True)
+plt.rcParams['lines.linewidth'] = 0.75
+plt.rcParams['grid.color']          = 'k'                                               ## color of the grid lines
+plt.rcParams['grid.linestyle']      = ':'                                               ## style of the grid lines
+plt.rcParams['grid.linewidth']      = 0.5  
+plt.rc('font', **{'family': 'serif', 'serif': ['Computer Modern']})
+plt.rc('text', usetex=True)
+colors = ['green', 'blue', 'cyan', 'darkred', 'blue', 'darkgray', 'red', 'skyblue', 'black']
+plt.rcParams.update({'font.size': 14 })  
 
 #----------code starts here!----------#
 pi = np.pi
@@ -87,16 +107,17 @@ class PrimaryCurrentPlotter(object):
 		x = self.E_PE_list
 		# y = self.I_PE_list
 		y = self.T_r_list
-		plt.xlim(0,max(x)+max(x)/50)
+		plt.xlim(0,6)
 		plt.ylim(0,1.1)
-		x_label = "Incident e+ energy " + self.energyUnit
+		x_label = r'$E_\textrm{PE}$' + " (keV)"
 		# y_label = "Incident e+ current " + self.currentUnit
-		y_label = "e+ transmission probability"
+		y_label = r"$T_\textrm{r}$"
 		plt.plot(x,y,"--")
 		plt.xlabel(x_label)
 		plt.ylabel(y_label)
 		plt.title(y_label + " vs " + x_label)
 		plt.grid(1)
+		plt.xscale('log')
 		pass
 
 
@@ -115,22 +136,39 @@ if __name__ == '__main__':
 		populations.append(population)
 
 		PCP.plotter()
-		plt.scatter(opt_coor[0], opt_coor[1])
-		plt.text(opt_coor[0], opt_coor[1], element, fontsize=12)
-	
+		plt.scatter(opt_coor[0], opt_coor[1], s=20*5)
+		# plt.text(opt_coor[0], opt_coor[1], element, fontsize=2*12)
+		# texts = [plt.text(opt_coor[0], opt_coor[1], element, fontsize=2*12)]
+		# adjust_text(texts, force_points=0.15, only_move={'points':'y', 'texts':'xy'}, autoalign='xy', arrowprops=dict(arrowstyle="->", color='r', lw=0.5))
+
+		text_shift = 0
+		if element == 'Ge':
+			text_shift = -.1
+		if element == 'Ag':
+			text_shift = -.05
+		plt.text(opt_coor[0]+text_shift, opt_coor[1], element)
+
 		plt.figure(1)
-		plt.scatter(opt_coor[0], population)
-		plt.xlabel("energies (keV)")
-		plt.ylabel("population")
-		plt.xlim(0,8)
-		plt.ylim(0,1.5e12)
+		plt.scatter(opt_coor[0], population/1e12, s=20*5)
+		x_label = r'$E_\textrm{PE}$' + " (keV)"
+		y_label = "Population " + '($10^{12}$' + " e+)"
+		plt.xlabel(x_label)
+		plt.ylabel(y_label)
+		plt.title("Ideal beam population and energy for different elements")
+		plt.xlim(0,6)
+		plt.ylim(0,1.4)
 		plt.grid(1)
-		plt.text(opt_coor[0], population, element, fontsize=12)
+		plt.text(opt_coor[0], population/1e12, element)
+	## figure post processing ##
+	plt.tick_params(length=5)
+	# plt.legend(loc='lower left')
+	plt.minorticks_on()
+	# plt.grid()
 	plt.show()
 	# for i, element in enumerate(SEE_param_dict.keys()):
 	# 	coor = mins_list[i]
 	# 	ax.scatter(coor[0],coor[1])
-	# 	ax.text(coor[0], coor[1], element,fontsize=12)
+	# 	ax.text(coor[0], coor[1], element,fontsize=2*12)
 
 	# plt.title("Minimum e+ currents and energies")
 	# x_label = "Incident e+ energy (keV)" 
