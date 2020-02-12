@@ -177,9 +177,9 @@ class DataAnalysis(object):
 		axes.set_ylim([axmin,axmax])
 		axes.set_zlim([axmin,axmax])
 
-		ax.set_xlabel('mm')
-		ax.set_ylabel('mm')
-		ax.set_zlabel('mm')
+		ax.set_xlabel('X (mm)')
+		ax.set_ylabel('Y (mm)')
+		ax.set_zlabel('Z (mm)')
 
 		ax.scatter(clusterx, clustery, clusterz)
 		for i in np.arange(0, len(clusterx)):
@@ -245,9 +245,9 @@ class DataAnalysis(object):
 		self.avg_cluster_time = avg_cluster_time
 		n_bins = 50
 		# print "time to cluster = ", cluster_time 
-		plt.hist(times, n_bins)
-		times[:] = []
-		plt.show()
+		# plt.hist(times, n_bins)
+		# times[:] = []
+		# plt.show()
 
 	def clusterDataReturner(self):
 		positions = C_positions_LIST
@@ -301,15 +301,16 @@ class MyRunAction(G4UserRunAction):
 
 	def EndOfRunAction(self, run):
 		# DA
-		# DA.grapher()
-		DA.timeAnalysis()
+		DA.grapher()
+		# DA.timeAnalysis()
 		DA.computeClusterMomentum()
-		DA.computeClusterSize()
+		# DA.computeClusterSize()
 		DA.wipeData()
 		# WIPE.wipe()
 		# print "*** End of Run"
 		# print "- Run sammary : (id= %d, #events= %d)" \
 		# % (run.GetRunID(), run.GetNumberOfEventToBeProcessed())
+		pass
 
 # ------------------------------------------------------------------
 class MyEventAction(G4UserEventAction):

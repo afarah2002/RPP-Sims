@@ -29,7 +29,7 @@ from field_designer import FieldDesign
 from cluster_generator import ClusterGenerator
 #----------code starts here!----------#
 
-energy_LIST = [1001,1500]
+energy_LIST = [1001]
 # energy_LIST = list(np.arange(1, 4, 0.5))
 # energy_LIST = list(np.arange(1001., 2000., 200.))
 global energyUnit
@@ -105,12 +105,13 @@ class ClusterClass(object):
 			gRunManager.SetUserAction(myRA)
 			gRunManager.Initialize()
 			gRunManager.BeamOn(1)
+			# DA.grapher()
 
 			# cluster_time_LIST, cluster_sizes_LIST = DA.dataReturner()
 
 			# saving ALL clusters for this energy to be SEEPed
-			cluster_time, cluster_positions, cluster_momenta = DA.clusterDataReturner()
-
+			# cluster_time, cluster_positions, cluster_momenta = DA.clusterDataReturner()
+			cluster_time, cluster_positions, cluster_momenta = 0,0,0
 			print "time to cluster = ", cluster_time 
 
 			self.ALL_clusters_positions.append(cluster_positions) 
@@ -121,7 +122,7 @@ class ClusterClass(object):
 CC = ClusterClass()
 if __name__ == '__main__':
 	step = 2
-	particleCount = 500
+	particleCount = 1000
 	edge = 500
 	cluster_width = 188
 	location_range = ClusGen.sphericalClusters(step)
@@ -133,6 +134,7 @@ if __name__ == '__main__':
 		positions, momenta, location = CC.run(e, location_range, particleCount, cluster_width, edge)
 
 		cluster_results[e] = [positions, momenta, location]
+	# plt.show()
 	gApplyUICommand("/vis/viewer/zoom 1.5")
 	for e, data in cluster_results.items():
 		positions, momenta, location = data[0], data[1], data[2]
