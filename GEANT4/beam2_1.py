@@ -165,33 +165,33 @@ class DataAnalysis(object):
 
 
 		print len(C_positions_LIST), "\n", len(C_momenta_LIST)
-		fig = plt.figure()
-		# Axes3D.scatter(self.self.px, self.self.py, self.self.pz)
+		# fig = plt.figure()
+		# # Axes3D.scatter(self.self.px, self.self.py, self.self.pz)
 
-		# first subplot: a 3D scatter plot of positions
-		ax = fig.add_subplot(111, projection='3d')
-		axmin = -160 
-		axmax = 160
-		axes = plt.gca()
-		axes.set_xlim([axmin,axmax])
-		axes.set_ylim([axmin,axmax])
-		axes.set_zlim([axmin,axmax])
+		# # first subplot: a 3D scatter plot of positions
+		# ax = fig.add_subplot(111, projection='3d')
+		# axmin = -160 
+		# axmax = 160
+		# axes = plt.gca()
+		# axes.set_xlim([axmin,axmax])
+		# axes.set_ylim([axmin,axmax])
+		# axes.set_zlim([axmin,axmax])
 
-		ax.set_xlabel('X (mm)')
-		ax.set_ylabel('Y (mm)')
-		ax.set_zlabel('Z (mm)')
+		# ax.set_xlabel('X (mm)')
+		# ax.set_ylabel('Y (mm)')
+		# ax.set_zlabel('Z (mm)')
 
-		ax.scatter(clusterx, clustery, clusterz)
-		for i in np.arange(0, len(clusterx)):
-			a = Arrow3D([clusterx[i], clusterx[i] + 5000*momx[i]], [clustery[i], clustery[i] + 1000*momy[i]], [clusterz[i], clusterz[i] + 1000*momz[i]], mutation_scale=20, lw=1, arrowstyle="-|>", color="r")
-			ax.add_artist(a)
+		# ax.scatter(clusterx, clustery, clusterz)
+		# for i in np.arange(0, len(clusterx)):
+		# 	a = Arrow3D([clusterx[i], clusterx[i] + 5000*momx[i]], [clustery[i], clustery[i] + 1000*momy[i]], [clusterz[i], clusterz[i] + 1000*momz[i]], mutation_scale=20, lw=1, arrowstyle="-|>", color="r")
+		# 	ax.add_artist(a)
 
 
-		plt.title("A single cluster")
+		# plt.title("A single cluster")
 
-		# plt.draw() 
+		# # plt.draw() 
 		
-		plt.show()
+		# plt.show()
 
 
 	def computeClusterSize(self):
@@ -244,10 +244,10 @@ class DataAnalysis(object):
 		avg_cluster_time = np.median(times)
 		self.avg_cluster_time = avg_cluster_time
 		n_bins = 50
-		# print "time to cluster = ", cluster_time 
-		# plt.hist(times, n_bins)
-		# times[:] = []
-		# plt.show()
+		print "time to cluster = ", cluster_time 
+		plt.hist(times, n_bins)
+		times[:] = []
+		plt.show()
 
 	def clusterDataReturner(self):
 		positions = C_positions_LIST
@@ -305,7 +305,7 @@ class MyRunAction(G4UserRunAction):
 		# DA.timeAnalysis()
 		DA.computeClusterMomentum()
 		# DA.computeClusterSize()
-		DA.wipeData()
+		# DA.wipeData()
 		# WIPE.wipe()
 		# print "*** End of Run"
 		# print "- Run sammary : (id= %d, #events= %d)" \

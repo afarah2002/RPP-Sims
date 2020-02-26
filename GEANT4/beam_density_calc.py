@@ -62,7 +62,7 @@ class PrimaryCurrentPlotter(object):
 		self.E_PE_list = np.arange(energyLB, energyUB, (energyUB-energyLB)/100000)
 		self.solRad = solRad
 		self.solTurns = solTurns
-		self.clusterArea = pi*(0.188/2)**2
+		self.clusterArea = pi*(0.188/2)**2 # (m2)
 		# print self.E_PE_list
 
 	def computePopulation(self, element, params):
@@ -90,7 +90,7 @@ class PrimaryCurrentPlotter(object):
 			   (4*vac_perm_constant*self.solTurns * SEE_yield)
 
 		# number of indident e+ through cluster area to get the incident current
-		self.population = self.I_PE/(1.6e-19*self.clusterArea*3e8*np.sqrt(2*self.E_PE/511))
+		self.population = (self.I_PE/(1.6e-19*self.clusterArea*3e8*np.sqrt(2*self.E_PE/511)))*(self.clusterArea*escape_depth*10e-9)
 		self.pop_trans = self.population*self.transmitted_percent
 		print element, "\n", \
 			  "beam population: ", np.format_float_scientific(self.population, precision=3), " e+", "\n", \
@@ -135,8 +135,8 @@ if __name__ == '__main__':
 		energies.append(opt_coor[0])
 		populations.append(population)
 
-		PCP.plotter()
-		plt.scatter(opt_coor[0], opt_coor[1], s=20*5)
+		# PCP.plotter()
+		# plt.scatter(opt_coor[0], opt_coor[1], s=20*5)
 		# plt.text(opt_coor[0], opt_coor[1], element, fontsize=2*12)
 		# texts = [plt.text(opt_coor[0], opt_coor[1], element, fontsize=2*12)]
 		# adjust_text(texts, force_points=0.15, only_move={'points':'y', 'texts':'xy'}, autoalign='xy', arrowprops=dict(arrowstyle="->", color='r', lw=0.5))
@@ -146,19 +146,19 @@ if __name__ == '__main__':
 			text_shift = -.1
 		if element == 'Ag':
 			text_shift = -.05
-		plt.text(opt_coor[0]+text_shift, opt_coor[1], element)
+		# plt.text(opt_coor[0]+text_shift, population, element)
 
 		plt.figure(1)
-		plt.scatter(opt_coor[0], population/1e12, s=20*5)
+		plt.scatter(opt_coor[0], population, s=20*5)
 		x_label = r'$E_\textrm{PE}$' + " (keV)"
-		y_label = "Population " + '($10^{12}$' + " e+)"
+		y_label = "Population " + "(e+)"
 		plt.xlabel(x_label)
 		plt.ylabel(y_label)
 		plt.title("Ideal beam population and energy for different elements")
 		plt.xlim(0,6)
-		plt.ylim(0,1.4)
+		plt.ylim(0,500)
 		plt.grid(1)
-		plt.text(opt_coor[0], population/1e12, element)
+		plt.text(opt_coor[0], population, element)
 	## figure post processing ##
 	plt.tick_params(length=5)
 	# plt.legend(loc='lower left')

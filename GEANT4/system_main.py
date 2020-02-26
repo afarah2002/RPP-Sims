@@ -125,8 +125,8 @@ if __name__ == '__main__':
 	particleCount = 1000
 	edge = 500
 	cluster_width = 188
-	location_range = ClusGen.sphericalClusters(step)
-	# location_range = ClusGen.cartesianClusters(cluster_width, edge)
+	# location_range = ClusGen.sphericalClusters(step)
+	location_range = ClusGen.cartesianClusters(cluster_width, edge)
 	cluster_results = {}
 
 	for e in energy_LIST:
@@ -136,9 +136,9 @@ if __name__ == '__main__':
 		cluster_results[e] = [positions, momenta, location]
 	# plt.show()
 	gApplyUICommand("/vis/viewer/zoom 1.5")
-	for e, data in cluster_results.items():
-		positions, momenta, location = data[0], data[1], data[2]
-		for pos in positions:
-			mom = momenta[positions.index(pos)]
-			SEEP.runSEE(e, pos, mom, location)
+	# for e, data in cluster_results.items():
+	# 	positions, momenta, location = data[0], data[1], data[2]
+	# 	for pos in positions:
+	# 		mom = momenta[positions.index(pos)]
+	# 		SEEP.runSEE(e, pos, mom, location)
 
