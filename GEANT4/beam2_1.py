@@ -20,6 +20,7 @@ from arrow_generator import Arrow3D
 
 #----------code starts here!----------#
 global times
+global cluster_time
 times = []
 class DataAnalysis(object):
 	"Performs data collection, analysis and visualization for the pre-SEE analysis"
@@ -41,6 +42,8 @@ class DataAnalysis(object):
 
 		self.cluster_time_LIST = []
 		self.cluster_sizes_LIST = []
+
+		times = []
 
 
 	def wipeData(self):
@@ -164,7 +167,7 @@ class DataAnalysis(object):
 			C_momenta_LIST.append(momentum)
 
 
-		print len(C_positions_LIST), "\n", len(C_momenta_LIST)
+		# print len(C_positions_LIST), "\n", len(C_momenta_LIST)
 		# fig = plt.figure()
 		# # Axes3D.scatter(self.self.px, self.self.py, self.self.pz)
 
@@ -239,13 +242,15 @@ class DataAnalysis(object):
 
 	def timeAnalysis(self):
 		times = self.cluster_time_LIST
-		print "HIIIIIIIIIIII", len(times)
 		global avg_cluster_time
 		avg_cluster_time = np.median(times)
 		self.avg_cluster_time = avg_cluster_time
 		n_bins = 50
-		print "time to cluster = ", cluster_time 
+		print "time to cluster = ", self.avg_cluster_time 
 		plt.hist(times, n_bins)
+		plt.xlabel("Time to cluster (ns)")
+		plt.ylabel("Frequency")
+		plt.title("Distribution of cluster times for a specific energy")
 		times[:] = []
 		plt.show()
 
@@ -257,6 +262,14 @@ class DataAnalysis(object):
 
 
 DA = DataAnalysis()
+
+'''
+##################################  ____________   _  ____________ ##################################
+################################## / ___/ __/ _ | / |/ /_  __/ / / ##################################
+##################################/ (_ / _// __ |/    / / / /_  _/ ##################################
+##################################\___/___/_/ |_/_/|_/ /_/   /_/   ##################################
+
+'''
 
 class MyPrimaryGeneratorAction(G4VUserPrimaryGeneratorAction):
 	"My Primary Generator Action"
@@ -301,8 +314,8 @@ class MyRunAction(G4UserRunAction):
 
 	def EndOfRunAction(self, run):
 		# DA
-		DA.grapher()
-		# DA.timeAnalysis()
+		# DA.grapher()
+		DA.timeAnalysis()
 		DA.computeClusterMomentum()
 		# DA.computeClusterSize()
 		# DA.wipeData()
@@ -364,3 +377,8 @@ class MySteppingAction(G4UserSteppingAction):
 			# return initialMomentum, finalMomentum 
 
 
+############################################################################################################################################################################################################
+############################################################################################################################################################################################################
+############################################################################################################################################################################################################
+############################################################################################################################################################################################################
+############################################################################################################################################################################################################

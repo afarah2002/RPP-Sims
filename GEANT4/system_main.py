@@ -29,8 +29,8 @@ from field_designer import FieldDesign
 from cluster_generator import ClusterGenerator
 #----------code starts here!----------#
 
-energy_LIST = [1001]
-# energy_LIST = list(np.arange(1, 4, 0.5))
+# energy_LIST = [100]
+energy_LIST = list(np.arange(0, 1e6, 1000))
 # energy_LIST = list(np.arange(1001., 2000., 200.))
 global energyUnit
 energyUnit = eV
@@ -63,6 +63,8 @@ class ClusterClass(object):
 		self.viz_theta = 90
 		self.viz_phi = 0
 	def run(self, energy, location_range, particleCount, cluster_width, edge):
+
+		print energy
 
 		if energyUnit == MeV:
 			cluster_constant = 4.644e-9
@@ -107,26 +109,30 @@ class ClusterClass(object):
 			gRunManager.BeamOn(1)
 			# DA.grapher()
 
+			# DA.timeAnalysis()
 			# cluster_time_LIST, cluster_sizes_LIST = DA.dataReturner()
 
 			# saving ALL clusters for this energy to be SEEPed
 			# cluster_time, cluster_positions, cluster_momenta = DA.clusterDataReturner()
-			cluster_time, cluster_positions, cluster_momenta = 0,0,0
-			print "time to cluster = ", cluster_time 
+			# cluster_time, cluster_positions, cluster_momenta = 0,0,0
+			# print "time to cluster = ", cluster_time 
 
-			self.ALL_clusters_positions.append(cluster_positions) 
-			self.ALL_clusters_momenta.append(cluster_momenta) 
+			# self.ALL_clusters_positions.append(cluster_positions) 
+			# self.ALL_clusters_momenta.append(cluster_momenta) 
 
 		return self.ALL_clusters_positions, self.ALL_clusters_momenta, location
 
 CC = ClusterClass()
 if __name__ == '__main__':
 	step = 2
-	particleCount = 1000
+	particleCount = 500
 	edge = 500
 	cluster_width = 188
 	# location_range = ClusGen.sphericalClusters(step)
 	location_range = ClusGen.cartesianClusters(cluster_width, edge)
+
+	# time testing
+	location_range = [[0,0]]
 	cluster_results = {}
 
 	for e in energy_LIST:
