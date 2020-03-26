@@ -22,6 +22,10 @@ from arrow_generator import Arrow3D
 global times
 global cluster_time
 times = []
+
+time_file = open("time_analysis_TIMES.txt", "w")
+time_means_file = open("time_analysis_TIMES_MEANS", "w")
+
 class DataAnalysis(object):
 	"Performs data collection, analysis and visualization for the pre-SEE analysis"
 
@@ -242,17 +246,25 @@ class DataAnalysis(object):
 
 	def timeAnalysis(self):
 		times = self.cluster_time_LIST
-		global avg_cluster_time
-		avg_cluster_time = np.median(times)
-		self.avg_cluster_time = avg_cluster_time
+		# global avg_cluster_time
+		median_cluster_time = np.median(times)
+		time_file.write(str(median_cluster_time)+"\n")
+
+		mean_cluster_time = np.mean(times)
+		time_means_file.write(str(mean_cluster_time)+"\n")
+
+
+
+
+		self.avg_cluster_time = mean_cluster_time
 		n_bins = 50
 		print "time to cluster = ", self.avg_cluster_time 
-		plt.hist(times, n_bins)
-		plt.xlabel("Time to cluster (ns)")
-		plt.ylabel("Frequency")
-		plt.title("Distribution of cluster times for a specific energy")
-		times[:] = []
-		plt.show()
+		# plt.hist(times, n_bins)
+		# plt.xlabel("Time to cluster (ns)")
+		# plt.ylabel("Frequency")
+		# plt.title("Distribution of cluster times for a specific energy")
+		# times[:] = []
+		# plt.show()
 
 	def clusterDataReturner(self):
 		positions = C_positions_LIST
@@ -316,7 +328,7 @@ class MyRunAction(G4UserRunAction):
 		# DA
 		# DA.grapher()
 		DA.timeAnalysis()
-		DA.computeClusterMomentum()
+		# DA.computeClusterMomentum()
 		# DA.computeClusterSize()
 		# DA.wipeData()
 		# WIPE.wipe()

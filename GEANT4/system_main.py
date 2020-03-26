@@ -28,9 +28,9 @@ from visualizer import Visualizer
 from field_designer import FieldDesign
 from cluster_generator import ClusterGenerator
 #----------code starts here!----------#
-
+energy_file = open("time_analysis_ENERGIES.txt", "w")
 # energy_LIST = [100]
-energy_LIST = list(np.arange(0, 1e6, 1000))
+energy_LIST = list(np.arange(0, 1e6, 100))
 # energy_LIST = list(np.arange(1001., 2000., 200.))
 global energyUnit
 energyUnit = eV
@@ -65,7 +65,7 @@ class ClusterClass(object):
 	def run(self, energy, location_range, particleCount, cluster_width, edge):
 
 		print energy
-
+		energy_file.write(str(energy)+"\n")
 		if energyUnit == MeV:
 			cluster_constant = 4.644e-9
 		if energyUnit == keV:
