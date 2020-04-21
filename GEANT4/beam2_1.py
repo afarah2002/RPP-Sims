@@ -25,6 +25,7 @@ times = []
 
 time_file = open("time_analysis_TIMES.txt", "w")
 time_means_file = open("time_analysis_TIMES_MEANS", "w")
+time_max_file = open("time_analysis_TIMES_MAX.txt", "w")
 
 class DataAnalysis(object):
 	"Performs data collection, analysis and visualization for the pre-SEE analysis"
@@ -248,12 +249,13 @@ class DataAnalysis(object):
 		times = self.cluster_time_LIST
 		# global avg_cluster_time
 		median_cluster_time = np.median(times)
-		time_file.write(str(median_cluster_time)+"\n")
+		# time_file.write(str(median_cluster_time)+"\n")
 
 		mean_cluster_time = np.mean(times)
-		time_means_file.write(str(mean_cluster_time)+"\n")
+		# time_means_file.write(str(mean_cluster_time)+"\n")
 
-
+		max_cluster_time = np.max(times)
+		# time_max_file.write(str(max_cluster_time)+"\n")
 
 
 		self.avg_cluster_time = mean_cluster_time
