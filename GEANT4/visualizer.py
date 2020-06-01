@@ -7,7 +7,7 @@ angles and view name to open a viewer.
 from Geant4 import *
 class Visualizer(object):
 
-	def visualizer(viz_theta, viz_phi, viewer_name):
+	def visualizer(self, viz_theta, viz_phi, viewer_name):
 		# time.sleep(.1)
 
 		gApplyUICommand("/vis/sceneHandler/create OGLSX OGLSX")

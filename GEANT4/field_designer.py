@@ -1,3 +1,9 @@
+'''
+This class changes the direction of the uniform magnetic field
+as is designated by cluster_generator.py, specific to the 
+type of cluster generation (spherical/cartesian)
+'''
+
 #----------GEANT4 imports----------#
 from Geant4 import *
 import g4py.ezgeom

@@ -23,7 +23,7 @@ from scipy import optimize, stats
 #----file imports--------#
 from geom_constructor import GeomConstructor 
 # from beam import BeamInitializer
-from beam3 import ClusteredPositronGenerator, MyRunAction, MyEventAction, MySteppingAction, WipeData
+from beam3 import ClusteredPositronGenerator, MyRunAction, MyEventAction, MySteppingAction
 from visualizer import Visualizer
 
 #----------code starts here!----------#
