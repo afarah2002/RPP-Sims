@@ -32,10 +32,6 @@ global times
 global cluster_time
 times = []
 
-time_file = open("time_analysis_TIMES.txt", "w")
-time_means_file = open("time_analysis_TIMES_MEANS", "w")
-time_max_file = open("time_analysis_TIMES_MAX.txt", "w")
-
 class DataAnalysis(object):
 	"Performs data collection, analysis and visualization for the pre-SEE analysis"
 

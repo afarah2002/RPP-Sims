@@ -10,14 +10,10 @@ import g4py.NISTmaterials
 import g4py.EMSTDpl
 import g4py.ParticleGun, g4py.MedicalBeam
 
-import scipy.stats as ss
 import matplotlib
 import matplotlib.pyplot as plt
 import matplotlib.mlab as mlab
-from matplotlib.backends.backend_pdf import PdfPages
-import random
 import time
-import thread
 import numpy as np
 from scipy import optimize, stats
 #----file imports--------#

@@ -21,12 +21,7 @@ import matplotlib.pyplot as plt
 import matplotlib.mlab as mlab
 plt.rc('font',family='Times New Roman')
 import numpy as np
-import random
-import thread
 import time
-import scipy.stats as ss
-from scipy import optimize, stats
-import sys
 #-----------FILE imports------------#
 from beam2_1 import MyPrimaryGeneratorAction, MyRunAction, MyEventAction,MySteppingAction, \
 				    DataAnalysis
@@ -36,7 +31,7 @@ from visualizer import Visualizer
 from field_designer import FieldDesign
 from cluster_generator import ClusterGenerator
 #----------code starts here!----------#
-energy_file = open("time_analysis_ENERGIES.txt", "w")
+# energy_file = open("time_analysis_ENERGIES.txt", "w")
 # energy_LIST = [100]
 energy_LIST = list(np.arange(0, 1e6, 100))
 # energy_LIST = list(np.arange(1001., 2000., 200.))
@@ -73,7 +68,7 @@ class ClusterClass(object):
 	def run(self, energy, location_range, particleCount, cluster_width, edge):
 
 		print energy
-		energy_file.write(str(energy)+"\n")
+		# energy_file.write(str(energy)+"\n")
 		if energyUnit == MeV:
 			cluster_constant = 4.644e-9
 		if energyUnit == keV:
