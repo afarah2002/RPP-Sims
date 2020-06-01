@@ -1,7 +1,0 @@
-/home/nasa01/Documents/STS2020/RPP-Sims/GEANT4/build/CMakeFiles/install/strip.dir
-/home/nasa01/Documents/STS2020/RPP-Sims/GEANT4/build/CMakeFiles/edit_cache.dir
-/home/nasa01/Documents/STS2020/RPP-Sims/GEANT4/build/CMakeFiles/tutorial.dir
-/home/nasa01/Documents/STS2020/RPP-Sims/GEANT4/build/CMakeFiles/rebuild_cache.dir
-/home/nasa01/Documents/STS2020/RPP-Sims/GEANT4/build/CMakeFiles/list_install_components.dir
-/home/nasa01/Documents/STS2020/RPP-Sims/GEANT4/build/CMakeFiles/install/local.dir
-/home/nasa01/Documents/STS2020/RPP-Sims/GEANT4/build/CMakeFiles/install.dir

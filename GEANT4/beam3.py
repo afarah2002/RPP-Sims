@@ -1,3 +1,9 @@
+'''
+This primary generator manager generates positrons for the secondary 
+electron emission analysis script, electron_emission.py , when it is 
+being used independely of the system_main.py script
+'''
+
 #----------imports----------#
 from Geant4 import * 
 import random
@@ -18,93 +24,47 @@ from matplotlib import colors
 from matplotlib.ticker import PercentFormatter
 import time
 
-
-
-global vectorCount
-vectorCount = 500 # number of scattered e+ per run
-
 #----------code starts here!----------#
-class WipeData(object):
-	# wipe lists for next data collection
-	def wipe(self):
-		pass
-
-WIPE = WipeData()
-
-class Arrow3D(FancyArrowPatch):
-    def __init__(self, xs, ys, zs, *args, **kwargs):
-        FancyArrowPatch.__init__(self, (0,0), (0,0), *args, **kwargs)
-        self._verts3d = xs, ys, zs
-
-    def draw(self, renderer):
-        xs3d, ys3d, zs3d = self._verts3d
-        xs, ys, zs = proj3d.proj_transform(xs3d, ys3d, zs3d, renderer.M)
-        self.set_positions((xs[0],ys[0]),(xs[1],ys[1]))
-        FancyArrowPatch.draw(self, renderer)
-
-class Plotter(object):
-	"graphs 3D positions"
-
-	def __init__(self):
-		pass
-
-	def dataCollection(self, posf, momf, tcluster):
-
-		pass
-
-
-	def dataAnalysis(self):
-
-		pass
-
-
-
-	def dataReturner(self):
-
-		pass
-
-	def grapher(self):
-
-		pass
-
-
-		# plt.show()
-
-PLT = Plotter()
-
-
-class MyPrimaryGeneratorAction(G4VUserPrimaryGeneratorAction):
+class ClusteredPositronGenerator(G4VUserPrimaryGeneratorAction):
 	"My Primary Generator Action"
 
-	def __init__(self, energy, locationArray, momentumArray):
+	def __init__(self, energy, p_LIST, m_LIST):
 		G4VUserPrimaryGeneratorAction.__init__(self)
 		self.particleGun = G4ParticleGun(1)
 		# print("\n Particle gun defined \n")
 		self.energy = energy
-		self.momentumArray = momentumArray
-		self.locationArray = locationArray
+		self.positions_LIST = p_LIST
+		self.momenta_LIST = m_LIST
+
 	def GeneratePrimaries(self, event):
 
 
 		# Particle param
 		#################################################
 		particle = "e+"
-		# energy_2 = 2.5
-		energyUnit = MeV 
-		dimensionUnit = cm
+		energyUnit = eV 
+		dimensionUnit = mm
 
 		energy = self.energy
+		# print "energy = ", energy
 		self.particleGun.SetParticleByName(particle) # define particle
 		self.particleGun.SetParticleEnergy(energy*energyUnit) # define particle energy 
 
-		for i in range(0, vectorCount): # creates random momentum vectors originating from [0, 0, 0]
-			mx = random.uniform(-1,1)
-			my = random.uniform(-1,1)
-			mz = random.uniform(-1,1)
-			momentumArray = [mx, my, mz]
-			self.particleGun.SetParticlePosition(G4ThreeVector(self.locationArray[0], self.locationArray[1], self.locationArray[2])*dimensionUnit) # define first particle generator location
-			self.particleGun.SetParticleMomentumDirection(G4ThreeVector(self.momentumArray[0], self.momentumArray[1], self.momentumArray[2])*dimensionUnit) # define first particle generator momentum
-			self.particleGun.GeneratePrimaryVertex(event)
+		
+		for position in self.positions_LIST: # creates random momentum vectors originating from [0, 0, 0]
+			momentumArray = self.momenta_LIST[self.positions_LIST.index(position)]
+			# print momentumArrayz
+			if momentumArray[0] != 0 or momentumArray[1] != 0 or momentumArray[2] != 0:
+				self.particleGun.SetParticlePosition(G4ThreeVector(position[0], position[1], position[2])*dimensionUnit) # define first particle generator location
+				self.particleGun.SetParticleMomentumDirection(G4ThreeVector(momentumArray[0], \
+																			momentumArray[1], \
+																			momentumArray[2])*dimensionUnit) 
+																			# this is just the direction of hte particle, mag is determined by energy
+				self.particleGun.GeneratePrimaryVertex(event)
+			# else:
+			# 	print KE 
+				# time.sleep(1)
+
 		#################################################
 
 #-------------------------------------------------------------------
@@ -112,7 +72,6 @@ class MyRunAction(G4UserRunAction):
 	"My Run Action"
 
 	def EndOfRunAction(self, run):
-		
 		pass
 
 # ------------------------------------------------------------------
@@ -133,8 +92,13 @@ class MySteppingAction(G4UserSteppingAction):
 		# change = step.particleChange()
 		track = step.GetTrack()
 		touchable = track.GetTouchable()
+		global KE
 		KE = track.GetKineticEnergy()
+		parentId = track.GetParentID()
+		particleName = track.GetDefinition().GetParticleName() 
 
+		# if particleName == "e+":
+		# print "e+ energy = ", KE
 		# kinetic energy in MeV - PRE
 		# initialKE = preStepPoint.GetKineticEnergy() 
 		# kinetic energy in MeV - POST
@@ -160,4 +124,7 @@ class MySteppingAction(G4UserSteppingAction):
 		# PLT.dataCollection(p, m, t) # calls data collection and analysis on final positions and momenta
 		# return initialMomentum, finalMomentum 
 
+
+		if particleName == 'e-' and parentId != 0:
+			print "--------------------------ELECTRON-----------------------------"
 

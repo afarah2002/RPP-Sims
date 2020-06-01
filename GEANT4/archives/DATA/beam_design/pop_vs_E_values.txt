@@ -1,0 +1,48 @@
+Be 
+beam population:  3.271e+02  e+ 
+beam energy:  0.425  keV 
+Mg 
+beam population:  2.909e+02  e+ 
+beam energy:  0.864  keV 
+Ge 
+beam population:  1.518e+02  e+ 
+beam energy:  2.454  keV 
+Ag 
+beam population:  8.772e+01  e+ 
+beam energy:  3.945  keV 
+Ni 
+beam population:  1.136e+02  e+ 
+beam energy:  2.984  keV 
+Pb 
+beam population:  1.059e+02  e+ 
+beam energy:  3.712  keV 
+Al 
+beam population:  1.183e+02  e+ 
+beam energy:  1.472  keV 
+Bi 
+beam population:  2.451e+02  e+ 
+beam energy:  5.604  keV 
+W 
+beam population:  3.927e+01  e+ 
+beam energy:  2.461  keV 
+Si 
+beam population:  3.842e+02  e+ 
+beam energy:  1.344  keV 
+Au 
+beam population:  5.557e+01  e+ 
+beam energy:  4.033  keV 
+Fe 
+beam population:  8.287e+01  e+ 
+beam energy:  1.89  keV 
+Pd 
+beam population:  9.787e+01  e+ 
+beam energy:  4.908  keV 
+Ti 
+beam population:  8.056e+01  e+ 
+beam energy:  1.676  keV 
+Pt 
+beam population:  4.038e+01  e+ 
+beam energy:  4.601  keV 
+Cu 
+beam population:  5.851e+01  e+ 
+beam energy:  2.216  keV 
