@@ -41,9 +41,6 @@ class ClusterGenerator(object):
 			for y in np.arange(-(edge-cluster_width/2 - spacing), edge - (cluster_width/2 + spacing) + interval+1, interval):
 				for z in np.arange(-(edge-cluster_width/2 - spacing), edge - (cluster_width/2 + spacing) + interval+1, interval):
 					cluster_coor = [x,y,z]
-					# cluster_coor_LIST.append(cluster_coor)
-					# print cluster_coor
-					# time.sleep(1)
 					opposite = np.multiply(cluster_coor, -1)
 					for i in cluster_coor:
 						if np.abs(i) == edge-cluster_width/2 - spacing and cluster_coor not in cluster_coor_LIST:

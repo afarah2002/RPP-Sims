@@ -19,11 +19,7 @@ import matplotlib.mlab as mlab
 from matplotlib.backends.backend_pdf import PdfPages
 import numpy as np
 import random
-import thread
 import time
-import scipy.stats as ss
-from scipy import optimize, stats
-import sys
 #-----------FILE imports------------#
 from geom_constructor import GeomConstructor 
 # -----------CLASS ASSIGNMENTS----------- #
