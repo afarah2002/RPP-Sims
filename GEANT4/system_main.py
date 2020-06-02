@@ -1,7 +1,7 @@
 #!/usr/bin/env python 
 
 '''	
-main file, simulates pre-scattered positrons
+main file, simulates pre-scattered positrons 
 (GEANT4 doesn't do beam-beam scattering), changing the 
 direction of a uniform magnetic field to cluster them, 
 records their final positions, momenta, and cluster times
