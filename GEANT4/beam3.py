@@ -19,7 +19,6 @@ import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 from matplotlib.patches import FancyArrowPatch
 from mpl_toolkits.mplot3d import proj3d
-from time import sleep
 from matplotlib import colors
 from matplotlib.ticker import PercentFormatter
 import time
@@ -37,20 +36,15 @@ class ClusteredPositronGenerator(G4VUserPrimaryGeneratorAction):
 		self.momenta_LIST = m_LIST
 
 	def GeneratePrimaries(self, event):
-
-
 		# Particle param
 		#################################################
 		particle = "e+"
 		energyUnit = eV 
 		dimensionUnit = mm
-
 		energy = self.energy
 		# print "energy = ", energy
 		self.particleGun.SetParticleByName(particle) # define particle
-		self.particleGun.SetParticleEnergy(energy*energyUnit) # define particle energy 
-
-		
+		self.particleGun.SetParticleEnergy(energy*energyUnit) # define particle energy		
 		for position in self.positions_LIST: # creates random momentum vectors originating from [0, 0, 0]
 			momentumArray = self.momenta_LIST[self.positions_LIST.index(position)]
 			# print momentumArrayz
@@ -59,12 +53,8 @@ class ClusteredPositronGenerator(G4VUserPrimaryGeneratorAction):
 				self.particleGun.SetParticleMomentumDirection(G4ThreeVector(momentumArray[0], \
 																			momentumArray[1], \
 																			momentumArray[2])*dimensionUnit) 
-																			# this is just the direction of hte particle, mag is determined by energy
+																			# this is just the direction of the particle, mag is determined by energy
 				self.particleGun.GeneratePrimaryVertex(event)
-			# else:
-			# 	print KE 
-				# time.sleep(1)
-
 		#################################################
 
 #-------------------------------------------------------------------
@@ -96,15 +86,11 @@ class MySteppingAction(G4UserSteppingAction):
 		KE = track.GetKineticEnergy()
 		parentId = track.GetParentID()
 		particleName = track.GetDefinition().GetParticleName() 
-
-		# if particleName == "e+":
 		# print "e+ energy = ", KE
 		# kinetic energy in MeV - PRE
 		# initialKE = preStepPoint.GetKineticEnergy() 
 		# kinetic energy in MeV - POST
 		# finalKE = postStepPoint.GetKineticEnergy()
-
-
 		p_test = [step.GetDeltaPosition().x,step.GetDeltaPosition().y,step.GetDeltaPosition().z]
 		p = [postStepPoint.GetPosition().x, postStepPoint.GetPosition().y, postStepPoint.GetPosition().z] # (mm)
 		# p and p_test are the SAME 
@@ -123,8 +109,6 @@ class MySteppingAction(G4UserSteppingAction):
 		# print p 
 		# PLT.dataCollection(p, m, t) # calls data collection and analysis on final positions and momenta
 		# return initialMomentum, finalMomentum 
-
-
 		if particleName == 'e-' and parentId != 0:
 			print "--------------------------ELECTRON-----------------------------"
 

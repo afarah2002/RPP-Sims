@@ -27,7 +27,6 @@ energy_LIST = [.002]
 
 class SEEConstructor(object):
 	def __init__(self):
-		# from EZsim.EZgeom import G4EzVolume
 		g4py.NISTmaterials.Construct()
 		# set DetectorConstruction to the RunManager
 		# G4VUserDetectorConstruction.Construct()
@@ -68,7 +67,6 @@ class SEEConstructor(object):
 GC = GeomConstructor()
 SEEConstructor = SEEConstructor()
 VIS = Visualizer()
-# # CC = ClusterClass()
 viz_theta = 0
 viz_phi = 0
 
@@ -77,38 +75,23 @@ class SecondaryElectronEmissionProcess(object):
 
 
 	def runSEE(self, energy, positions, momenta, location):
-
-		print "energy = ", energy, " eV"
 		SEEConstructor
 		SEEConstructor.construct()
 		gRunManager.GeometryHasBeenModified()
 		PGA_1 = ClusteredPositronGenerator(energy, positions, momenta)
 		gRunManager.SetUserAction(PGA_1)
-
 		myEA = MyEventAction()
 		gRunManager.SetUserAction(myEA)
-
 		fieldMgr = gTransportationManager.GetFieldManager()
 		myField = G4UniformMagField(G4ThreeVector(0, 0, 0))
-
 		# myField = MyField(1)
 		fieldMgr.SetDetectorField(myField)
 		fieldMgr.CreateChordFinder(myField)
-
 		mySA = MySteppingAction()
 		gRunManager.SetUserAction(mySA)
-
 		myRA = MyRunAction()
 		gRunManager.SetUserAction(myRA)
-
 		gRunManager.Initialize()
-
 		gRunManager.BeamOn(1)
-
 		VIS.visualizer(viz_theta, viz_phi, "cluster_gen")
-		
 		# gApplyUICommand("/vis/viewer/update")
-
-		time.sleep(2)
-
-
