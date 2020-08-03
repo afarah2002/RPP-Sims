@@ -7,4 +7,5 @@ Simulating a new setup for efficient radioisotope positron propulsion, where the
 ## Requires:
 
 A working installation of GEANT4PY (I found the G4PY configuration in Geant4.10.05.p01 to work the best)
+Python 2.7
 	
